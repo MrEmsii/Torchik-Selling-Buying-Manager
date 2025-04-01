@@ -31,9 +31,13 @@ class FolderApp:
         self.button_frame = ttk.Frame(master, padding=5)
 
         self.main_frame = ttk.Frame(master, padding=5)
+        self.zamowienia_frame = ttk.Frame(master, padding=5)
+        self.secend_frame = ttk.Frame(self.master, padding=5)
+        self.third_frame = ttk.Frame(self.master, padding=5)
 
         self.button_icon_pack()
         self.start_frame()
+        self.load_zamowienia()
 
         self.button_frame.grid(row=0, column=0, rowspan=5, sticky="nsew", padx=5, pady=5)
 
@@ -43,19 +47,16 @@ class FolderApp:
         master.grid_rowconfigure(3, weight=4)
 
         master.grid_columnconfigure(0, weight=1)
-        master.grid_columnconfigure(1, weight=20)
-        master.grid_columnconfigure(2, weight=20)
-        master.grid_columnconfigure(3, weight=20)
+        master.grid_columnconfigure(1, weight=2000)
+        master.grid_columnconfigure(2, weight=2000)
+        master.grid_columnconfigure(3, weight=2000)
 
     def start_frame(self):
-        self.secend_frame = ttk.Frame(self.master, padding=5)
-        self.third_frame = ttk.Frame(self.master, padding=5)
-        self.zamowienia_tree = self.stworz_zamowienie_tree(self.main_frame, 'Zamówienia') 
+        self.zamowienia_tree = self.stworz_zamowienie_tree(self.zamowienia_frame, 'Zamówienia') 
         self.button_manager(frame="main", startup=True)
-        self.load_zamowienia()
         
         self.zamowienia_tree.bind("<Double-1>", self.on_double_click_otwieranie_zamowienia)
-        self.main_frame.grid(row=0, column=1, columnspan=3, rowspan=5, sticky="nsew", padx=5, pady=5, ipadx=5)
+        self.zamowienia_frame.grid(row=0, column=1, columnspan=3, rowspan=5, sticky="nsew", padx=5, pady=5)
 
     def button_manager(self, frame, commend = 'main', startup = False):
         if startup == False:
@@ -114,7 +115,7 @@ class FolderApp:
 
         if frame != 'main':
             self.button_back_pack(self.button_frame, commend)
-        self.main_frame.grid(row=0, column=1, columnspan=3, rowspan=5, sticky="nsew", padx=5, pady=5, ipadx=5)
+        self.main_frame.grid(row=0, column=1, columnspan=3, rowspan=5, sticky="nsew", padx=5, pady=5)
 
 
     def stworz_inside_tree(self, parent_frame, label_text):
@@ -328,6 +329,7 @@ class FolderApp:
             art_szczegoly = art.szczegoly
             artykuly_data.append((art_id, art_kategoria, art_firma, art_nazwa, art_kolor, art_szczegoly))
 
+        artykuly_data.sort(key=lambda x:x[3])
         self.artykuly_tree.delete(*self.artykuly_tree.get_children())
 
         for id, kategoria, firma, nazwa, kolor, szczegoly in artykuly_data:
@@ -335,6 +337,7 @@ class FolderApp:
 
 
     def load_inside_zamowienie(self, id_zamowienia):
+        self.zamowienia_frame.grid_remove()
         self.usun_all_widgets()
         self.button_manager("lista dodanych do zamowienia")
         self.inside_tree = self.stworz_inside_tree(self.main_frame, 'Lista artykułów dodatych do zamówienia') 
@@ -392,22 +395,32 @@ class FolderApp:
             artykul_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
             self.dodaj_artykul_do_zamowienie(self.zamowienie_id, artykul_id)
             self.load_inside_zamowienie(self.zamowienie_id)
+            messagebox.showinfo("Inicjalizacja operacji", "Inicjalizacja operacji, proszę poczekaj")
+            self.load_zamowienia()
+
 
     def on_double_click_filtrowanie_kategoria(self, event):
         selected_item = self.kategorie_tree.selection()
         if selected_item:
             kategoria_id = self.kategorie_tree.item(selected_item[0], 'values')[0]
             self.load_artykuly(kategoria_id=kategoria_id)
+            self.load_kategorie()
+
+    def on_double_click_filtrowanie_kategoria_resetowanie(self, event):
+        self.load_kategorie()
+        self.load_artykuly()
+        
 
     def dodaj_zamowienie(self):
+        self.zamowienia_frame.grid_remove()
         self.secend_frame = ttk.Frame(self.master, padding=5)
         self.third_frame = ttk.Frame(self.master, padding=5)
 
         self.button_manager("dodaj_zamowienie")
 
-        self.main_frame.grid(row=0, column=1, columnspan=5, rowspan=1, sticky="nsew", padx=5, pady=5, ipadx=5)
-        self.secend_frame.grid(row=1, column=1, columnspan=5, rowspan=3, sticky="nsew", padx=5, pady=5, ipadx=5)
-        self.third_frame.grid(row=0, column=6, columnspan=1, rowspan=4, sticky="nsew", padx=5, pady=5, ipadx=5)
+        self.main_frame.grid(row=0, column=1, columnspan=5, rowspan=1, sticky="nsew", padx=5, pady=5)
+        self.secend_frame.grid(row=1, column=1, columnspan=5, rowspan=3, sticky="nsew", padx=5, pady=5)
+        self.third_frame.grid(row=0, column=6, columnspan=1, rowspan=4, sticky="nsew", padx=5, pady=5)
                 
         self.kupujacy_tree = self.stworz_name_tree(self.main_frame, "Kupujacy", True)
         self.sklepy_tree = self.stworz_name_tree(self.secend_frame, "Sklepy", True)
@@ -474,18 +487,20 @@ class FolderApp:
         except tk.TclError:
             messagebox.showerror("Błąd", "Nieprawidłowa wartość rabatu! Wpisz liczbę.")
             return
-        
+       
         kupujacy_id = int(self.kupujacy_tree.item(self.kupujacy_tree.selection()[0], 'values')[0])
         sklep_id = int(self.sklepy_tree.item(self.sklepy_tree.selection()[0], 'values')[0])
         data = self.konwersja_string_do_data(self.date.get())
         
-
         zamowienie = Zamowienie(data=data, kupujacy_id=kupujacy_id, sklep_id=sklep_id, rabat_j=rabat_j, rabat_procent=rabat_procentowy)
         
         self.db_session.add(zamowienie)
         self.db_session.commit()
-
+        
         self.powrot_do_glownego_okna()
+        
+        messagebox.showinfo("Inicjalizacja operacji", "Inicjalizacja operacji, proszę poczekaj")
+
 
     def mod_zamowienie(self):
         zamowienie_id = self.zamowienia_tree.item(self.zamowienia_tree.selection()[0], 'values')[0]
@@ -531,6 +546,7 @@ class FolderApp:
         self.load_zamowienia()
 
     def stworz_artykul(self):
+        self.zamowienia_frame.grid_remove()
         self.usun_all_widgets()
 
         self.secend_frame = ttk.Frame(self.master, padding=5)
@@ -539,9 +555,9 @@ class FolderApp:
         self.button_manager("tworzenie_artykuly")
 
 
-        self.main_frame.grid(row=0, column=1, columnspan=5, rowspan=2, sticky="nsew", padx=5, pady=5, ipadx=5)
-        self.secend_frame.grid(row=2, column=1, columnspan=5, rowspan=2, sticky="nsew", padx=5, pady=5, ipadx=5)
-        self.third_frame.grid(row=0, column=6, columnspan=1, rowspan=4, sticky="nsew", padx=5, pady=5, ipadx=5)
+        self.main_frame.grid(row=0, column=1, columnspan=5, rowspan=2, sticky="nsew", padx=5, pady=5)
+        self.secend_frame.grid(row=2, column=1, columnspan=5, rowspan=2, sticky="nsew", padx=5, pady=5)
+        self.third_frame.grid(row=0, column=6, columnspan=1, rowspan=4, sticky="nsew", padx=5, pady=5)
         
         self.firmy_tree = self.stworz_name_tree(self.main_frame, "Lista Firm", True)
         self.kategorie_tree = self.stworz_name_tree(self.secend_frame, "Kategorie Lista", True)
@@ -766,38 +782,53 @@ class FolderApp:
         self.artykuly_tree.bind("<Double-1>", self.on_double_click_dodawanie_artykulu_do_zamowienia)
 
     def list_kupujacy(self):
+        self.zamowienia_frame.grid_remove()
         self.button_manager("kupujacy")
         self.kupujacy_tree = self.stworz_name_tree(self.main_frame, "Kupujacy", True)
         self.load_kupujacy()
 
     def list_firmy(self):
+        self.zamowienia_frame.grid_remove()
         self.button_manager("firmy")
         self.firmy_tree = self.stworz_name_tree(self.main_frame, "Firmy", True)
         self.load_firmy()
 
     def list_sklepy(self):
+        self.zamowienia_frame.grid_remove()
         self.button_manager("sklepy")
         self.sklepy_tree = self.stworz_name_tree(self.main_frame, "Sklepy", True)
         self.load_sklepy()
 
     def list_kategorie(self):
+        self.zamowienia_frame.grid_remove()
         self.button_manager("kategorie")
         self.kategorie_tree = self.stworz_name_tree(self.main_frame, "Kategorie", True)
+        self.main_frame.grid(row=0, column=1, columnspan=3, rowspan=5, sticky="nsew", padx=5, pady=5)
+
         self.load_kategorie()
 
     def list_artykulow(self):
-
+        self.zamowienia_frame.grid_remove()
         self.secend_frame = ttk.Frame(self.master, padding=5)
 
         self.button_manager("artykuly")
-        self.main_frame.grid(row=0, column=1, columnspan=1, rowspan=5, sticky="nsew", padx=5, pady=5, ipadx=5)
-        self.secend_frame.grid(row=0, column=2, columnspan=2, rowspan=5, sticky="nsew", padx=5, pady=5, ipadx=5)
+        self.main_frame.grid(row=0, column=1, columnspan=1, rowspan=5, sticky="nsew", padx=5, pady=5)
+        self.secend_frame.grid(row=0, column=2, columnspan=2, rowspan=5, sticky="nsew", padx=5, pady=5)
         
         self.kategorie_tree = self.stworz_name_tree(self.main_frame, "Kategorie Lista", True)
         self.artykuly_tree = self.stworz_artykuly_tree(self.secend_frame, "Artykuły Lista")
         self.load_kategorie()
         self.load_artykuly()
         self.kategorie_tree.bind("<Double-1>", self.on_double_click_filtrowanie_kategoria)
+        self.kategorie_tree.bind("<Double-3>", self.on_double_click_filtrowanie_kategoria_resetowanie)
+
+    def func2(self, event):
+        print('Double-1')
+        self.kategorie_tree.unbind("<Double-1>")
+
+    def func1(self, event):
+        self.on_double_click_filtrowanie_kategoria
+        self.kategorie_tree.bind("<Double-1>", self.func2)
 
     def refresh(self):
         pass
@@ -828,27 +859,38 @@ class FolderApp:
 
     def button_back_pack(self, frame, commend = "main"):
         if commend == "main":
-            commend = self.powrot_do_glownego_okna
+            commend = self.packowanie
         elif commend == "lista_artykułów":
             commend = self.powrot_do_lista_artykulow
 
         self.dodaj_button = ttk.Button(frame, text="Wróć", command=commend, width = 10, image=self.backButton_icon, compound="left")
         self.dodaj_button.pack(side='bottom', padx=1, pady=3) 
 
-    def powrot_do_glownego_okna(self):
-        self.usun_all_widgets()
+    def packowanie(self):
+        if self.zamowienia_frame.winfo_ismapped():
+           print("?")
 
-        self.start_frame()
+        else :
+            self.usun_all_widgets()
+
+            self.zamowienia_frame.grid()
+            print("!?")
+            self.button_manager(frame="main", startup=True)
+
+      
+
+    def powrot_do_glownego_okna(self):
+        self.packowanie()
         self.load_zamowienia()
 
     def powrot_do_lista_artykulow(self):
         self.usun_all_widgets()
 
-        self.start_frame()
+        # self.start_frame()
         self.list_artykulow()
 
     def button_dodaj_zamowienie(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Dodaj\nzamówienie", command=self.dodaj_zamowienie, width = 10, image=self.usun_zamowienie_icon, compound="left",)
+        self.dodaj_button = ttk.Button(frame, text="Dodaj\nzamówienie", command=self.dodaj_zamowienie, width = 10, image=self.usun_zamowienie_icon, compound="left")
         self.dodaj_button.pack(side='top', padx=1, pady=3)
 
     def button_modyfikuj_zamowienie(self, frame):

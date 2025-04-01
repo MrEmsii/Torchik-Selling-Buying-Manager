@@ -99,30 +99,3 @@ def SQLconnect(dsc):
 
     Session = sessionmaker(bind=engine)
     return Session()
-
-def Test(session):
-    kupujacy_1 = Kupujacy(nazwa="F3irma")
-    sklep1 = Sklep(nazwa="Te2mu")
-    firma_1 = Firma(nazwa="Prusa4")
-    kategoria_1 = Kategoria(nazwa="maszyny")
-    art_1 = Artykul_Lista(artykul="Azbest", kategoria=0, firma=firma_1)
-    zamow_1 = Zamowienie(data=datetime.date(2022,6,18), kupujacy= kupujacy_1, sklep=sklep1)
-    
-    # session.add_all([kupujacy_1, firma_1, sklep1, kategoria_1, art_1, zamow_1])
-    # session.commit() # Ważne!
-
-    session.execute(artykuly_relacja.insert().values(
-        zamowienie_id=3,
-        artykul_id=5,
-        cena_jednostkowa=21
-    ))
-    session.commit() # Ważne!
-
-    print(f"Dodano artykuł {art_1.artykul} do zamówienia {zamow_1.id}")
-
-if __name__ == "__main__":
-    # Połączenie z bazą danych (przekaż odpowiednią ścieżkę)
-    dsc = os.path.dirname(__file__) # lub inna ścieżka
-    session = SQLconnect(dsc)
-
-    Test(session) # Testowanie

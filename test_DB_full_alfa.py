@@ -23,7 +23,7 @@ def Test(session):
         lista.extend((kupujacy_1, sklep1, firma_1, kategoria_1, art_1))
 
     for i in range(0, b):
-        zamow_1 = Zamowienie(data=datetime.date(random.randint(2000,2026), random.randint(1,12), random.randint(1,28)), kupujacy_id = random.randint(1, d), sklep_id=random.randint(1,d))
+        zamow_1 = Zamowienie(data=datetime.date(random.randint(2000,2026), random.randint(1,12), random.randint(1,28)),rabat_procent=random.randint(0,50),rabat_j = random.randint(0,1000), kupujacy_id = random.randint(1, d), sklep_id=random.randint(1,d))
         lista.append(zamow_1)
         
         
@@ -35,7 +35,8 @@ def Test(session):
         session.execute(artykuly_relacja.insert().values(
             zamowienie_id=random.randint(1,b),
             artykul_id=random.randint(1,d),
-            cena_jednostkowa=random.randint(1, 1000)
+            cena_jednostkowa=random.randint(1, 1000),
+            ilosc_artykulu = random.randint(1,32)
         ))
         session.commit() # Ważne!
 

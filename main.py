@@ -5,7 +5,8 @@ from tkinterdnd2 import DND_FILES, TkinterDnD
 from dbControler import SQLconnect, select, Kupujacy, Kategoria, Sklep, Firma, Zamowienie, Artykul_Lista, artykuly_relacja
 from tkcalendar import DateEntry
 import datetime as datetime
-
+import time
+import threading #czy potrzebne?
 
 class FolderApp:
     def __init__(self, master):
@@ -14,7 +15,7 @@ class FolderApp:
         self.style = ttk.Style()
         master.tk.call('source', self.dsc + '/themes/awdark.tcl')
 
-        self.style.theme_use("awdark")  # Use a modern theme
+        self.style.theme_use("awdark")
         self.style.configure("Treeview", background="#D8E8E8", foreground="black", rowheight=20, fieldbackground="#E8E8E8", font=('Arial', 8))
         self.style.map("Treeview", background=[('selected', '#347083')], foreground=[('selected', 'white')])
 
@@ -37,7 +38,7 @@ class FolderApp:
 
         self.button_icon_pack()
         self.start_frame()
-        self.load_zamowienia()
+        self.load_zamowienia_daemon()
 
         self.button_frame.grid(row=0, column=0, rowspan=5, sticky="nsew", padx=5, pady=5)
 
@@ -53,7 +54,7 @@ class FolderApp:
 
     def start_frame(self):
         self.zamowienia_tree = self.stworz_zamowienie_tree(self.zamowienia_frame, 'Zamówienia') 
-        self.button_manager(frame="main", startup=True)
+        self.button_manager(frame="main", startup = True)
         
         self.zamowienia_tree.bind("<Double-1>", self.on_double_click_otwieranie_zamowienia)
         self.zamowienia_frame.grid(row=0, column=1, columnspan=3, rowspan=5, sticky="nsew", padx=5, pady=5)
@@ -83,19 +84,25 @@ class FolderApp:
 
         elif frame == "kupujacy":
             self.button_dodaj_kupujacy(self.button_frame)
-            self.button_nazwa_kupujacy(self.button_frame)
+            self.button_zmiana_nazwa_kupujacy(self.button_frame)
             self.button_usun_kupujacy(self.button_frame)
 
         elif frame == "sklepy":
             self.button_dodaj_sklep(self.button_frame) 
+            self.button_zmiana_nazwa_sklep(self.button_frame)
             self.button_usun_sklep(self.button_frame)
 
         elif frame == "firmy":
             self.button_dodaj_firma(self.button_frame) 
+            self.button_zmiana_nazwa_firma(self.button_frame)
             self.button_usun_firma(self.button_frame)
 
         elif frame == "artykuly":
             self.button_stworz_artykul(self.button_frame) 
+            # self.button_zmiana_nazwa_artykul(self.button_frame)
+            # self.button_zmiana_kategoria_artykul(self.button_frame)
+            # self.button_zmiana_firma_artykul(self.button_frame)
+            # self.button_zmiana_inne_artykul(self.button_frame)
             self.button_zniszcz_artykul(self.button_frame)
 
         elif frame == "dodaj_zamowienie":
@@ -105,6 +112,7 @@ class FolderApp:
 
         elif frame == "kategorie":
             self.button_dodaj_kategoria(self.button_frame) 
+            self.button_zmiana_nazwa_kategoria(self.button_frame)
             self.button_usun_kategorie(self.button_frame)
 
         elif frame == 'tworzenie_artykuly':
@@ -116,7 +124,6 @@ class FolderApp:
         if frame != 'main':
             self.button_back_pack(self.button_frame, commend)
         self.main_frame.grid(row=0, column=1, columnspan=3, rowspan=5, sticky="nsew", padx=5, pady=5)
-
 
     def stworz_inside_tree(self, parent_frame, label_text):
         label = ttk.Label(parent_frame, text=label_text, font=("Arial", 12))
@@ -226,7 +233,33 @@ class FolderApp:
 
         return tree  
 
+    def show_message_async_demon(self):
+        threading.Thread(target=self.show_message_async, daemon=True).start()
+
+    def show_message_async(self):
+        self.msg_windows = tk.Toplevel(root)
+        self.msg_windows.geometry("300x50+340+160")
+        self.msg_windows.title("Inicjalizacja operacji")
+        
+        label = tk.Label(self.msg_windows, text="Inicjalizacja operacji, proszę poczekaj", padx=20, pady=10)
+        label.pack()
+        
+        time.sleep(2)
+        self.msg_windows.destroy()
+
+    def ukryj_message_async(self):
+        try:
+            if self.msg_windows.winfo_exists():
+                self.msg_windows.destroy()
+        except AttributeError:
+            pass
+
+    def load_zamowienia_daemon(self):
+        threading.Thread(target=self.load_zamowienia, daemon=True).start()
+
     def load_zamowienia(self):
+        self.show_message_async_demon()
+
         zamowienia = self.db_session.query(Zamowienie).all()
         zamowienia_data = []
 
@@ -248,6 +281,7 @@ class FolderApp:
         for z_id, data, kupujacy, sklep, rabat_1, rabat_2, cena, cena_rabat in zamowienia_data:
             self.zamowienia_tree.insert('', 'end', values=(z_id, data, kupujacy, sklep, rabat_1, rabat_2, cena, cena_rabat))
 
+        self.ukryj_message_async()
 
     def load_sklepy(self):
         sklepy = self.db_session.query(Sklep).all()
@@ -261,10 +295,8 @@ class FolderApp:
         self.sklepy_tree.delete(*self.sklepy_tree.get_children())
         sklepy_data.sort(key=lambda x:x[1])
 
-
         for sklep_id, sklep_nazwa in sklepy_data:
             self.sklepy_tree.insert('', 'end', values=(sklep_id, sklep_nazwa))
-     
 
     def load_kupujacy(self):
         kupujacy = self.db_session.query(Kupujacy).all()
@@ -277,7 +309,6 @@ class FolderApp:
 
         self.kupujacy_tree.delete(*self.kupujacy_tree.get_children())
         kupujacy_data.sort(key=lambda x:x[1])
-
 
         for kup_id, kup_nazwa in kupujacy_data:
             self.kupujacy_tree.insert('', 'end', values=(kup_id, kup_nazwa))
@@ -307,10 +338,10 @@ class FolderApp:
             firma_name = firma.nazwa
             firmy_data.append((firma_id, firma_name))
 
-        self.firmy_tree.delete(*self.firmy_tree.get_children())
+        self.firma_tree.delete(*self.firma_tree.get_children())
 
         for firma_id, firma_name in firmy_data:
-            self.firmy_tree.insert('', 'end', values=(firma_id, firma_name))  
+            self.firma_tree.insert('', 'end', values=(firma_id, firma_name))  
             
     def load_artykuly(self, kategoria_id = None):
         if not kategoria_id:
@@ -334,7 +365,6 @@ class FolderApp:
 
         for id, kategoria, firma, nazwa, kolor, szczegoly in artykuly_data:
             self.artykuly_tree.insert('', 'end', values=(id, kategoria, firma, nazwa, kolor, szczegoly))
-
 
     def load_inside_zamowienie(self, id_zamowienia):
         self.zamowienia_frame.grid_remove()
@@ -395,8 +425,8 @@ class FolderApp:
             artykul_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
             self.dodaj_artykul_do_zamowienie(self.zamowienie_id, artykul_id)
             self.load_inside_zamowienie(self.zamowienie_id)
-            messagebox.showinfo("Inicjalizacja operacji", "Inicjalizacja operacji, proszę poczekaj")
-            self.load_zamowienia()
+
+            self.load_zamowienia_daemon()
 
 
     def on_double_click_filtrowanie_kategoria(self, event):
@@ -409,7 +439,6 @@ class FolderApp:
     def on_double_click_filtrowanie_kategoria_resetowanie(self, event):
         self.load_kategorie()
         self.load_artykuly()
-        
 
     def dodaj_zamowienie(self):
         self.zamowienia_frame.grid_remove()
@@ -498,9 +527,6 @@ class FolderApp:
         self.db_session.commit()
         
         self.powrot_do_glownego_okna()
-        
-        messagebox.showinfo("Inicjalizacja operacji", "Inicjalizacja operacji, proszę poczekaj")
-
 
     def mod_zamowienie(self):
         zamowienie_id = self.zamowienia_tree.item(self.zamowienia_tree.selection()[0], 'values')[0]
@@ -523,7 +549,7 @@ class FolderApp:
             
             self.db_session.query(Zamowienie).filter_by(id=zamowienie_id).delete(synchronize_session=False)
             self.db_session.commit()
-            self.load_zamowienia()  
+            self.load_zamowienia_daemon()  
 
     def del_artykul_do_zamowienie(self):
         selected_item = self.inside_tree.selection()
@@ -543,7 +569,7 @@ class FolderApp:
             self.db_session.commit()
             self.load_inside_zamowienie(self.zamowienie_id)
 
-        self.load_zamowienia()
+        self.load_zamowienia_daemon()
 
     def stworz_artykul(self):
         self.zamowienia_frame.grid_remove()
@@ -554,12 +580,11 @@ class FolderApp:
 
         self.button_manager("tworzenie_artykuly")
 
-
         self.main_frame.grid(row=0, column=1, columnspan=5, rowspan=2, sticky="nsew", padx=5, pady=5)
         self.secend_frame.grid(row=2, column=1, columnspan=5, rowspan=2, sticky="nsew", padx=5, pady=5)
         self.third_frame.grid(row=0, column=6, columnspan=1, rowspan=4, sticky="nsew", padx=5, pady=5)
         
-        self.firmy_tree = self.stworz_name_tree(self.main_frame, "Lista Firm", True)
+        self.firma_tree = self.stworz_name_tree(self.main_frame, "Lista Firm", True)
         self.kategorie_tree = self.stworz_name_tree(self.secend_frame, "Kategorie Lista", True)
 
         nazwa_label = ttk.Label(self.third_frame, text = 'Nazwa artykułu:', font=('calibre', 10, 'bold'), anchor='center')
@@ -595,7 +620,7 @@ class FolderApp:
         self.load_firmy()
 
     def zatwierdz_nowy_artykul(self):
-        selected_item = self.firmy_tree.selection()
+        selected_item = self.firma_tree.selection()
         if not selected_item:
             messagebox.showerror("Błąd", "Brak wybranej firmy! Wybierz firmę.")
             return
@@ -610,14 +635,13 @@ class FolderApp:
             messagebox.showerror("Błąd", "Nieprawidłowa wartość rabatu! Wpisz liczbę.")
             return
        
-        firma_id = int(self.firmy_tree.item(self.firmy_tree.selection()[0], 'values')[0])
+        firma_id = int(self.firma_tree.item(self.firma_tree.selection()[0], 'values')[0])
         kategoria_id = int(self.kategorie_tree.item(self.kategorie_tree.selection()[0], 'values')[0])
               
         artykul = Artykul_Lista(kategoria_id=kategoria_id, firma_id=firma_id, artykul=nazwa, kolor = self.kolor_artykulu_string.get(), szczegoly=self.szczegoly_artykulu_string.get())
         self.db_session.add(artykul)
         self.db_session.commit()
        
-
         self.powrot_do_lista_artykulow()
 
     def zniszcz_artykul(self):
@@ -637,13 +661,11 @@ class FolderApp:
             self.db_session.commit()
             self.powrot_do_lista_artykulow()
 
-
     def dodaj_artykul_do_zamowienie(self, zamowienie, id_art):
         self.db_session.execute(artykuly_relacja.insert().values(
             zamowienie_id = zamowienie,
             artykul_id = id_art,
             cena_jednostkowa=21
-
         ))
         self.db_session.commit()
 
@@ -672,6 +694,7 @@ class FolderApp:
             if kupujacy:
                 kupujacy.nazwa = new_value 
                 self.db_session.commit()
+                self.load_zamowienia_daemon()
                 self.load_kupujacy() 
 
     def usun_kupujacego(self):
@@ -690,8 +713,8 @@ class FolderApp:
             obj = self.db_session.query(Kupujacy).filter_by(id=kupujacy_id).first()
             self.db_session.delete(obj)
             self.db_session.commit()
-            self.load_kupujacy()    
-
+            self.load_zamowienia_daemon()
+            self.load_kupujacy()   
 
     def stworz_sklep(self):
         sklep_name = simpledialog.askstring("Dodaj Sklep", "Podaj nazwę SKLEPU: \t\t\t")
@@ -700,7 +723,26 @@ class FolderApp:
             self.db_session.add(sklep)
             self.db_session.commit()
             self.load_sklepy()    
-        
+
+    def zmien_nazwa_sklep(self):
+        selected_item = self.sklepy_tree.selection()
+        if not selected_item:
+            return
+
+        element_value = self.sklepy_tree.item(selected_item[0], 'values')
+        sklep_id = element_value[0]
+        stara_nazwa = element_value[1]
+
+        new_value = simpledialog.askstring("Edit",'Nowa wartość\t\t\t', initialvalue=stara_nazwa)
+
+        if new_value and new_value.strip():
+            sklep = self.db_session.query(Sklep).filter_by(id=sklep_id).first()
+
+            if sklep:
+                sklep.nazwa = new_value 
+                self.db_session.commit()
+                self.load_zamowienia_daemon()
+                self.load_sklepy() 
 
     def usun_sklep(self):
         selected_item = self.sklepy_tree.selection()
@@ -720,7 +762,6 @@ class FolderApp:
             self.db_session.commit()
             self.load_sklepy()    
 
-
     def stworz_firma(self):
         firma_name = simpledialog.askstring("Dodaj firme", "Podaj nazwę FIRMY: \t\t\t")
         if firma_name is not None:
@@ -728,10 +769,29 @@ class FolderApp:
             self.db_session.add(firma)
             self.db_session.commit()
             self.load_firmy()    
-        
+
+    def zmien_nazwa_firma(self):
+        selected_item = self.firma_tree.selection()
+        if not selected_item:
+            return
+
+        element_value = self.firma_tree.item(selected_item[0], 'values')
+        firma_id = element_value[0]
+        stara_nazwa = element_value[1]
+
+        new_value = simpledialog.askstring("Edit",'Nowa wartość\t\t\t', initialvalue=stara_nazwa)
+
+        if new_value and new_value.strip():
+            firma = self.db_session.query(Firma).filter_by(id=firma_id).first()
+
+            if firma:
+                firma.nazwa = new_value 
+                self.db_session.commit()
+                self.load_zamowienia_daemon()
+                self.load_firmy() 
 
     def usun_firma(self):
-        selected_item = self.firmy_tree.selection()
+        selected_item = self.firma_tree.selection()
         if not selected_item:
             return
         
@@ -742,12 +802,11 @@ class FolderApp:
         )
 
         if dialog and dialog.lower() in ["yes", "tak"]:
-            firma_id = self.firmy_tree.item(self.firmy_tree.selection()[0], 'values')[0]
+            firma_id = self.firma_tree.item(self.firma_tree.selection()[0], 'values')[0]
             obj = self.db_session.query(Firma).filter_by(id=firma_id).first()
             self.db_session.delete(obj)
             self.db_session.commit()
             self.load_firmy()    
-
 
     def stworz_kategoria(self):
         kategoria_name = simpledialog.askstring("Dodaj kategorie", "Podaj nazwę KATEGORII: \t\t\t")
@@ -756,7 +815,26 @@ class FolderApp:
             self.db_session.add(kategoria)
             self.db_session.commit()
             self.load_kategorie()    
-        
+
+    def zmien_nazwa_kategoria(self):
+        selected_item = self.kategorie_tree.selection()
+        if not selected_item:
+            return
+
+        element_value = self.kategorie_tree.item(selected_item[0], 'values')
+        kategoria_id = element_value[0]
+        stara_nazwa = element_value[1]
+
+        new_value = simpledialog.askstring("Edit",'Nowa wartość\t\t\t', initialvalue=stara_nazwa)
+
+        if new_value and new_value.strip():
+            kategoria = self.db_session.query(Kategoria).filter_by(id=kategoria_id).first()
+
+            if kategoria:
+                kategoria.nazwa = new_value 
+                self.db_session.commit()
+                self.load_zamowienia_daemon()
+                self.load_kategorie() 
 
     def usun_kategorie(self):
         selected_item = self.kategorie_tree.selection()
@@ -776,7 +854,6 @@ class FolderApp:
             self.db_session.commit()
             self.load_kategorie()    
 
-
     def dodaj_list_artykulow(self):
         self.list_artykulow()
         self.artykuly_tree.bind("<Double-1>", self.on_double_click_dodawanie_artykulu_do_zamowienia)
@@ -790,7 +867,7 @@ class FolderApp:
     def list_firmy(self):
         self.zamowienia_frame.grid_remove()
         self.button_manager("firmy")
-        self.firmy_tree = self.stworz_name_tree(self.main_frame, "Firmy", True)
+        self.firma_tree = self.stworz_name_tree(self.main_frame, "Firmy", True)
         self.load_firmy()
 
     def list_sklepy(self):
@@ -803,7 +880,6 @@ class FolderApp:
         self.zamowienia_frame.grid_remove()
         self.button_manager("kategorie")
         self.kategorie_tree = self.stworz_name_tree(self.main_frame, "Kategorie", True)
-        self.main_frame.grid(row=0, column=1, columnspan=3, rowspan=5, sticky="nsew", padx=5, pady=5)
 
         self.load_kategorie()
 
@@ -817,18 +893,12 @@ class FolderApp:
         
         self.kategorie_tree = self.stworz_name_tree(self.main_frame, "Kategorie Lista", True)
         self.artykuly_tree = self.stworz_artykuly_tree(self.secend_frame, "Artykuły Lista")
+        
         self.load_kategorie()
         self.load_artykuly()
+        
         self.kategorie_tree.bind("<Double-1>", self.on_double_click_filtrowanie_kategoria)
         self.kategorie_tree.bind("<Double-3>", self.on_double_click_filtrowanie_kategoria_resetowanie)
-
-    def func2(self, event):
-        print('Double-1')
-        self.kategorie_tree.unbind("<Double-1>")
-
-    def func1(self, event):
-        self.on_double_click_filtrowanie_kategoria
-        self.kategorie_tree.bind("<Double-1>", self.func2)
 
     def refresh(self):
         pass
@@ -859,34 +929,25 @@ class FolderApp:
 
     def button_back_pack(self, frame, commend = "main"):
         if commend == "main":
-            commend = self.packowanie
+            commend = self.pokaz_main_frame
         elif commend == "lista_artykułów":
             commend = self.powrot_do_lista_artykulow
 
         self.dodaj_button = ttk.Button(frame, text="Wróć", command=commend, width = 10, image=self.backButton_icon, compound="left")
         self.dodaj_button.pack(side='bottom', padx=1, pady=3) 
 
-    def packowanie(self):
-        if self.zamowienia_frame.winfo_ismapped():
-           print("?")
-
-        else :
+    def pokaz_main_frame(self):
+        if not self.zamowienia_frame.winfo_ismapped():
             self.usun_all_widgets()
-
             self.zamowienia_frame.grid()
-            print("!?")
             self.button_manager(frame="main", startup=True)
 
-      
-
     def powrot_do_glownego_okna(self):
-        self.packowanie()
-        self.load_zamowienia()
+        self.pokaz_main_frame()
+        self.load_zamowienia_daemon()
 
     def powrot_do_lista_artykulow(self):
         self.usun_all_widgets()
-
-        # self.start_frame()
         self.list_artykulow()
 
     def button_dodaj_zamowienie(self, frame):
@@ -949,7 +1010,7 @@ class FolderApp:
         self.dodaj_button = ttk.Button(frame, text="Dodaj\nkupującego", command=self.stworz_kupujacy, width = 10, image=self.usun_zamowienie_icon, compound="left")
         self.dodaj_button.pack(side='top', padx=1, pady=3)        
 
-    def button_nazwa_kupujacy(self, frame):
+    def button_zmiana_nazwa_kupujacy(self, frame):
         self.dodaj_button = ttk.Button(frame, text="Zmień\nnazwę\nkupującego", command=self.zmien_nazwa_kupujacy, width = 10, image=self.usun_zamowienie_icon, compound="left")
         self.dodaj_button.pack(side='top', padx=1, pady=3) 
 
@@ -961,6 +1022,10 @@ class FolderApp:
         self.dodaj_button = ttk.Button(frame, text="Dodaj\nsklep", command=self.stworz_sklep, width = 10, image=self.usun_zamowienie_icon, compound="left")
         self.dodaj_button.pack(side='top', padx=1, pady=3)
 
+    def button_zmiana_nazwa_sklep(self, frame):
+        self.dodaj_button = ttk.Button(frame, text="Zmień\nnazwę\nsklepu", command=self.zmien_nazwa_sklep, width = 10, image=self.usun_zamowienie_icon, compound="left")
+        self.dodaj_button.pack(side='top', padx=1, pady=3) 
+
     def button_usun_sklep(self, frame):
         self.dodaj_button = ttk.Button(frame, text="Usuń\nsklep", command=self.usun_sklep, width = 10, image=self.usun_zamowienie_icon, compound="left")
         self.dodaj_button.pack(side='top', padx=1, pady=3)
@@ -969,6 +1034,10 @@ class FolderApp:
         self.dodaj_button = ttk.Button(frame, text="Dodaj\nfirma", command=self.stworz_firma, width = 10, image=self.usun_zamowienie_icon, compound="left")
         self.dodaj_button.pack(side='top', padx=1, pady=3)
 
+    def button_zmiana_nazwa_firma(self, frame):
+        self.dodaj_button = ttk.Button(frame, text="Zmień\nnazwę\nfirmy", command=self.zmien_nazwa_firma, width = 10, image=self.usun_zamowienie_icon, compound="left")
+        self.dodaj_button.pack(side='top', padx=1, pady=3) 
+
     def button_usun_firma(self, frame):
         self.dodaj_button = ttk.Button(frame, text="Usuń\nfirma", command=self.usun_firma, width = 10, image=self.usun_zamowienie_icon, compound="left")
         self.dodaj_button.pack(side='top', padx=1, pady=3)
@@ -976,6 +1045,10 @@ class FolderApp:
     def button_dodaj_kategoria(self, frame):
         self.dodaj_button = ttk.Button(frame, text="Dodaj\nkategoria", command=self.stworz_kategoria, width = 10, image=self.usun_zamowienie_icon, compound="left")
         self.dodaj_button.pack(side='top', padx=1, pady=3)
+
+    def button_zmiana_nazwa_kategoria(self, frame):
+        self.dodaj_button = ttk.Button(frame, text="Zmień\nnazwę\nkategorii", command=self.zmien_nazwa_kategoria, width = 10, image=self.usun_zamowienie_icon, compound="left")
+        self.dodaj_button.pack(side='top', padx=1, pady=3) 
 
     def button_usun_kategorie(self, frame):
         self.dodaj_button = ttk.Button(frame, text="Usuń\nkategorie", command=self.usun_kategorie, width = 10, image=self.usun_zamowienie_icon, compound="left")
@@ -986,7 +1059,7 @@ class FolderApp:
         self.dodaj_button.pack(side='bottom', padx=1, pady=3)
 
 if __name__ == "__main__":
-    root = TkinterDnD.Tk()  # Use TkinterDnD for DnD
+    root = TkinterDnD.Tk()
     root.geometry("1280x720+0+0")
     app = FolderApp(root)
     root.mainloop()

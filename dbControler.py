@@ -85,7 +85,7 @@ class Artykul_Lista(Base):
     id = Column(Integer, primary_key=True)
     kategoria_id = Column(Integer, ForeignKey('kategoria.id'))
     firma_id = Column(Integer, ForeignKey('firma.id'), default=None)
-    artykul = Column(String)
+    nazwa = Column(String)
     kolor = Column(String, default=None)
     szczegoly = Column(String, default=None)
 

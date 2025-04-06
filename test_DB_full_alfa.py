@@ -19,11 +19,11 @@ def Test(session):
         sklep1 = Sklep(nazwa="Te2mu"+str(i))
         firma_1 = Firma(nazwa="Prusa4"+str(i))
         kategoria_1 = Kategoria(nazwa="maszyny"+str(i))
-        art_1 = Artykul_Lista(artykul="Azbest", kategoria_id=random.randint(1,d), firma_id=random.randint(1,d))
+        art_1 = Artykul_Lista(nazwa="Azbest"+str(random.randint(1,g)), kategoria_id=random.randint(1, d), firma_id=random.randint(1, d))
         lista.extend((kupujacy_1, sklep1, firma_1, kategoria_1, art_1))
 
     for i in range(0, b):
-        zamow_1 = Zamowienie(data=datetime.date(random.randint(2000,2026), random.randint(1,12), random.randint(1,28)),rabat_procent=random.randint(0,50),rabat_j = random.randint(0,1000), kupujacy_id = random.randint(1, d), sklep_id=random.randint(1,d))
+        zamow_1 = Zamowienie(data=datetime.date(random.randint(2000,2026), random.randint(1, 12), random.randint(1, 28)),rabat_procent=random.randint(0, 50),rabat_j = random.randint(0, 1000), kupujacy_id = random.randint(1, d), sklep_id=random.randint(1, d))
         lista.append(zamow_1)
         
         
@@ -33,10 +33,10 @@ def Test(session):
 
     for i in range(0, g):
         session.execute(artykuly_relacja.insert().values(
-            zamowienie_id=random.randint(1,b),
-            artykul_id=random.randint(1,d),
+            zamowienie_id=random.randint(1, b),
+            artykul_id=random.randint(1, d),
             cena_jednostkowa=random.randint(1, 1000),
-            ilosc_artykulu = random.randint(1,32)
+            ilosc_artykulu = random.randint(1, 64)
         ))
         session.commit() # Ważne!
 

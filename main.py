@@ -98,12 +98,17 @@ class FolderApp:
             self.button_usun_firma(self.button_frame)
 
         elif frame == "lista_artykuly":
-            self.button_stworz_modyfikuj_artykul(self.button_frame) 
+            self.button_stworz_artykul(self.button_frame) 
             self.button_modyfikuj_artykul(self.button_frame) 
             self.button_zniszcz_artykul(self.button_frame)
 
-        elif frame == "dodaj_modyfikuj_zamowienie":
+        elif frame == "dodaj_zamowienie":
             self.buttons_zatwierdz_zamowienia(self.button_frame) 
+            self.button_dodaj_kupujacy(self.button_frame)
+            self.button_dodaj_sklep(self.button_frame) 
+
+        elif frame == "modyfikuj_zamowienie":
+            self.button_zatwierdz_edycje_zamowienie(self.button_frame) 
             self.button_dodaj_kupujacy(self.button_frame)
             self.button_dodaj_sklep(self.button_frame) 
 
@@ -112,8 +117,13 @@ class FolderApp:
             self.button_zmiana_nazwa_kategoria(self.button_frame)
             self.button_usun_kategorie(self.button_frame)
 
-        elif frame == 'tworzenie_modyfikacja_artykuly':
+        elif frame == 'tworzenie_artykuly':
             self.button_zatwierdz_artykul(self.button_frame)
+            self.button_dodaj_firma(self.button_frame)
+            self.button_dodaj_kategoria(self.button_frame) 
+
+        elif frame == 'modyfikacja_artykuly':
+            self.button_zatwierdz_edycje_artykul(self.button_frame)
             self.button_dodaj_firma(self.button_frame)
             self.button_dodaj_kategoria(self.button_frame) 
 
@@ -457,11 +467,12 @@ class FolderApp:
         self.zamowienie_kupujacy_id = zamowienie.kupujacy_id
         self.zamowienie_sklep_id = zamowienie.sklep_id
 
-    def dodaj_zamowienie(self, commend = "stworz"):
+    def dodaj_modyfikuj_zamowienie(self, commend = "stworz"):
         if commend == "stworz":
             self.rabat_j_var = tk.DoubleVar()
             self.rabat_p_var = tk.DoubleVar()
             self.zamowienie_data = tk.StringVar()
+            self.button_manager("dodaj_zamowienie")
 
         elif commend == "modyfikuj":
             selected_item = self.zamowienia_tree.selection()
@@ -475,8 +486,8 @@ class FolderApp:
 
             self.rabat_j_var = tk.DoubleVar(value=self.zamowienie_rabat_j)
             self.rabat_p_var = tk.DoubleVar(value=self.zamowienie_rabat_procentowy)
+            self.button_manager("modyfikuj_zamowienie")
 
-        self.button_manager("dodaj_modyfikuj_zamowienie")
 
         self.zamowienia_frame.grid_remove()
         self.secend_frame = ttk.Frame(self.master, padding=5)
@@ -531,7 +542,7 @@ class FolderApp:
         date = datetime.datetime.strptime(date, format).date()
         return date
 
-    def zatwierdz_nowy_modyfikuj_zamowienie(self):
+    def zatwierdz_nowy_modyfikuj_zamowienie(self, commend = "stworz"):
         selected_item = self.kupujacy_tree.selection()
         if not selected_item:
             messagebox.showerror("Błąd", "Brak wybranego kupującego! Wybierz kupującego.")
@@ -563,11 +574,22 @@ class FolderApp:
         kupujacy_id = int(self.kupujacy_tree.item(self.kupujacy_tree.selection()[0], 'values')[0])
         sklep_id = int(self.sklepy_tree.item(self.sklepy_tree.selection()[0], 'values')[0])
         
-        zamowienie = Zamowienie(data=data, kupujacy_id=kupujacy_id, sklep_id=sklep_id, rabat_j=rabat_j, rabat_procent=rabat_procentowy)
+        if commend == "stworz":
+            zamowienie = Zamowienie(data=data, kupujacy_id=kupujacy_id, sklep_id=sklep_id, rabat_j=rabat_j, rabat_procent=rabat_procentowy)
+            self.db_session.add(zamowienie)
+            
+        elif commend == "modyfikuj":
+            print("Test")
+            zamowienie = self.db_session.query(Zamowienie).filter_by(id=self.zamowienie_id).first()
         
-        self.db_session.add(zamowienie)
+            if zamowienie:
+                zamowienie.data = data
+                zamowienie.rabat_j = rabat_j
+                zamowienie.rabat_procent = rabat_procentowy
+                zamowienie.kupujacy_id = kupujacy_id
+                zamowienie.sklep_id = sklep_id
+
         self.db_session.commit()
-        
         self.powrot_do_glownego_okna()
 
     def usun_zamowienie(self):
@@ -609,13 +631,15 @@ class FolderApp:
         self.load_zamowienia_daemon()
 
     def stworz_modyfikuj_artykul(self, commend = "stworz"):
+        self.zamowienia_frame.grid_remove()
+
         if commend == "stworz":
             self.usun_all_widgets()
 
-            self.zamowienia_frame.grid_remove()
             self.nazwa_artykulu_string = None
             self.kolor_artykulu_string = None
             self.szczegoly_artykulu_string = None
+            self.button_manager("tworzenie_artykuly", back_target = 'lista_artykułów' )
 
         elif commend == "modyfikuj":
             selected_item = self.artykuly_tree.selection()
@@ -624,10 +648,10 @@ class FolderApp:
                 return
         
             self.artykul_modyfikacja_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
-            self.usun_all_widgets()
             self.wczytaj_informacje_artykul(self.artykul_modyfikacja_id)
+            self.usun_all_widgets()
+            self.button_manager("modyfikacja_artykuly", back_target = 'lista_artykułów' )
 
-        self.button_manager("tworzenie_modyfikacja_artykuly", back_target = 'lista_artykułów' )
         self.secend_frame = ttk.Frame(self.master, padding=5)
         self.third_frame = ttk.Frame(self.master, padding=5)
 
@@ -713,7 +737,6 @@ class FolderApp:
             artykul = Artykul_Lista(kategoria_id=kategoria_id, firma_id=firma_id, nazwa=nazwa, kolor = self.kolor_artykulu_string.get(), szczegoly=self.szczegoly_artykulu_string.get())
             self.db_session.add(artykul)
         elif commend == "modyfikuj":
-            kategoria_id = int(self.kategorie_tree.item(self.kategorie_tree.selection()[0], 'values')[0])
             artykul = self.db_session.query(Artykul_Lista).filter_by(id=self.artykul_modyfikacja_id).first()
         
             if artykul:
@@ -1061,11 +1084,11 @@ class FolderApp:
         self.list_artykulow()
 
     def button_dodaj_zamowienie(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Dodaj\nzamówienie", command=self.dodaj_zamowienie, width = 10, image=self.usun_zamowienie_icon, compound="left")
+        self.dodaj_button = ttk.Button(frame, text="Dodaj\nzamówienie", command=self.dodaj_modyfikuj_zamowienie, width = 10, image=self.usun_zamowienie_icon, compound="left")
         self.dodaj_button.pack(side='top', padx=1, pady=3)
 
     def button_modyfikuj_zamowienie(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Edytuj\nzamówienie", command=lambda: self.dodaj_zamowienie(commend="modyfikuj"), width = 10, image=self.usun_zamowienie_icon, compound="left")
+        self.dodaj_button = ttk.Button(frame, text="Edytuj\nzamówienie", command=lambda: self.dodaj_modyfikuj_zamowienie(commend="modyfikuj"), width = 10, image=self.usun_zamowienie_icon, compound="left")
         self.dodaj_button.pack(side='top', padx=1, pady=3)
 
     def button_usun_zamowienie(self, frame):
@@ -1077,7 +1100,7 @@ class FolderApp:
         self.dodaj_button.pack(side='top', padx=1, pady=(3,30))
 
     def button_zatwierdz_edycje_zamowienie(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Zatwierdź\nartykuł", command=lambda: self.zatwierdz_nowy_modyfikuj_zamowienie(commend="modyfikuj"), width = 10, image=self.usun_zamowienie_icon, compound="left")
+        self.dodaj_button = ttk.Button(frame, text="Zatwierdź edycje\nzamówienia", command=lambda: self.zatwierdz_nowy_modyfikuj_zamowienie(commend="modyfikuj"), width = 10, image=self.usun_zamowienie_icon, compound="left")
         self.dodaj_button.pack(side='top', padx=1, pady=(3,30))  
 
     def button_lista_artykulow(self, frame):
@@ -1100,7 +1123,7 @@ class FolderApp:
         self.dodaj_button = ttk.Button(frame, text="Lista\nkategorii", command=self.list_kategorie, width = 10, image=self.usun_zamowienie_icon, compound="left")
         self.dodaj_button.pack(side='top', padx=1, pady=3)
 
-    def button_stworz_modyfikuj_artykul(self, frame):
+    def button_stworz_artykul(self, frame):
         self.dodaj_button = ttk.Button(frame, text="Stwórz\nartykuł", command=self.stworz_modyfikuj_artykul, width = 10, image=self.usun_zamowienie_icon, compound="left")
         self.dodaj_button.pack(side='top', padx=1, pady=3) 
 

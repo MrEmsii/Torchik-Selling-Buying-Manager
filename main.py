@@ -127,6 +127,9 @@ class FolderApp:
             self.button_dodaj_firma(self.button_frame)
             self.button_dodaj_kategoria(self.button_frame) 
 
+        elif frame == "wyjdź_z_cena_ilosc":
+            self.button_zatwierdz_dodanie_artykulu(self.button_cena_ilosc_frame)
+
         if frame != 'main':
             self.button_back_pack(self.button_frame, back_target)
         self.main_frame.grid(row=0, column=1, columnspan=3, rowspan=5, sticky="nsew", padx=5, pady=5)
@@ -425,7 +428,38 @@ class FolderApp:
             self.zamowienie_id = self.zamowienia_tree.item(selected_item[0], 'values')[0]
             self.load_inside_zamowienie(self.zamowienie_id)
 
-    def on_double_click_dodawanie_artykulu_do_zamowienia(self, event):
+    def cena_ilosc_window(self):
+        self.window = tk.Toplevel(self.master)
+        self.window.geometry("500x400+100+100")
+
+        self.window.iconbitmap(os.path.join(self.dsc, "image", "icon.ico"))
+        self.background_label = tk.Label(self.window, image=self.background_image)
+        self.background_label.place(x=0, y=0, relwidth=1, relheight=1) 
+
+        self.filament_frame = ttk.Frame(self.window)
+        self.button_cena_ilosc_frame = ttk.Frame(self.window)
+        self.filament_frame.grid(row=0, column=1,sticky="nsew", padx=5, pady=5)
+        self.button_cena_ilosc_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+
+        self.button_manager(frame="wyjdź_z_cena_ilosc", back_target="wyjdź_z_cena_ilosc")
+
+
+        cena_label = ttk.Label(self.filament_frame, text = 'Cena:', font=('calibre', 10, 'bold'), anchor='center')
+        ilosc_label = ttk.Label(self.filament_frame, text = 'Ilość:', font=('calibre', 10, 'bold'), anchor='w')
+        
+        self.cena_artykulu_var = tk.DoubleVar(value=0)
+        self.ilosc_artykulu_var = tk.DoubleVar(value=1)
+
+        cena_entry = ttk.Entry(self.filament_frame, textvariable = self.cena_artykulu_var, font=('calibre',10,'normal'), width=5)
+        ilosc_entry = ttk.Entry(self.filament_frame, textvariable = self.ilosc_artykulu_var, font=('calibre',10,'normal'), width=5)
+
+        cena_label.grid(row=1,column=1)
+        ilosc_label.grid(row=2,column=1)
+
+        cena_entry.grid(row=1,column=2)
+        ilosc_entry.grid(row=2,column=2)
+
+    def cena_ilosc_dodanie(self):
         try:
             cena_artykulu_var = self.cena_artykulu_var.get()
         except tk.TclError:
@@ -438,12 +472,19 @@ class FolderApp:
             messagebox.showerror("Błąd", "Nieprawidłowa wartość f! Wpisz liczbę.")
             return
 
-        selected_item = self.artykuly_tree.selection()
+        artykul_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
+        self.dodaj_artykul_do_zamowienie(self.zamowienie_dodawanie_artykulu_id, artykul_id, cena_artykulu_var, ilosc_artykulu_var)
 
+    def on_double_click_dodawanie_artykulu_do_zamowienia(self, event):
+
+        selected_item = self.artykuly_tree.selection()
+        
+        self.zamowienie_dodawanie_artykulu_id = self.zamowienie_id
+        
         if selected_item:
-            artykul_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
-            self.dodaj_artykul_do_zamowienie(self.zamowienie_id, artykul_id, cena_artykulu_var, ilosc_artykulu_var)
-            self.load_inside_zamowienie(self.zamowienie_id)
+            self.cena_ilosc_window()
+            self.cena_ilosc_dodanie(selected_item = selected_item, zamowienie_id = zamowienie_id) #przycisk
+            self.load_inside_zamowienie(zamowienie_id)
 
             self.load_zamowienia_daemon()
 
@@ -579,7 +620,6 @@ class FolderApp:
             self.db_session.add(zamowienie)
             
         elif commend == "modyfikuj":
-            print("Test")
             zamowienie = self.db_session.query(Zamowienie).filter_by(id=self.zamowienie_id).first()
         
             if zamowienie:
@@ -962,31 +1002,31 @@ class FolderApp:
 
     def dodaj_list_artykulow(self):
         self.list_artykulow(backTarget='zamówienie')
-        self.third_frame = ttk.Frame(self.master, padding=5)
-        self.third_frame.grid(row=0, column=6, columnspan=1, rowspan=4, sticky="nsew", padx=5, pady=5)
+        # self.third_frame = ttk.Frame(self.master, padding=5)
+        # self.third_frame.grid(row=0, column=6, columnspan=1, rowspan=4, sticky="nsew", padx=5, pady=5)
 
-        self.third_frame.grid_rowconfigure(0, weight=80)
-        self.third_frame.grid_rowconfigure(1, weight=1)
-        self.third_frame.grid_rowconfigure(2, weight=1)
-        self.third_frame.grid_rowconfigure(3, weight=10)
-        self.third_frame.grid_rowconfigure(4, weight=1)
-        self.third_frame.grid_rowconfigure(5, weight=1)
-        self.third_frame.grid_rowconfigure(6, weight=80)
+        # self.third_frame.grid_rowconfigure(0, weight=80)
+        # self.third_frame.grid_rowconfigure(1, weight=1)
+        # self.third_frame.grid_rowconfigure(2, weight=1)
+        # self.third_frame.grid_rowconfigure(3, weight=10)
+        # self.third_frame.grid_rowconfigure(4, weight=1)
+        # self.third_frame.grid_rowconfigure(5, weight=1)
+        # self.third_frame.grid_rowconfigure(6, weight=80)
 
-        cena_label = ttk.Label(self.third_frame, text = 'Cena:', font=('calibre', 10, 'bold'), anchor='center')
-        ilosc_label = ttk.Label(self.third_frame, text = 'Ilość:', font=('calibre', 10, 'bold'), anchor='w')
+        # cena_label = ttk.Label(self.third_frame, text = 'Cena:', font=('calibre', 10, 'bold'), anchor='center')
+        # ilosc_label = ttk.Label(self.third_frame, text = 'Ilość:', font=('calibre', 10, 'bold'), anchor='w')
         
-        self.cena_artykulu_var = tk.DoubleVar(value=0)
-        self.ilosc_artykulu_var = tk.DoubleVar(value=1)
+        # self.cena_artykulu_var = tk.DoubleVar(value=0)
+        # self.ilosc_artykulu_var = tk.DoubleVar(value=1)
 
-        cena_entry = ttk.Entry(self.third_frame, textvariable = self.cena_artykulu_var, font=('calibre',10,'normal'), width=5)
-        ilosc_entry = ttk.Entry(self.third_frame, textvariable = self.ilosc_artykulu_var, font=('calibre',10,'normal'), width=5)
+        # cena_entry = ttk.Entry(self.third_frame, textvariable = self.cena_artykulu_var, font=('calibre',10,'normal'), width=5)
+        # ilosc_entry = ttk.Entry(self.third_frame, textvariable = self.ilosc_artykulu_var, font=('calibre',10,'normal'), width=5)
 
-        cena_label.grid(row=1,column=0)
-        cena_entry.grid(row=2,column=0)
+        # cena_label.grid(row=1,column=0)
+        # cena_entry.grid(row=2,column=0)
 
-        ilosc_label.grid(row=4,column=0)
-        ilosc_entry.grid(row=5,column=0)
+        # ilosc_label.grid(row=4,column=0)
+        # ilosc_entry.grid(row=5,column=0)
 
         self.artykuly_tree.bind("<Double-1>", self.on_double_click_dodawanie_artykulu_do_zamowienia)
 
@@ -1100,7 +1140,7 @@ class FolderApp:
         self.dodaj_button.pack(side='top', padx=1, pady=(3,30))
 
     def button_zatwierdz_edycje_zamowienie(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Zatwierdź edycje\nzamówienia", command=lambda: self.zatwierdz_nowy_modyfikuj_zamowienie(commend="modyfikuj"), width = 10, image=self.usun_zamowienie_icon, compound="left")
+        self.dodaj_button = ttk.Button(frame, text="Zatwierdź\nedycje\nzamówienia", command=lambda: self.zatwierdz_nowy_modyfikuj_zamowienie(commend="modyfikuj"), width = 10, image=self.usun_zamowienie_icon, compound="left")
         self.dodaj_button.pack(side='top', padx=1, pady=(3,30))  
 
     def button_lista_artykulow(self, frame):
@@ -1136,7 +1176,7 @@ class FolderApp:
         self.dodaj_button.pack(side='top', padx=1, pady=(3,30))       
 
     def button_zatwierdz_edycje_artykul(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Zatwierdź\nartykuł", command=lambda: self.zatwierdz_nowy_modyfikuj_artykul(commend="modyfikuj"), width = 10, image=self.usun_zamowienie_icon, compound="left")
+        self.dodaj_button = ttk.Button(frame, text="Zatwierdź\nedycję\nartykułu", command=lambda: self.zatwierdz_nowy_modyfikuj_artykul(commend="modyfikuj"), width = 10, image=self.usun_zamowienie_icon, compound="left")
         self.dodaj_button.pack(side='top', padx=1, pady=(3,30))  
 
     def button_zniszcz_artykul(self, frame):
@@ -1145,6 +1185,10 @@ class FolderApp:
 
     def button_dodaj_artykul_zamowienie(self, frame):
         self.dodaj_button = ttk.Button(frame, text="Dodaj\nartykuł do\nzamowienia", command=self.dodaj_list_artykulow, width = 10, image=self.usun_zamowienie_icon, compound="left")
+        self.dodaj_button.pack(side='top', padx=1, pady=3)
+
+    def button_zatwierdz_dodanie_artykulu(self, frame):
+        self.dodaj_button = ttk.Button(frame, text="Dodaj\nartykuł do\nzamowienia", command=self.cena_ilosc_dodanie, width = 10, image=self.usun_zamowienie_icon, compound="left")
         self.dodaj_button.pack(side='top', padx=1, pady=3)
 
     def button_usun_artykul_zamowienie(self, frame):

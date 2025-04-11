@@ -1,4 +1,4 @@
-import os, shutil
+import os
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog, PhotoImage, Listbox
 from tkinterdnd2 import DND_FILES, TkinterDnD
@@ -6,7 +6,8 @@ from dbControler import SQLconnect, select, Kupujacy, Kategoria, Sklep, Firma, Z
 from tkcalendar import DateEntry
 import datetime as datetime
 import time
-import threading #czy potrzebne?
+import threading
+from winsound import *
 
 class FolderApp:
     def __init__(self, master):
@@ -53,6 +54,7 @@ class FolderApp:
         master.grid_columnconfigure(3, weight=2000)
 
     def start_frame(self):
+        self.play_music_on_start_demon()
         self.zamowienia_tree = self.stworz_zamowienie_tree(self.zamowienia_frame, 'Zamówienia') 
         self.button_manager(frame="main", startup = True)
         
@@ -205,7 +207,6 @@ class FolderApp:
 
         tree.pack(side='left', expand=True, fill='both')
 
-
         tree.column('id_artykułu', width=20, anchor='e')
         tree.heading('id_artykułu', text='id_artykułu', anchor='e')
 
@@ -307,6 +308,9 @@ class FolderApp:
 
     def show_message_async_demon(self):
         threading.Thread(target=self.show_message_async, daemon=True).start()
+
+    def play_music_on_start_demon(self):
+        threading.Thread(target=lambda: PlaySound('sounds/start_sound.wav', SND_FILENAME), daemon=True).start()
 
     def show_message_async(self):
         self.msg_windows = tk.Toplevel(root)
@@ -605,7 +609,6 @@ class FolderApp:
             self.rabat_j_var = tk.DoubleVar(value=self.zamowienie_rabat_j)
             self.rabat_p_var = tk.DoubleVar(value=self.zamowienie_rabat_procentowy)
             self.button_manager("modyfikuj_zamowienie")
-
 
         self.zamowienia_frame.grid_remove()
         self.secend_frame = ttk.Frame(self.master, padding=5)

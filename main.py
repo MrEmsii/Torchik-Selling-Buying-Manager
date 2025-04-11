@@ -129,6 +129,7 @@ class FolderApp:
 
         elif frame == "wyjdź_z_cena_ilosc":
             self.button_zatwierdz_dodanie_artykulu(self.button_cena_ilosc_frame)
+            self.button_anuluj_dodanie_artykulu(self.button_cena_ilosc_frame)
 
         if frame != 'main':
             self.button_back_pack(self.button_frame, back_target)
@@ -138,7 +139,22 @@ class FolderApp:
         label = ttk.Label(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)
 
-        tree = ttk.Treeview(parent_frame, columns=("id_artykul", 'Cena', 'Ilosc', "Kategoria", 'Marka', 'Artykul', 'Kolor', 'Szczegoly'), show='headings')
+        container = ttk.Frame(parent_frame)
+        container.pack(expand=True, fill='both')
+
+        scrollbar = ttk.Scrollbar(container, orient="vertical")
+
+        tree = ttk.Treeview(
+            container, 
+            columns=("id_artykul", 'Cena', 'Ilosc', "Kategoria", 'Marka', 'Artykul', 'Kolor', 'Szczegoly'), 
+            show='headings',
+            yscrollcommand=scrollbar.set
+            )
+        
+        scrollbar.config(command=tree.yview)
+        scrollbar.pack(side='right', fill='y')
+
+        tree.pack(side='left', expand=True, fill='both')
 
         tree.column('id_artykul', width=50, anchor='e')
         tree.heading('id_artykul', text='ID', anchor='center')
@@ -170,8 +186,25 @@ class FolderApp:
 
     def stworz_artykuly_tree(self, parent_frame, label_text):
         label = ttk.Label(parent_frame, text=label_text, font=("Arial", 12))
-        tree = ttk.Treeview(parent_frame, columns=("id_artykułu", 'Kategoria', 'Firma', 'artykul','Kolor','szczegoly'), show='headings')
         label.pack(pady=5)
+
+        container = ttk.Frame(parent_frame)
+        container.pack(expand=True, fill='both')
+
+        scrollbar = ttk.Scrollbar(container, orient="vertical")
+
+        tree = ttk.Treeview(
+            container, 
+            columns=("id_artykułu", 'Kategoria', 'Firma', 'artykul','Kolor','szczegoly'), 
+            show='headings',
+            yscrollcommand=scrollbar.set
+            )
+        
+        scrollbar.config(command=tree.yview)
+        scrollbar.pack(side='right', fill='y')
+
+        tree.pack(side='left', expand=True, fill='both')
+
 
         tree.column('id_artykułu', width=20, anchor='e')
         tree.heading('id_artykułu', text='id_artykułu', anchor='e')
@@ -199,7 +232,23 @@ class FolderApp:
         label = ttk.Label(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)
 
-        tree = ttk.Treeview(parent_frame, columns=('id', 'name'), show='headings', height=10)
+        container = ttk.Frame(parent_frame)
+        container.pack(expand=True, fill='both')
+
+        scrollbar = ttk.Scrollbar(container, orient="vertical")
+
+        tree = ttk.Treeview(
+            container, 
+            columns=('id', 'name'), 
+            show='headings', 
+            yscrollcommand=scrollbar.set
+            )
+        
+        scrollbar.config(command=tree.yview)
+        scrollbar.pack(side='right', fill='y')
+
+        tree.pack(side='left', expand=True, fill='both')
+        
         tree.column('id', width=10, anchor='e')
         tree.heading('id', text='ID', anchor='e')
 
@@ -211,8 +260,24 @@ class FolderApp:
 
     def stworz_zamowienie_tree(self, parent_frame, label_text):
         label = ttk.Label(parent_frame, text=label_text, font=("Arial", 12))
-        tree = ttk.Treeview(parent_frame, columns=("id_zamowiania", 'Data', 'Kupujacy', 'Sklep','Rabat jednostkowy','Rabat procentowy', 'Cena', "Cena_po_rabacie"), show='headings')
         label.pack(pady=5)
+
+        container = ttk.Frame(parent_frame)
+        container.pack(expand=True, fill='both')
+
+        scrollbar = ttk.Scrollbar(container, orient="vertical")
+
+        tree = ttk.Treeview(
+            container,
+            columns=("id_zamowiania", 'Data', 'Kupujacy', 'Sklep', 'Rabat jednostkowy', 'Rabat procentowy', 'Cena', "Cena_po_rabacie"),
+            show='headings',
+            yscrollcommand=scrollbar.set,
+        )
+
+        scrollbar.config(command=tree.yview)
+        scrollbar.pack(side='right', fill='y')
+
+        tree.pack(side='left', expand=True, fill='both')
 
         tree.column('id_zamowiania', width=50, anchor='e')
         tree.heading('id_zamowiania', text='id_zamowiania', anchor='e')
@@ -237,10 +302,8 @@ class FolderApp:
 
         tree.column('Cena_po_rabacie', width=100, anchor='e')
         tree.heading('Cena_po_rabacie', text='Cena po rabacie', anchor='e')
-        
-        tree.pack(expand=True, fill='both')
 
-        return tree  
+        return tree
 
     def show_message_async_demon(self):
         threading.Thread(target=self.show_message_async, daemon=True).start()
@@ -430,63 +493,77 @@ class FolderApp:
 
     def cena_ilosc_window(self):
         self.window = tk.Toplevel(self.master)
-        self.window.geometry("500x400+100+100")
+        self.window.geometry("300x180+500+300")
 
         self.window.iconbitmap(os.path.join(self.dsc, "image", "icon.ico"))
         self.background_label = tk.Label(self.window, image=self.background_image)
         self.background_label.place(x=0, y=0, relwidth=1, relheight=1) 
 
-        self.filament_frame = ttk.Frame(self.window)
-        self.button_cena_ilosc_frame = ttk.Frame(self.window)
-        self.filament_frame.grid(row=0, column=1,sticky="nsew", padx=5, pady=5)
+        self.button_cena_ilosc_frame = ttk.Frame(self.window, padding=5)
+        self.filament_frame = ttk.Frame(self.window, padding=5)
+
         self.button_cena_ilosc_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+        self.filament_frame.grid(row=0, column=1, columnspan=2, sticky="nsew", padx=5, pady=5)
 
         self.button_manager(frame="wyjdź_z_cena_ilosc", back_target="wyjdź_z_cena_ilosc")
-
 
         cena_label = ttk.Label(self.filament_frame, text = 'Cena:', font=('calibre', 10, 'bold'), anchor='center')
         ilosc_label = ttk.Label(self.filament_frame, text = 'Ilość:', font=('calibre', 10, 'bold'), anchor='w')
         
-        self.cena_artykulu_var = tk.DoubleVar(value=0)
-        self.ilosc_artykulu_var = tk.DoubleVar(value=1)
+        self.cena_artykulu_var = tk.StringVar(value=0.0)
+        self.ilosc_artykulu_var = tk.StringVar(value=1.0)
 
         cena_entry = ttk.Entry(self.filament_frame, textvariable = self.cena_artykulu_var, font=('calibre',10,'normal'), width=5)
         ilosc_entry = ttk.Entry(self.filament_frame, textvariable = self.ilosc_artykulu_var, font=('calibre',10,'normal'), width=5)
 
-        cena_label.grid(row=1,column=1)
-        ilosc_label.grid(row=2,column=1)
+        cena_label.grid(row=1, column=1)
+        ilosc_label.grid(row=2, column=1)
 
-        cena_entry.grid(row=1,column=2)
-        ilosc_entry.grid(row=2,column=2)
+        cena_entry.grid(row=1, column=2)
+        ilosc_entry.grid(row=2, column=2)
+
+        zamowienie_id = self.zamowienie_dodawanie_artykulu_id
+        self.load_inside_zamowienie(zamowienie_id)
+
+        self.filament_frame.grid_rowconfigure(0, weight=80)
+        self.filament_frame.grid_rowconfigure(1, weight=1)
+        self.filament_frame.grid_rowconfigure(2, weight=1)
+        self.filament_frame.grid_rowconfigure(3, weight=80)
+
+        self.window.grid_rowconfigure(0, weight=4)
+        self.window.grid_rowconfigure(1, weight=4)
+
+        self.window.grid_columnconfigure(0, weight=1)
+        self.window.grid_columnconfigure(1, weight=2000)
+        self.window.grid_columnconfigure(2, weight=2000)
 
     def cena_ilosc_dodanie(self):
         try:
-            cena_artykulu_var = self.cena_artykulu_var.get()
-        except tk.TclError:
+            cena_artykulu_var = float(self.cena_artykulu_var.get())
+        except ValueError:
             messagebox.showerror("Błąd", "Nieprawidłowa wartość d! Wpisz liczbę.")
             return
 
         try:
-            ilosc_artykulu_var =  self.ilosc_artykulu_var.get()
-        except tk.TclError:
+            ilosc_artykulu_var =  float(self.ilosc_artykulu_var.get())
+        except ValueError:
             messagebox.showerror("Błąd", "Nieprawidłowa wartość f! Wpisz liczbę.")
             return
 
-        artykul_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
-        self.dodaj_artykul_do_zamowienie(self.zamowienie_dodawanie_artykulu_id, artykul_id, cena_artykulu_var, ilosc_artykulu_var)
+        zamowienie_id = self.zamowienie_dodawanie_artykulu_id
+        self.dodaj_artykul_do_zamowienie(zamowienie_id, self.cena_ilosc_select_item, cena_artykulu_var, ilosc_artykulu_var)
+        
+        self.load_zamowienia_daemon()
+        self.load_inside_zamowienie(zamowienie_id)
+        self.window.destroy()
 
     def on_double_click_dodawanie_artykulu_do_zamowienia(self, event):
-
         selected_item = self.artykuly_tree.selection()
-        
         self.zamowienie_dodawanie_artykulu_id = self.zamowienie_id
-        
         if selected_item:
+            artykul_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
+            self.cena_ilosc_select_item = artykul_id
             self.cena_ilosc_window()
-            self.cena_ilosc_dodanie(selected_item = selected_item, zamowienie_id = zamowienie_id) #przycisk
-            self.load_inside_zamowienie(zamowienie_id)
-
-            self.load_zamowienia_daemon()
 
     def on_double_click_filtrowanie_kategoria(self, event):
         selected_item = self.kategorie_tree.selection()
@@ -1002,31 +1079,6 @@ class FolderApp:
 
     def dodaj_list_artykulow(self):
         self.list_artykulow(backTarget='zamówienie')
-        # self.third_frame = ttk.Frame(self.master, padding=5)
-        # self.third_frame.grid(row=0, column=6, columnspan=1, rowspan=4, sticky="nsew", padx=5, pady=5)
-
-        # self.third_frame.grid_rowconfigure(0, weight=80)
-        # self.third_frame.grid_rowconfigure(1, weight=1)
-        # self.third_frame.grid_rowconfigure(2, weight=1)
-        # self.third_frame.grid_rowconfigure(3, weight=10)
-        # self.third_frame.grid_rowconfigure(4, weight=1)
-        # self.third_frame.grid_rowconfigure(5, weight=1)
-        # self.third_frame.grid_rowconfigure(6, weight=80)
-
-        # cena_label = ttk.Label(self.third_frame, text = 'Cena:', font=('calibre', 10, 'bold'), anchor='center')
-        # ilosc_label = ttk.Label(self.third_frame, text = 'Ilość:', font=('calibre', 10, 'bold'), anchor='w')
-        
-        # self.cena_artykulu_var = tk.DoubleVar(value=0)
-        # self.ilosc_artykulu_var = tk.DoubleVar(value=1)
-
-        # cena_entry = ttk.Entry(self.third_frame, textvariable = self.cena_artykulu_var, font=('calibre',10,'normal'), width=5)
-        # ilosc_entry = ttk.Entry(self.third_frame, textvariable = self.ilosc_artykulu_var, font=('calibre',10,'normal'), width=5)
-
-        # cena_label.grid(row=1,column=0)
-        # cena_entry.grid(row=2,column=0)
-
-        # ilosc_label.grid(row=4,column=0)
-        # ilosc_entry.grid(row=5,column=0)
 
         self.artykuly_tree.bind("<Double-1>", self.on_double_click_dodawanie_artykulu_do_zamowienia)
 
@@ -1189,7 +1241,11 @@ class FolderApp:
 
     def button_zatwierdz_dodanie_artykulu(self, frame):
         self.dodaj_button = ttk.Button(frame, text="Dodaj\nartykuł do\nzamowienia", command=self.cena_ilosc_dodanie, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3)
+        self.dodaj_button.pack(side='top', padx=2, pady=2)
+
+    def button_anuluj_dodanie_artykulu(self, frame):
+        self.dodaj_button = ttk.Button(frame, text="Anuluj\ndodawanie\nartykułu do\nzamówienia", command=self.window.destroy, width = 10, image=self.usun_zamowienie_icon, compound="left")
+        self.dodaj_button.pack(side='top', padx=2, pady=2)
 
     def button_usun_artykul_zamowienie(self, frame):
         self.dodaj_button = ttk.Button(frame, text="Usuń\nartykuł z\nzamówienia", command=self.usun_artykul_zamowienie, width = 10, image=self.usun_zamowienie_icon, compound="left")

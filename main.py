@@ -54,7 +54,7 @@ class FolderApp:
         master.grid_columnconfigure(3, weight=2000)
 
     def start_frame(self):
-        self.play_music_on_start_demon()
+        self.play_sound_on_start_demon()
         self.zamowienia_tree = self.stworz_zamowienie_tree(self.zamowienia_frame, 'Zamówienia') 
         self.button_manager(frame="main", startup = True)
         
@@ -309,8 +309,11 @@ class FolderApp:
     def show_message_async_demon(self):
         threading.Thread(target=self.show_message_async, daemon=True).start()
 
-    def play_music_on_start_demon(self):
+    def play_sound_on_start_demon(self):
         threading.Thread(target=lambda: PlaySound('sounds/start_sound.wav', SND_FILENAME), daemon=True).start()
+
+    def error_sound_demon(self):
+        threading.Thread(target=lambda: PlaySound('sounds/error_sound.wav', SND_FILENAME), daemon=True).start()
 
     def show_message_async(self):
         self.msg_windows = tk.Toplevel(root)
@@ -545,12 +548,14 @@ class FolderApp:
         try:
             cena_artykulu_var = float(self.cena_artykulu_var.get())
         except ValueError:
+            self.error_sound_demon()
             messagebox.showerror("Błąd", "Nieprawidłowa wartość d! Wpisz liczbę.")
             return
 
         try:
             ilosc_artykulu_var =  float(self.ilosc_artykulu_var.get())
         except ValueError:
+            self.error_sound_demon()
             messagebox.showerror("Błąd", "Nieprawidłowa wartość f! Wpisz liczbę.")
             return
 
@@ -599,6 +604,7 @@ class FolderApp:
         elif commend == "modyfikuj":
             selected_item = self.zamowienia_tree.selection()
             if not selected_item:
+                self.error_sound_demon()
                 messagebox.showerror("Błąd", "Brak wybranego zamówienia! Wybierz zamówienie.")
                 return
 
@@ -666,29 +672,34 @@ class FolderApp:
     def zatwierdz_nowy_modyfikuj_zamowienie(self, commend = "stworz"):
         selected_item = self.kupujacy_tree.selection()
         if not selected_item:
+            self.error_sound_demon()
             messagebox.showerror("Błąd", "Brak wybranego kupującego! Wybierz kupującego.")
             return
         
         selected_item = self.sklepy_tree.selection()
         if not selected_item:
+            self.error_sound_demon()
             messagebox.showerror("Błąd", "Brak wybranego sklepu! Wybierz sklep.")
             return
 
         try:
             rabat_j = self.rabat_j_var.get()
         except tk.TclError:
+            self.error_sound_demon()
             messagebox.showerror("Błąd", "Nieprawidłowa wartość rabatu! Wpisz liczbę.")
             return
 
         try:
             rabat_procentowy = self.rabat_p_var.get()
         except tk.TclError:
+            self.error_sound_demon()
             messagebox.showerror("Błąd", "Nieprawidłowa wartość rabatu! Wpisz liczbę.")
             return
        
         try:
             data = self.konwersja_string_do_data(self.zamowienie_data.get())
         except ValueError:
+            self.error_sound_demon()
             messagebox.showerror("Błąd", "Nieprawidłowa data! Wpisz date.\n             RRRR-MM-DD")
             return
         
@@ -764,6 +775,7 @@ class FolderApp:
         elif commend == "modyfikuj":
             selected_item = self.artykuly_tree.selection()
             if not selected_item:
+                self.error_sound_demon()
                 messagebox.showerror("Błąd", "Brak wybranego artykułu! Wybierz artykuł.")
                 return
         
@@ -838,16 +850,19 @@ class FolderApp:
     def zatwierdz_nowy_modyfikuj_artykul(self, commend = "stworz"):
         selected_item = self.firma_tree.selection()
         if not selected_item:
+            self.error_sound_demon()
             messagebox.showerror("Błąd", "Brak wybranej firmy! Wybierz firmę.")
             return
         
         selected_item = self.kategorie_tree.selection()
         if not selected_item:
+            self.error_sound_demon()
             messagebox.showerror("Błąd", "Brak wybranej kategori artykulu! Wybierz kategorie.")
             return
 
         nazwa = self.nazwa_artykulu_string.get()
         if not nazwa:
+            self.error_sound_demon()
             messagebox.showerror("Błąd", "Brak nazwy artykułu! Wpisz nazwę.")
             return
        

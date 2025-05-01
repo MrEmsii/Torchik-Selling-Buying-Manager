@@ -333,11 +333,14 @@ class FolderApp:
         except AttributeError:
             pass
 
-    def load_zamowienia_daemon(self):
-        threading.Thread(target=self.load_zamowienia, daemon=True).start()
+    def load_zamowienia_daemon(self, widok = "pokaz"):
+        commend = self.load_zamowienia(widok = widok)
+        threading.Thread(target=lambda: commend, daemon=True).start()
 
-    def load_zamowienia(self):
-        self.show_message_async_demon()
+    def load_zamowienia(self, widok):
+        if widok == "pokaz":
+            self.show_message_async_demon()
+
 
         zamowienia = self.db_session.query(Zamowienie).all()
         zamowienia_data = []
@@ -345,15 +348,15 @@ class FolderApp:
         for zamow in zamowienia:
             zamow_id = zamow.id
             zamow_data = zamow.data
-            zamow_kupujacy = zamow.kupujacy.nazwa if zamow.kupujacy else None
-            zamow_sklep = zamow.sklep.nazwa if zamow.sklep else None
+            zamow_kupujacy = zamow.kupujacy.nazwa if zamow.kupujacy else " "
+            zamow_sklep = zamow.sklep.nazwa if zamow.sklep else  " "
             rabat_j = f"{zamow.rabat_j:.2f} PLN"
             rabat_proc = f"{zamow.rabat_procent :.0f} %"
             zamow_cena = f"{zamow.oblicz_cene(self.db_session):,.2f} PLN".replace(",", " ")
             zamow_cena_rabat = f"{zamow.oblicz_cene_rabat(self.db_session):,.2f} PLN".replace(",", " ")
             zamowienia_data.append((zamow_id, zamow_data, zamow_kupujacy, zamow_sklep, rabat_j, rabat_proc, zamow_cena, zamow_cena_rabat))
 
-        zamowienia_data.sort(key=lambda x:x[0], reverse=True)
+        zamowienia_data.sort(key=lambda x:x[0], reverse=True )
         zamowienia_data.sort(key=lambda x:x[1], reverse=True)
         self.zamowienia_tree.delete(*self.zamowienia_tree.get_children())
 
@@ -372,7 +375,7 @@ class FolderApp:
             sklepy_data.append((sklep_id, sklep_nazwa))
 
         self.sklepy_tree.delete(*self.sklepy_tree.get_children())
-        sklepy_data.sort(key=lambda x:x[1])
+        sklepy_data.sort(key=lambda x: x[1].lower())
 
         for sklep_id, sklep_nazwa in sklepy_data:
             self.sklepy_tree.insert('', 'end', values=(sklep_id, sklep_nazwa))
@@ -432,11 +435,11 @@ class FolderApp:
 
         for art in artykuly:
             art_id = art.id
-            art_kategoria = art.kategoria.nazwa if art.kategoria else None
-            art_firma = art.firma.nazwa if art.firma else None
+            art_kategoria = art.kategoria.nazwa if art.kategoria else  " "
+            art_firma = art.firma.nazwa if art.firma else  " "
             art_nazwa = art.nazwa
-            art_kolor = art.kolor
-            art_szczegoly = art.szczegoly
+            art_kolor = art.kolor if art.kolor else  " "
+            art_szczegoly = art.szczegoly if art.szczegoly else  " "
             artykuly_data.append((art_id, art_kategoria, art_firma, art_nazwa, art_kolor, art_szczegoly))
 
         artykuly_data.sort(key=lambda x:x[3])
@@ -982,7 +985,7 @@ class FolderApp:
             if sklep:
                 sklep.nazwa = new_value 
                 self.db_session.commit()
-                self.load_zamowienia_daemon()
+                self.load_zamowienia_daemon(widok = "ukryj")
                 self.load_sklepy() 
 
     def usun_sklep(self):

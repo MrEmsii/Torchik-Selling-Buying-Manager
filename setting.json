@@ -1,0 +1,7 @@
+{
+    "volume": 0.1,
+    "language": "pl_PL",
+    "start_sound": "start_sound.wav",
+    "click_sound": "click_sound.wav",
+    "error_sound": "error_sound.wav"
+}

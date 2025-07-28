@@ -1,4 +1,7 @@
 {
-    "button_usun_firma": "Usuń\nfirma"
+    "button_usun_firma": {
+        "text": "Usuń\nfirma",
+        "toolTip": "Przycisk służący do usuwnania zaznaczonej firmy. Działa tylko z zaznaczoną firmą!"
+        }
     
 }

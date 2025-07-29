@@ -21,6 +21,7 @@ class FolderApp:
             self.json_setting(status = "start")
         
         self.konfiguracja_programu = self.json_setting(status="read")
+        self.leksykon_programu = self.json_language(self.konfiguracja_programu["language"])
 
         self.style = ttk.Style()
         master.tk.call('source', self.dsc + '/themes/awdark.tcl')
@@ -61,6 +62,15 @@ class FolderApp:
         master.grid_columnconfigure(1, weight=2000)
         master.grid_columnconfigure(2, weight=2000)
         master.grid_columnconfigure(3, weight=2000)
+
+
+    def json_language(self, language_code):
+        try:
+            with open(os.path.join(self.dsc, "language", f"{language_code}.json"), 'r', encoding='utf-8') as file:
+                return json.load(file)
+        except FileNotFoundError:
+            messagebox.showerror("Błąd", f"Plik językowy '{language_code}.json' nie został znaleziony.")
+            return {}
 
     def json_setting(self, status = "read", key = None, value = None):
         if status == "start":
@@ -189,7 +199,7 @@ class FolderApp:
         scrollbar.config(command=tree.yview)
         scrollbar.pack(side='right', fill='y')
 
-        tree.pack(side='left', expand=True, fill='both')
+        tree.pack( expand=True, fill='both')
 
         tree.column('id_artykul', width=50, anchor='e')
         tree.heading('id_artykul', text='ID', anchor='center')
@@ -238,7 +248,7 @@ class FolderApp:
         scrollbar.config(command=tree.yview)
         scrollbar.pack(side='right', fill='y')
 
-        tree.pack(side='left', expand=True, fill='both')
+        tree.pack( expand=True, fill='both')
 
         tree.column('id_artykułu', width=20, anchor='e')
         tree.heading('id_artykułu', text='id_artykułu', anchor='e')
@@ -281,7 +291,7 @@ class FolderApp:
         scrollbar.config(command=tree.yview)
         scrollbar.pack(side='right', fill='y')
 
-        tree.pack(side='left', expand=True, fill='both')
+        tree.pack( expand=True, fill='both')
         
         tree.column('id', width=10, anchor='e')
         tree.heading('id', text='ID', anchor='e')
@@ -311,7 +321,7 @@ class FolderApp:
         scrollbar.config(command=tree.yview)
         scrollbar.pack(side='right', fill='y')
 
-        tree.pack(side='left', expand=True, fill='both')
+        tree.pack( expand=True, fill='both')
 
         tree.column('id_zamowiania', width=50, anchor='e')
         tree.heading('id_zamowiania', text='id_zamowiania', anchor='e')
@@ -1203,7 +1213,7 @@ class FolderApp:
             widget.destroy()
 
     def button_icon_pack(self):
-        self.stworz_zamowienie_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_project_icon.png")).subsample(8, 8)
+        self.stworz_zamowienie_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_element_icon.png")).subsample(8, 8)
         self.edit_zamowienie_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_project_icon.png")).subsample(8, 8)
         self.stworz_art_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_project_icon.png")).subsample(8, 8)
         self.usun_zamowienie_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_project_icon.png")).subsample(8, 8)
@@ -1212,20 +1222,6 @@ class FolderApp:
         self.stworz_kupujacego_inside_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_project_icon.png")).subsample(20, 20)
         self.stworz_sklep_inside_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_project_icon.png")).subsample(20, 20)
         self.refresh_element_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_project_icon.png")).subsample(8, 8)
-
-    def button_back_pack(self, frame, commend = "main"):
-        if commend == "main":
-            commend = self.pokaz_main_frame
-            message_tooltip = "Wróć do głównego okna"
-        elif commend == "lista_artykułów":
-            commend = self.powrot_do_lista_artykulow
-            message_tooltip = "Wróć do listy artykułów"
-        elif commend == "zamówienie":
-            commend = lambda: self.load_inside_zamowienie(self.zamowienie_id)
-            message_tooltip =  "Wróć do zamówienia"
-        self.dodaj_button = ttk.Button(frame, text="Wróć", command=commend, width = 10, image=self.backButton_icon, compound="left")
-        self.dodaj_button.pack(side='bottom', padx=1, pady=3) 
-        ToolTip(self.dodaj_button, msg=message_tooltip, follow=True)
 
     def pokaz_main_frame(self):
         if not self.zamowienia_frame.winfo_ismapped():
@@ -1241,171 +1237,127 @@ class FolderApp:
         self.usun_all_widgets()
         self.list_artykulow()
 
-    def button_ustawienia(self, frame):
-        print(self.konfiguracja_programu["language"])
-        self.dodaj_button = ttk.Button(frame, text="Ustawienia", command=self.ustawienia_programu, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='bottom', padx=1, pady=3)
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
-
-    def button_dodaj_zamowienie(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Dodaj\nzamówienie", command=self.dodaj_modyfikuj_zamowienie, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3)
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
-
-    def button_modyfikuj_zamowienie(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Edytuj\nzamówienie", command=lambda: self.dodaj_modyfikuj_zamowienie(commend="modyfikuj"), width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3)
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
-
-    def button_usun_zamowienie(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Usuń\nzamówienie", command=self.usun_zamowienie, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='bottom', padx=1, pady=(3,30))
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
-        
-    def buttons_zatwierdz_zamowienia(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Zatwierdź\nzamówienie", command=self.zatwierdz_nowy_modyfikuj_zamowienie, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=(3,30))
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
-
-    def button_zatwierdz_edycje_zamowienie(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Zatwierdź\nedycje\nzamówienia", command=lambda: self.zatwierdz_nowy_modyfikuj_zamowienie(commend="modyfikuj"), width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=(3,30))  
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
-
-    def button_lista_artykulow(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Lista\nartykułów", command=self.list_artykulow, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=(30,30))
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
-
-    def button_lista_sklepow(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Lista\nsklepów", command=self.list_sklepy, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3)
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
-
-    def button_lista_firm(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Lista\nfirm", command=self.list_firmy, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3)
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
-
-    def button_lista_kupujacych(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Lista\nkupujących", command=self.list_kupujacy, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3)    
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
-        
-    def button_lista_kategorii(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Lista\nkategorii", command=self.list_kategorie, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3)
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
-
-    def button_stworz_artykul(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Stwórz\nartykuł", command=self.stworz_modyfikuj_artykul, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3) 
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
-
-    def button_modyfikuj_artykul(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Modyfikuj\nartykułu", command=lambda: self.stworz_modyfikuj_artykul(commend="modyfikuj"), width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3) 
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
-
-    def button_zatwierdz_artykul(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Zatwierdź\nartykuł", command=self.zatwierdz_nowy_modyfikuj_artykul, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=(3,30))       
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
-
-    def button_zatwierdz_edycje_artykul(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Zatwierdź\nedycję\nartykułu", command=lambda: self.zatwierdz_nowy_modyfikuj_artykul(commend="modyfikuj"), width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=(3,30))  
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
-
-    def button_zniszcz_artykul(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Usuń\nartykuł", command=self.zniszcz_artykul, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3)   
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
-
-    def button_dodaj_artykul_zamowienie(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Dodaj\nartykuł do\nzamowienia", command=self.dodaj_list_artykulow, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3)
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
-
-    def button_zatwierdz_dodanie_artykulu(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Dodaj\nartykuł do\nzamowienia", command=self.cena_ilosc_dodanie, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=2, pady=2)
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
-
-    def button_anuluj_dodanie_artykulu(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Anuluj\ndodawanie\nartykułu do\nzamówienia", command=self.window.destroy, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=2, pady=2)
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
-
-    def button_usun_artykul_zamowienie(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Usuń\nartykuł z\nzamówienia", command=self.usun_artykul_zamowienie, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3)
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
-
-    def button_dodaj_kupujacy(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Dodaj\nkupującego", command=self.stworz_kupujacy, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3)        
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
-
-    def button_zmiana_nazwa_kupujacy(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Zmień\nnazwę\nkupującego", command=self.zmien_nazwa_kupujacy, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3) 
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
-
-    def button_usun_kupujacy(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Usuń\nkupującego", command=self.usun_kupujacego, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3) 
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
+    def utworz_przycisk(self, frame, key, command, side='top', padx=1, pady=3, icon=None):
+        leksykon = self.leksykon_programu[key]
+        przycisk = ttk.Button(
+            frame,
+            text=leksykon["text"],
+            command=command,
+            width=10,
+            image=icon or self.refresh_element_icon,
+            compound="left"
+        )
+        przycisk.pack(side=side, padx=padx, pady=pady)
+        ToolTip(przycisk, msg=leksykon["toolTip"], follow=True)
+        return przycisk
 
     def button_dodaj_sklep(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Dodaj\nsklep", command=self.stworz_sklep, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3)
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_dodaj_sklep", self.stworz_sklep, icon=self.stworz_zamowienie_icon)
 
     def button_zmiana_nazwa_sklep(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Zmień\nnazwę\nsklepu", command=self.zmien_nazwa_sklep, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3) 
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_zmiana_nazwa_sklep", self.zmien_nazwa_sklep)
 
     def button_usun_sklep(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Usuń\nsklep", command=self.usun_sklep, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3)
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_usun_sklep", self.usun_sklep)
 
     def button_dodaj_firma(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Dodaj\nfirma", command=self.stworz_firma, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3)
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_dodaj_firma", self.stworz_firma)
 
     def button_zmiana_nazwa_firma(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Zmień\nnazwę\nfirmy", command=self.zmien_nazwa_firma, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3) 
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_zmiana_nazwa_firma", self.zmien_nazwa_firma)
 
     def button_usun_firma(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Usuń\nfirma", command=self.usun_firma, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3)
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_usun_firma", self.usun_firma)
 
     def button_dodaj_kategoria(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Dodaj\nkategoria", command=self.stworz_kategoria, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3)
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_dodaj_kategoria", self.stworz_kategoria)
 
     def button_zmiana_nazwa_kategoria(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Zmień\nnazwę\nkategorii", command=self.zmien_nazwa_kategoria, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3) 
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_zmiana_nazwa_kategoria", self.zmien_nazwa_kategoria)
 
     def button_usun_kategorie(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Usuń\nkategorie", command=self.usun_kategorie, width = 10, image=self.usun_zamowienie_icon, compound="left")
-        self.dodaj_button.pack(side='top', padx=1, pady=3)
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_usun_kategorie", self.usun_kategorie)
+
+    def button_dodaj_kupujacy(self, frame):
+        self.dodaj_button = self.utworz_przycisk(frame, "button_dodaj_kupujacy", self.stworz_kupujacy)
+
+    def button_zmiana_nazwa_kupujacy(self, frame):
+        self.dodaj_button = self.utworz_przycisk(frame, "button_zmiana_nazwa_kupujacy", self.zmien_nazwa_kupujacy)
+
+    def button_usun_kupujacy(self, frame):
+        self.dodaj_button = self.utworz_przycisk(frame, "button_usun_kupujacy", self.usun_kupujacego)
+
+    def button_dodaj_zamowienie(self, frame):
+        self.dodaj_button = self.utworz_przycisk(frame, "button_dodaj_zamowienie", self.dodaj_modyfikuj_zamowienie)
+
+    def button_modyfikuj_zamowienie(self, frame):
+        self.dodaj_button = self.utworz_przycisk(frame, "button_modyfikuj_zamowienie", lambda: self.dodaj_modyfikuj_zamowienie(commend="modyfikuj"))
+
+    def button_usun_zamowienie(self, frame):
+        self.dodaj_button = self.utworz_przycisk(frame, "button_usun_zamowienie", self.usun_zamowienie, side='bottom', pady=(3,30))
+
+    def button_lista_artykulow(self, frame):
+        self.dodaj_button = self.utworz_przycisk(frame, "button_lista_artykulow", self.list_artykulow, pady=(30,30))
+
+    def button_lista_sklepow(self, frame):
+        self.dodaj_button = self.utworz_przycisk(frame, "button_lista_sklepow", self.list_sklepy)
+
+    def button_lista_firm(self, frame):
+        self.dodaj_button = self.utworz_przycisk(frame, "button_lista_firm", self.list_firmy)
+
+    def button_lista_kupujacych(self, frame):
+        self.dodaj_button = self.utworz_przycisk(frame, "button_lista_kupujacych", self.list_kupujacy)
+
+    def button_lista_kategorii(self, frame):
+        self.dodaj_button = self.utworz_przycisk(frame, "button_lista_kategorii", self.list_kategorie)
 
     def button_refresh_zamowienia(self, frame):
-        self.dodaj_button = ttk.Button(frame, text="Odśwież", command=self.load_zamowienia_daemon, width = 10, image=self.refresh_element_icon, compound="left")
-        self.dodaj_button.pack(side='bottom', padx=1, pady=3)
-        ToolTip(self.dodaj_button, msg="Hover info", follow=True)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_refresh_zamowienia", self.load_zamowienia_daemon, side='bottom')
+
+    def button_stworz_artykul(self, frame):
+        self.dodaj_button = self.utworz_przycisk(frame, "button_stworz_artykul", self.stworz_modyfikuj_artykul)
+
+    def button_modyfikuj_artykul(self, frame):
+        self.dodaj_button = self.utworz_przycisk(frame, "button_modyfikuj_artykul", lambda: self.stworz_modyfikuj_artykul(commend="modyfikuj"))
+
+    def button_zatwierdz_artykul(self, frame):
+        self.dodaj_button = self.utworz_przycisk(frame, "button_zatwierdz_artykul", self.zatwierdz_nowy_modyfikuj_artykul, pady=(3,30))
+
+    def button_zatwierdz_edycje_artykul(self, frame):
+        self.dodaj_button = self.utworz_przycisk(frame, "button_zatwierdz_edycje_artykul", lambda: self.zatwierdz_nowy_modyfikuj_artykul(commend="modyfikuj"), pady=(3,30))
+
+    def button_zniszcz_artykul(self, frame):
+        self.dodaj_button = self.utworz_przycisk(frame, "button_zniszcz_artykul", self.zniszcz_artykul)
+
+    def button_dodaj_artykul_zamowienie(self, frame):
+        self.dodaj_button = self.utworz_przycisk(frame, "button_dodaj_artykul_zamowienie", self.dodaj_list_artykulow)
+
+    def button_zatwierdz_dodanie_artykulu(self, frame):
+        self.dodaj_button = self.utworz_przycisk(frame, "button_zatwierdz_dodanie_artykulu", self.cena_ilosc_dodanie)
+
+    def button_anuluj_dodanie_artykulu(self, frame):
+        self.dodaj_button = self.utworz_przycisk(frame, "button_anuluj_dodanie_artykulu", self.window.destroy)
+
+    def button_usun_artykul_zamowienie(self, frame):
+        self.dodaj_button = self.utworz_przycisk(frame, "button_usun_artykul_zamowienie", self.usun_artykul_zamowienie)
+
+    def button_zatwierdz_edycje_zamowienie(self, frame):
+        self.dodaj_button = self.utworz_przycisk(frame, "button_zatwierdz_edycje_zamowienie", lambda: self.zatwierdz_nowy_modyfikuj_zamowienie(commend="modyfikuj"), pady=(3,30))
+
+    def button_ustawienia(self, frame):
+        self.dodaj_button = self.utworz_przycisk(frame, "button_ustawienia", self.ustawienia_programu, pady=5, side='bottom')
+
+    def buttons_zatwierdz_zamowienia(self, frame):
+        self.dodaj_button = self.utworz_przycisk(frame, "buttons_zatwierdz_zamowienia", self.zatwierdz_nowy_modyfikuj_zamowienie, pady=(3,30))
+
+    def button_back_pack(self, frame, commend = "main"):
+        if commend == "main":
+            commend = self.pokaz_main_frame
+        elif commend == "lista_artykułów":
+            commend = self.powrot_do_lista_artykulow
+        elif commend == "zamówienie":
+            commend = lambda: self.load_inside_zamowienie(self.zamowienie_id)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_back_pack", commend, side='bottom', padx=5, pady=5)
 
 if __name__ == "__main__":
     root = TkinterDnD.Tk()

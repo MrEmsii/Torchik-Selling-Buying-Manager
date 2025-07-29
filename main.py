@@ -19,6 +19,8 @@ class FolderApp:
         
         if os.path.exists(self.dsc + "/setting.json") == False:
             self.json_setting(status = "start")
+        
+        self.konfiguracja_programu = self.json_setting(status="read")
 
         self.style = ttk.Style()
         master.tk.call('source', self.dsc + '/themes/awdark.tcl')
@@ -341,17 +343,15 @@ class FolderApp:
         threading.Thread(target=self.show_message_async, daemon=True).start()
 
     def play_sound_on_start_demon(self):
-        config = self.json_setting()
-        if config["volume"] != 0:
-            mixer.music.load(os.path.join(self.dsc, "sounds", config["start_sound"]))
-            mixer.music.set_volume(config["volume"])
+        if self.konfiguracja_programu["volume"] != 0:
+            mixer.music.load(os.path.join(self.dsc, "sounds", self.konfiguracja_programu["start_sound"]))
+            mixer.music.set_volume(self.konfiguracja_programu["volume"])
             mixer.music.play()
 
     def error_sound_demon(self):
-        config = self.json_setting()
-        if config["volume"] != 0:
-            mixer.music.load(os.path.join(self.dsc, "sounds", config["error_sound"]))
-            mixer.music.set_volume(config["volume"])
+        if self.konfiguracja_programu["volume"] != 0:
+            mixer.music.load(os.path.join(self.dsc, "sounds", self.konfiguracja_programu["error_sound"]))
+            mixer.music.set_volume(self.konfiguracja_programu["volume"])
             mixer.music.play()
 
     def show_message_async(self):
@@ -1242,6 +1242,7 @@ class FolderApp:
         self.list_artykulow()
 
     def button_ustawienia(self, frame):
+        print(self.konfiguracja_programu["language"])
         self.dodaj_button = ttk.Button(frame, text="Ustawienia", command=self.ustawienia_programu, width = 10, image=self.usun_zamowienie_icon, compound="left")
         self.dodaj_button.pack(side='bottom', padx=1, pady=3)
         ToolTip(self.dodaj_button, msg="Hover info", follow=True)

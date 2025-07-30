@@ -480,27 +480,35 @@ class FolderApp:
             self.firma_tree.insert('', 'end', values=(firma_id, firma_name))  
 
     def load_artykuly(self, kategoria_id = None):
-        if not kategoria_id:
-            artykuly = self.db_session.query(Artykul_Lista).all()
-        else:
-            artykuly = self.db_session.query(Artykul_Lista).filter_by(kategoria_id=kategoria_id).all()
-        
-        artykuly_data = []
+        self.show_message_async()
 
-        for art in artykuly:
-            art_id = art.id
-            art_kategoria = art.kategoria.nazwa if art.kategoria else  " "
-            art_firma = art.firma.nazwa if art.firma else  " "
-            art_nazwa = art.nazwa
-            art_kolor = art.kolor if art.kolor else  " "
-            art_szczegoly = art.szczegoly if art.szczegoly else  " "
-            artykuly_data.append((art_id, art_kategoria, art_firma, art_nazwa, art_kolor, art_szczegoly))
+        def task():
+            if not kategoria_id:
+                artykuly = self.db_session.query(Artykul_Lista).all()
+            else:
+                artykuly = self.db_session.query(Artykul_Lista).filter_by(kategoria_id=kategoria_id).all()
+            
+            artykuly_data = []
 
-        artykuly_data.sort(key=lambda x:x[3])
-        self.artykuly_tree.delete(*self.artykuly_tree.get_children())
+            for art in artykuly:
+                art_id = art.id
+                art_kategoria = art.kategoria.nazwa if art.kategoria else  " "
+                art_firma = art.firma.nazwa if art.firma else  " "
+                art_nazwa = art.nazwa
+                art_kolor = art.kolor if art.kolor else  " "
+                art_szczegoly = art.szczegoly if art.szczegoly else  " "
+                artykuly_data.append((art_id, art_kategoria, art_firma, art_nazwa, art_kolor, art_szczegoly))
 
-        for id, kategoria, firma, nazwa, kolor, szczegoly in artykuly_data:
-            self.artykuly_tree.insert('', 'end', values=(id, kategoria, firma, nazwa, kolor, szczegoly))
+            artykuly_data.sort(key=lambda x:x[3])
+
+            def update_gui():
+                self.artykuly_tree.delete(*self.artykuly_tree.get_children())
+                for id, kategoria, firma, nazwa, kolor, szczegoly in artykuly_data:
+                    self.artykuly_tree.insert('', 'end', values=(id, kategoria, firma, nazwa, kolor, szczegoly))
+                self.ukryj_message_async()
+
+            self.master.after(0, update_gui)
+        threading.Thread(target=task, daemon=True).start()
 
     def load_inside_zamowienie(self, id_zamowienia):
         self.zamowienia_frame.grid_remove()
@@ -1248,11 +1256,11 @@ class FolderApp:
             self.delete_artykul_zamowienie_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_artykul_zamowienie_icon.png")).subsample(8, 8)
             
             self.lista_artykulow_icon = PhotoImage(file=os.path.join(self.dsc, "image", "lista_artykulow_icon.png")).subsample(8, 8)
+            self.lista_kategorie_icon = PhotoImage(file=os.path.join(self.dsc, "image", "lista_kategorie_icon.png")).subsample(8, 8)
+            self.lista_kupujacy_icon = PhotoImage(file=os.path.join(self.dsc, "image", "lista_kupujacy_icon.png")).subsample(8, 8)
             self.lista_zamowien_icon = PhotoImage(file=os.path.join(self.dsc, "image", "lista_zamowien_icon.png")).subsample(8, 8)
             self.lista_sklepy_icon = PhotoImage(file=os.path.join(self.dsc, "image", "lista_sklepy_icon.png")).subsample(8, 8)
             self.lista_firmy_icon = PhotoImage(file=os.path.join(self.dsc, "image", "lista_firmy_icon.png")).subsample(8, 8)
-            self.lista_kategorie_icon = PhotoImage(file=os.path.join(self.dsc, "image", "lista_kategorie_icon.png")).subsample(8, 8)
-            self.lista_kupujacy_icon = PhotoImage(file=os.path.join(self.dsc, "image", "lista_kupujacy_icon.png")).subsample(8, 8)
 
             self.backButton_icon = PhotoImage(file=os.path.join(self.dsc, "image", "backButton_icon.png")).subsample(8, 8)
             self.refresh_icon = PhotoImage(file=os.path.join(self.dsc, "image", "refresh_icon.png")).subsample(8, 8)
@@ -1400,3 +1408,4 @@ if __name__ == "__main__":
     app = FolderApp(root)
     root.mainloop()
 
+# change inicjalizacja list wszytskich / tak samo framów

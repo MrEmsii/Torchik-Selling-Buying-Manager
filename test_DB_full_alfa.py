@@ -10,9 +10,9 @@ from dbControler import SQLconnect, select, Kupujacy, Kategoria, Sklep, Firma, Z
 
 def Test(session):
     lista = []
-    d = 10
-    b = d*100
-    g = d*100
+    d = 1000 # Liczba artykułów, kupujących, sklepów, firm i kategorii
+    b = 1000 # Liczba zamówień
+    g = 200 # Liczba artykułów w zamówieniach
 
     for i in range(1, d*(16+1)):
         kupujacy_1 = Kupujacy(nazwa="Firma"+str(i))

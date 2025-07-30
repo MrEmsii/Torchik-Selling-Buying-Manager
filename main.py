@@ -1,16 +1,16 @@
 import os
 import tkinter as tk
+import threading
+import json
+import datetime as datetime
+import time
+
 from tkinter import ttk, messagebox, simpledialog, PhotoImage
 from TkToolTip import ToolTip
 from tkinterdnd2 import DND_FILES, TkinterDnD
 from dbControler import SQLconnect, select, Kupujacy, Kategoria, Sklep, Firma, Zamowienie, Artykul_Lista, artykuly_relacja
 from tkcalendar import DateEntry
-import datetime as datetime
-import time
-import threading
-import json
-from pygame import mixer, mixer_music
-from winsound import *
+from pygame import mixer
 
 class FolderApp:
     def __init__(self, master):
@@ -47,10 +47,6 @@ class FolderApp:
         self.secend_frame = ttk.Frame(self.master, padding=5)
         self.third_frame = ttk.Frame(self.master, padding=5)
 
-        self.button_icon_pack()
-        self.start_frame()
-        self.load_zamowienia_daemon()
-
         self.button_frame.grid(row=0, column=0, rowspan=5, sticky="nsew", padx=5, pady=5)
 
         master.grid_rowconfigure(0, weight=4)
@@ -63,6 +59,9 @@ class FolderApp:
         master.grid_columnconfigure(2, weight=2000)
         master.grid_columnconfigure(3, weight=2000)
 
+        self.button_icon_pack()
+        self.start_frame()
+        self.load_zamowienia_daemon()
 
     def json_language(self, language_code):
         try:
@@ -352,6 +351,9 @@ class FolderApp:
     def show_message_async_demon(self):
         threading.Thread(target=self.show_message_async, daemon=True).start()
 
+    def hide_message_async_demon(self):
+        threading.Thread(target=self.ukryj_message_async, daemon=True).start()
+
     def play_sound_on_start_demon(self):
         if self.konfiguracja_programu["volume"] != 0:
             mixer.music.load(os.path.join(self.dsc, "sounds", self.konfiguracja_programu["start_sound"]))
@@ -365,22 +367,22 @@ class FolderApp:
             mixer.music.play()
 
     def show_message_async(self):
-        self.msg_windows = tk.Toplevel(root)
-        self.msg_windows.geometry("300x50+340+160")
-        self.msg_windows.title("Inicjalizacja operacji")
-        
-        label = tk.Label(self.msg_windows, text="Inicjalizacja operacji, proszę poczekaj", padx=20, pady=10)
-        label.pack()
-        
-        time.sleep(2)
-        self.msg_windows.destroy()
+        def pokaz_okno():
+            self.msg_windows = tk.Toplevel(self.master)
+            self.msg_windows.geometry("300x50+340+160")
+            self.msg_windows.title("Inicjalizacja operacji")
+
+            label = tk.Label(self.msg_windows, text="Inicjalizacja operacji, proszę poczekaj", padx=20, pady=10)
+            label.pack()
+
+        self.master.after(0, pokaz_okno)
 
     def ukryj_message_async(self):
-        try:
-            if self.msg_windows.winfo_exists():
+        def zamknij_okno():
+            if hasattr(self, 'msg_windows') and self.msg_windows.winfo_exists():
                 self.msg_windows.destroy()
-        except AttributeError:
-            pass
+
+        self.master.after(0, zamknij_okno)
 
     def load_zamowienia_daemon(self, widok = "pokaz"):
         commend = self.load_zamowienia(widok = widok)
@@ -388,30 +390,35 @@ class FolderApp:
 
     def load_zamowienia(self, widok):
         if widok == "pokaz":
-            self.show_message_async_demon()
+            self.show_message_async()
 
-        zamowienia = self.db_session.query(Zamowienie).all()
-        zamowienia_data = []
+        def task():
+            zamowienia = self.db_session.query(Zamowienie).all()
+            zamowienia_data = []
 
-        for zamow in zamowienia:
-            zamow_id = zamow.id
-            zamow_data = zamow.data
-            zamow_kupujacy = zamow.kupujacy.nazwa if zamow.kupujacy else " "
-            zamow_sklep = zamow.sklep.nazwa if zamow.sklep else  " "
-            rabat_j = f"{zamow.rabat_j:.2f} PLN"
-            rabat_proc = f"{zamow.rabat_procent :.0f} %"
-            zamow_cena = f"{zamow.oblicz_cene(self.db_session):,.2f} PLN".replace(",", " ")
-            zamow_cena_rabat = f"{zamow.oblicz_cene_rabat(self.db_session):,.2f} PLN".replace(",", " ")
-            zamowienia_data.append((zamow_id, zamow_data, zamow_kupujacy, zamow_sklep, rabat_j, rabat_proc, zamow_cena, zamow_cena_rabat))
+            for zamow in zamowienia:
+                zamow_id = zamow.id
+                zamow_data = zamow.data
+                zamow_kupujacy = zamow.kupujacy.nazwa if zamow.kupujacy else " "
+                zamow_sklep = zamow.sklep.nazwa if zamow.sklep else " "
+                rabat_j = f"{zamow.rabat_j:.2f} PLN"
+                rabat_proc = f"{zamow.rabat_procent :.0f} %"
+                zamow_cena = f"{zamow.oblicz_cene(self.db_session):,.2f} PLN".replace(",", " ")
+                zamow_cena_rabat = f"{zamow.oblicz_cene_rabat(self.db_session):,.2f} PLN".replace(",", " ")
+                zamowienia_data.append((zamow_id, zamow_data, zamow_kupujacy, zamow_sklep, rabat_j, rabat_proc, zamow_cena, zamow_cena_rabat))
 
-        zamowienia_data.sort(key=lambda x:x[0], reverse=True )
-        zamowienia_data.sort(key=lambda x:x[1], reverse=True)
-        self.zamowienia_tree.delete(*self.zamowienia_tree.get_children())
+            zamowienia_data.sort(key=lambda x: x[0], reverse=True)
+            zamowienia_data.sort(key=lambda x: x[1], reverse=True)
 
-        for z_id, data, kupujacy, sklep, rabat_1, rabat_2, cena, cena_rabat in zamowienia_data:
-            self.zamowienia_tree.insert('', 'end', values=(z_id, data, kupujacy, sklep, rabat_1, rabat_2, cena, cena_rabat))
+            def update_gui():
+                self.zamowienia_tree.delete(*self.zamowienia_tree.get_children())
+                for z_id, data, kupujacy, sklep, rabat_1, rabat_2, cena, cena_rabat in zamowienia_data:
+                    self.zamowienia_tree.insert('', 'end', values=(z_id, data, kupujacy, sklep, rabat_1, rabat_2, cena, cena_rabat))
+                self.ukryj_message_async()
 
-        self.ukryj_message_async()
+            self.master.after(0, update_gui)
+
+        threading.Thread(target=task, daemon=True).start()
 
     def load_sklepy(self):
         sklepy = self.db_session.query(Sklep).all()
@@ -1365,7 +1372,3 @@ if __name__ == "__main__":
     app = FolderApp(root)
     root.mainloop()
 
-
-
-# comments for next project status
-# dane["button_usun_firma]['text']

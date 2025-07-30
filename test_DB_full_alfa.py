@@ -12,7 +12,7 @@ def Test(session):
     lista = []
     d = 10
     b = d*100
-    g = d*10
+    g = d*100
 
     for i in range(1, d*(16+1)):
         kupujacy_1 = Kupujacy(nazwa="Firma"+str(i))

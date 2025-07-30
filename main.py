@@ -3,7 +3,6 @@ import tkinter as tk
 import threading
 import json
 import datetime as datetime
-import time
 
 from tkinter import ttk, messagebox, simpledialog, PhotoImage
 from TkToolTip import ToolTip
@@ -1220,16 +1219,45 @@ class FolderApp:
             widget.destroy()
 
     def button_icon_pack(self):
-        self.stworz_zamowienie_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_element_icon.png")).subsample(8, 8)
-        self.edit_zamowienie_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_project_icon.png")).subsample(8, 8)
-        self.stworz_art_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_project_icon.png")).subsample(8, 8)
-        self.usun_zamowienie_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_project_icon.png")).subsample(8, 8)
-        self.stworz_zamowienie_inside_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_project_icon.png")).subsample(20, 20)
-        self.backButton_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_project_icon.png")).subsample(8, 8)
-        self.stworz_kupujacego_inside_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_project_icon.png")).subsample(20, 20)
-        self.stworz_sklep_inside_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_project_icon.png")).subsample(20, 20)
-        self.refresh_element_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_project_icon.png")).subsample(8, 8)
+            self.add_firma_icon = PhotoImage(file=os.path.join(self.dsc, "image", "add_firma_icon.png")).subsample(8, 8)
+            self.edit_firma_icon = PhotoImage(file=os.path.join(self.dsc, "image", "edit_firma_icon.png")).subsample(8, 8)
+            self.delete_firma_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_firma_icon.png")).subsample(8, 8)
+            
+            self.add_sklep_icon = PhotoImage(file=os.path.join(self.dsc, "image", "add_sklep_icon.png")).subsample(8, 8)
+            self.edit_sklep_icon = PhotoImage(file=os.path.join(self.dsc, "image", "edit_sklep_icon.png")).subsample(8, 8)
+            self.delete_sklep_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_sklep_icon.png")).subsample(8, 8)
 
+            self.add_kategoria_icon = PhotoImage(file=os.path.join(self.dsc, "image", "add_kategoria_icon.png")).subsample(8, 8)
+            self.edit_kategoria_icon = PhotoImage(file=os.path.join(self.dsc, "image", "edit_kategoria_icon.png")).subsample(8, 8)
+            self.delete_kategoria_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_kategoria_icon.png")).subsample(8, 8)
+            
+            self.add_kupujacy_icon = PhotoImage(file=os.path.join(self.dsc, "image", "add_kupujacy_icon.png")).subsample(8, 8)
+            self.edit_kupujacy_icon = PhotoImage(file=os.path.join(self.dsc, "image", "edit_kupujacy_icon.png")).subsample(8, 8)
+            self.delete_kupujacy_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_kupujacy_icon.png")).subsample(8, 8)
+            
+            self.add_artykul_icon = PhotoImage(file=os.path.join(self.dsc, "image", "add_artykul_icon.png")).subsample(8, 8)
+            self.edit_artykul_icon = PhotoImage(file=os.path.join(self.dsc, "image", "edit_artykul_icon.png")).subsample(8, 8)
+            self.delete_artykul_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_artykul_icon.png")).subsample(8, 8)
+            
+            self.add_zamowienie_icon = PhotoImage(file=os.path.join(self.dsc, "image", "add_zamowienie_icon.png")).subsample(8, 8)
+            self.edit_zamowienie_icon = PhotoImage(file=os.path.join(self.dsc, "image", "edit_zamowienie_icon.png")).subsample(8, 8)
+            self.delete_zamowienie_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_zamowienie_icon.png")).subsample(8, 8)
+            
+            self.add_artykul_zamowienie_icon = PhotoImage(file=os.path.join(self.dsc, "image", "add_artykul_zamowienie_icon.png")).subsample(8, 8)
+            self.edit_artykul_zamowienie_icon = PhotoImage(file=os.path.join(self.dsc, "image", "edit_artykul_zamowienie_icon.png")).subsample(8, 8)
+            self.delete_artykul_zamowienie_icon = PhotoImage(file=os.path.join(self.dsc, "image", "delete_artykul_zamowienie_icon.png")).subsample(8, 8)
+            
+            self.lista_artykulow_icon = PhotoImage(file=os.path.join(self.dsc, "image", "lista_artykulow_icon.png")).subsample(8, 8)
+            self.lista_zamowien_icon = PhotoImage(file=os.path.join(self.dsc, "image", "lista_zamowien_icon.png")).subsample(8, 8)
+            self.lista_sklepy_icon = PhotoImage(file=os.path.join(self.dsc, "image", "lista_sklepy_icon.png")).subsample(8, 8)
+            self.lista_firmy_icon = PhotoImage(file=os.path.join(self.dsc, "image", "lista_firmy_icon.png")).subsample(8, 8)
+            self.lista_kategorie_icon = PhotoImage(file=os.path.join(self.dsc, "image", "lista_kategorie_icon.png")).subsample(8, 8)
+            self.lista_kupujacy_icon = PhotoImage(file=os.path.join(self.dsc, "image", "lista_kupujacy_icon.png")).subsample(8, 8)
+
+            self.backButton_icon = PhotoImage(file=os.path.join(self.dsc, "image", "backButton_icon.png")).subsample(8, 8)
+            self.refresh_icon = PhotoImage(file=os.path.join(self.dsc, "image", "refresh_icon.png")).subsample(8, 8)
+            self.setting_icon = PhotoImage(file=os.path.join(self.dsc, "image", "setting_icon.png")).subsample(8, 8)
+    
     def pokaz_main_frame(self):
         if not self.zamowienia_frame.winfo_ismapped():
             self.usun_all_widgets()
@@ -1251,7 +1279,7 @@ class FolderApp:
             text=leksykon["text"],
             command=command,
             width=10,
-            image=icon or self.refresh_element_icon,
+            image=icon or self.refresh_icon,
             compound="left"
         )
         przycisk.pack(side=side, padx=padx, pady=pady)
@@ -1259,103 +1287,103 @@ class FolderApp:
         return przycisk
 
     def button_dodaj_sklep(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_dodaj_sklep", self.stworz_sklep, icon=self.stworz_zamowienie_icon)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_dodaj_sklep", self.stworz_sklep, icon=self.add_sklep_icon)
 
     def button_zmiana_nazwa_sklep(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_zmiana_nazwa_sklep", self.zmien_nazwa_sklep)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_zmiana_nazwa_sklep", self.zmien_nazwa_sklep, icon=self.edit_sklep_icon)
 
     def button_usun_sklep(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_usun_sklep", self.usun_sklep)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_usun_sklep", self.usun_sklep, icon=self.delete_sklep_icon)
 
     def button_dodaj_firma(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_dodaj_firma", self.stworz_firma)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_dodaj_firma", self.stworz_firma, icon=self.add_firma_icon)
 
     def button_zmiana_nazwa_firma(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_zmiana_nazwa_firma", self.zmien_nazwa_firma)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_zmiana_nazwa_firma", self.zmien_nazwa_firma, icon=self.edit_firma_icon)
 
     def button_usun_firma(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_usun_firma", self.usun_firma)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_usun_firma", self.usun_firma, icon=self.delete_firma_icon)
 
     def button_dodaj_kategoria(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_dodaj_kategoria", self.stworz_kategoria)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_dodaj_kategoria", self.stworz_kategoria, icon=self.add_kategoria_icon)
 
     def button_zmiana_nazwa_kategoria(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_zmiana_nazwa_kategoria", self.zmien_nazwa_kategoria)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_zmiana_nazwa_kategoria", self.zmien_nazwa_kategoria, icon=self.edit_kategoria_icon)
 
     def button_usun_kategorie(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_usun_kategorie", self.usun_kategorie)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_usun_kategorie", self.usun_kategorie, icon=self.delete_kategoria_icon)
 
     def button_dodaj_kupujacy(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_dodaj_kupujacy", self.stworz_kupujacy)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_dodaj_kupujacy", self.stworz_kupujacy, icon=self.add_kupujacy_icon)
 
     def button_zmiana_nazwa_kupujacy(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_zmiana_nazwa_kupujacy", self.zmien_nazwa_kupujacy)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_zmiana_nazwa_kupujacy", self.zmien_nazwa_kupujacy, icon=self.edit_kupujacy_icon)
 
     def button_usun_kupujacy(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_usun_kupujacy", self.usun_kupujacego)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_usun_kupujacy", self.usun_kupujacego, icon=self.delete_kupujacy_icon)
 
     def button_dodaj_zamowienie(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_dodaj_zamowienie", self.dodaj_modyfikuj_zamowienie)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_dodaj_zamowienie", self.dodaj_modyfikuj_zamowienie, icon=self.add_zamowienie_icon)
 
     def button_modyfikuj_zamowienie(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_modyfikuj_zamowienie", lambda: self.dodaj_modyfikuj_zamowienie(commend="modyfikuj"))
+        self.dodaj_button = self.utworz_przycisk(frame, "button_modyfikuj_zamowienie", lambda: self.dodaj_modyfikuj_zamowienie(commend="modyfikuj"), icon=self.edit_zamowienie_icon)
 
     def button_usun_zamowienie(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_usun_zamowienie", self.usun_zamowienie, side='bottom', pady=(3,30))
+        self.dodaj_button = self.utworz_przycisk(frame, "button_usun_zamowienie", self.usun_zamowienie, side='bottom', pady=(3,30), icon=self.delete_zamowienie_icon)
 
     def button_lista_artykulow(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_lista_artykulow", self.list_artykulow, pady=(30,30))
+        self.dodaj_button = self.utworz_przycisk(frame, "button_lista_artykulow", self.list_artykulow, pady=(30,30), icon=self.lista_artykulow_icon)
 
     def button_lista_sklepow(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_lista_sklepow", self.list_sklepy)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_lista_sklepow", self.list_sklepy, icon=self.lista_sklepy_icon)
 
     def button_lista_firm(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_lista_firm", self.list_firmy)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_lista_firm", self.list_firmy, icon=self.lista_firmy_icon)
 
     def button_lista_kupujacych(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_lista_kupujacych", self.list_kupujacy)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_lista_kupujacych", self.list_kupujacy, icon=self.lista_kupujacy_icon)
 
     def button_lista_kategorii(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_lista_kategorii", self.list_kategorie)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_lista_kategorii", self.list_kategorie, icon=self.lista_kategorie_icon)
 
     def button_refresh_zamowienia(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_refresh_zamowienia", self.load_zamowienia_daemon, side='bottom')
+        self.dodaj_button = self.utworz_przycisk(frame, "button_refresh_zamowienia", self.load_zamowienia_daemon, side='bottom', icon=self.refresh_icon)
 
     def button_stworz_artykul(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_stworz_artykul", self.stworz_modyfikuj_artykul)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_stworz_artykul", self.stworz_modyfikuj_artykul, icon=self.add_artykul_icon)
 
     def button_modyfikuj_artykul(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_modyfikuj_artykul", lambda: self.stworz_modyfikuj_artykul(commend="modyfikuj"))
+        self.dodaj_button = self.utworz_przycisk(frame, "button_modyfikuj_artykul", lambda: self.stworz_modyfikuj_artykul(commend="modyfikuj"), icon=self.edit_artykul_icon)
 
     def button_zatwierdz_artykul(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_zatwierdz_artykul", self.zatwierdz_nowy_modyfikuj_artykul, pady=(3,30))
+        self.dodaj_button = self.utworz_przycisk(frame, "button_zatwierdz_artykul", self.zatwierdz_nowy_modyfikuj_artykul, pady=(3,30), icon=self.add_artykul_icon)
 
     def button_zatwierdz_edycje_artykul(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_zatwierdz_edycje_artykul", lambda: self.zatwierdz_nowy_modyfikuj_artykul(commend="modyfikuj"), pady=(3,30))
+        self.dodaj_button = self.utworz_przycisk(frame, "button_zatwierdz_edycje_artykul", lambda: self.zatwierdz_nowy_modyfikuj_artykul(commend="modyfikuj"), pady=(3,30), icon=self.edit_artykul_icon)
 
     def button_zniszcz_artykul(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_zniszcz_artykul", self.zniszcz_artykul)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_zniszcz_artykul", self.zniszcz_artykul, icon=self.delete_artykul_icon)
 
     def button_dodaj_artykul_zamowienie(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_dodaj_artykul_zamowienie", self.dodaj_list_artykulow)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_dodaj_artykul_zamowienie", self.dodaj_list_artykulow, icon=self.add_artykul_zamowienie_icon)
 
     def button_zatwierdz_dodanie_artykulu(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_zatwierdz_dodanie_artykulu", self.cena_ilosc_dodanie)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_zatwierdz_dodanie_artykulu", self.cena_ilosc_dodanie, icon=self.add_artykul_zamowienie_icon)
 
     def button_anuluj_dodanie_artykulu(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_anuluj_dodanie_artykulu", self.window.destroy)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_anuluj_dodanie_artykulu", self.window.destroy, icon=self.backButton_icon)
 
     def button_usun_artykul_zamowienie(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_usun_artykul_zamowienie", self.usun_artykul_zamowienie)
+        self.dodaj_button = self.utworz_przycisk(frame, "button_usun_artykul_zamowienie", self.usun_artykul_zamowienie, icon=self.delete_artykul_zamowienie_icon)
 
     def button_zatwierdz_edycje_zamowienie(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_zatwierdz_edycje_zamowienie", lambda: self.zatwierdz_nowy_modyfikuj_zamowienie(commend="modyfikuj"), pady=(3,30))
+        self.dodaj_button = self.utworz_przycisk(frame, "button_zatwierdz_edycje_zamowienie", lambda: self.zatwierdz_nowy_modyfikuj_zamowienie(commend="modyfikuj"), pady=(3,30), icon=self.edit_zamowienie_icon)
 
     def button_ustawienia(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "button_ustawienia", self.ustawienia_programu, pady=5, side='bottom')
+        self.dodaj_button = self.utworz_przycisk(frame, "button_ustawienia", self.ustawienia_programu, pady=5, side='bottom', icon=self.setting_icon)
 
     def buttons_zatwierdz_zamowienia(self, frame):
-        self.dodaj_button = self.utworz_przycisk(frame, "buttons_zatwierdz_zamowienia", self.zatwierdz_nowy_modyfikuj_zamowienie, pady=(3,30))
+        self.dodaj_button = self.utworz_przycisk(frame, "buttons_zatwierdz_zamowienia", self.zatwierdz_nowy_modyfikuj_zamowienie, pady=(3,30), icon=self.add_zamowienie_icon)
 
     def button_back_pack(self, frame, commend = "main"):
         if commend == "main":

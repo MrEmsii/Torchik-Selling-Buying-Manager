@@ -5,13 +5,13 @@ from sqlalchemy.orm import declarative_base
 from sqlalchemy import Table, Date, select
 import datetime
 import os, random
-from dbControler import SQLconnect, select, Kupujacy, Kategoria, Sklep, Firma, Zamowienie, Artykul_Lista, artykuly_relacja
+from model.models import SQLconnect, select, Kupujacy, Kategoria, Sklep, Firma, Zamowienie, Artykul_Lista, artykuly_relacja
 
 
 def Test(session):
     lista = []
-    d = 1000 # Liczba artykułów, kupujących, sklepów, firm i kategorii
-    b = 1000 # Liczba zamówień
+    d = 100 # Liczba artykułów, kupujących, sklepów, firm i kategorii
+    b = 100 # Liczba zamówień
     g = 200 # Liczba artykułów w zamówieniach
 
     for i in range(1, d*(16+1)):

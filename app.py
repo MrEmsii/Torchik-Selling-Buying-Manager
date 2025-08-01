@@ -1,7 +1,8 @@
 from controller.controller import Controller
 
 def main():
-    Controller()
+    ctrl = Controller()
+    ctrl.run()
 
 if __name__ == '__main__':
     main()

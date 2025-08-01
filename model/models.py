@@ -92,10 +92,10 @@ class Artykul_Lista(Base):
     kategoria = relationship('Kategoria', back_populates='art_lista')
     firma = relationship('Firma', back_populates='art_lista')
 
-def SQLconnect(dsc):
-    db_path = os.path.join(dsc, "database", 'Torchik_database.db')
+def SQLconnect():
+    db_path = os.path.join(os.path.dirname(__file__), '..', 'database', 'Torchik_database.db')
     engine = create_engine(f'sqlite:///{db_path}')
-    # Base.metadata.create_all(engine)
+    Base.metadata.create_all(engine)
 
     Session = sessionmaker(bind=engine)
     return Session()

@@ -10,7 +10,7 @@ from model.models import SQLconnect, select, Kupujacy, Kategoria, Sklep, Firma, 
 
 def Test(session):
     lista = []
-    d = 100 # Liczba artykułów, kupujących, sklepów, firm i kategorii
+    d = 1000 # Liczba artykułów, kupujących, sklepów, firm i kategorii
     b = 100 # Liczba zamówień
     g = 200 # Liczba artykułów w zamówieniach
 
@@ -46,6 +46,6 @@ def Test(session):
 if __name__ == "__main__":
     # Połączenie z bazą danych (przekaż odpowiednią ścieżkę)
     dsc = os.path.dirname(__file__) # lub inna ścieżka
-    session = SQLconnect(dsc)
+    session = SQLconnect()
 
     Test(session) # Testowanie

@@ -4,17 +4,21 @@ from view.view import View
 import os
 
 from tkinterdnd2 import DND_FILES, TkinterDnD
+import tkinter as tk
 
+from pygame import mixer
 import threading
 import json
 import datetime as datetime
 
 class Controller:
     def __init__(self):
+        mixer.init()
+
         self.dsc = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
         self.master = TkinterDnD.Tk()
         self.session = SQLconnect()
-
+        
         self.view    = View(self.master, dsc=self.dsc)
 
         if os.path.exists(self.dsc + "/resources/setting.json") == False:
@@ -23,6 +27,10 @@ class Controller:
         
         self.konfiguracja_programu = self.json_setting(status="read")
         self.leksykon_programu = self.json_language(self.konfiguracja_programu["language"])
+        # self.play_sound_on_start_demon()
+        self.inicjalizacja_frame()
+
+        self.load_zamowienia_daemon()
 
     def run(self):
         self.view.master.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -31,7 +39,143 @@ class Controller:
     def on_closing(self):
         if View.messagebox(self, type="close"):
             self.session.close()
+            # self.play_sound_on_close_demon()
+
             self.view.master.destroy()
+
+    def ustawienia_programu(self):
+        print("dodać ustawienia")
+
+    def load_zamowienia_daemon(self, widok = "pokaz"):
+        print("load_zamowienia_daemon")
+        commend = self.load_zamowienia(widok = widok)
+        threading.Thread(target=lambda: commend, daemon=True).start()
+
+    def load_zamowienia(self, widok):
+        if widok == "pokaz":
+            self.view.show_message_async()
+
+        def task():
+            zamowienia = self.session.query(Zamowienie).all()
+            zamowienia_data = []
+
+            for zamow in zamowienia:
+                zamow_id = zamow.id
+                zamow_data = zamow.data
+                zamow_kupujacy = zamow.kupujacy.nazwa if zamow.kupujacy else " "
+                zamow_sklep = zamow.sklep.nazwa if zamow.sklep else " "
+                rabat_j = f"{zamow.rabat_j:.2f} PLN"
+                rabat_proc = f"{zamow.rabat_procent :.0f} %"
+                zamow_cena = f"{zamow.oblicz_cene(self.session):,.2f} PLN".replace(",", " ")
+                zamow_cena_rabat = f"{zamow.oblicz_cene_rabat(self.session):,.2f} PLN".replace(",", " ")
+                zamowienia_data.append((zamow_id, zamow_data, zamow_kupujacy, zamow_sklep, rabat_j, rabat_proc, zamow_cena, zamow_cena_rabat))
+
+            zamowienia_data.sort(key=lambda x: x[0], reverse=True)
+            zamowienia_data.sort(key=lambda x: x[1], reverse=True)
+
+            def update_gui():
+                self.zamowienia_tree.delete(*self.zamowienia_tree.get_children())
+                for z_id, data, kupujacy, sklep, rabat_1, rabat_2, cena, cena_rabat in zamowienia_data:
+                    self.zamowienia_tree.insert('', 'end', values=(z_id, data, kupujacy, sklep, rabat_1, rabat_2, cena, cena_rabat))
+                self.view.ukryj_message_async()
+
+            self.master.after(0, update_gui)
+
+        threading.Thread(target=task, daemon=True).start()
+
+    def button_manager(self, frame, back_target = 'main', startup = False):
+        if startup == False:
+            for widget in self.main_frame.winfo_children():
+                widget.destroy()
+
+            for widget in self.button_frame.winfo_children():
+                widget.destroy()
+        
+        if frame == "main":
+            self.button_dodaj_zamowienie(self.button_frame)
+            self.button_modyfikuj_zamowienie(self.button_frame)
+            self.button_lista_artykulow(self.button_frame)
+            self.button_lista_sklepow(self.button_frame)
+            self.button_lista_kupujacych(self.button_frame)
+            self.button_lista_kategorii(self.button_frame)
+            self.button_lista_firm(self.button_frame)
+            self.button_refresh_zamowienia(self.button_frame)  
+            self.button_ustawienia(self.button_frame) 
+            self.button_usun_zamowienie(self.button_frame)
+
+        elif frame == "lista dodanych do zamowienia":
+            self.button_dodaj_artykul_zamowienie(self.button_frame)
+            self.button_usun_artykul_zamowienie(self.button_frame)
+
+        elif frame == "kupujacy":
+            self.button_dodaj_kupujacy(self.button_frame)
+            self.button_zmiana_nazwa_kupujacy(self.button_frame)
+            self.button_usun_kupujacy(self.button_frame)
+
+        elif frame == "sklepy":
+            self.button_dodaj_sklep(self.button_frame) 
+            self.button_zmiana_nazwa_sklep(self.button_frame)
+            self.button_usun_sklep(self.button_frame)
+
+        elif frame == "firmy":
+            self.button_dodaj_firma(self.button_frame) 
+            self.button_zmiana_nazwa_firma(self.button_frame)
+            self.button_usun_firma(self.button_frame)
+
+        elif frame == "lista_artykuly":
+            self.button_stworz_artykul(self.button_frame) 
+            self.button_modyfikuj_artykul(self.button_frame) 
+            self.button_zniszcz_artykul(self.button_frame)
+
+        elif frame == "dodaj_zamowienie":
+            self.buttons_zatwierdz_zamowienia(self.button_frame) 
+            self.button_dodaj_kupujacy(self.button_frame)
+            self.button_dodaj_sklep(self.button_frame) 
+
+        elif frame == "modyfikuj_zamowienie":
+            self.button_zatwierdz_edycje_zamowienie(self.button_frame) 
+            self.button_dodaj_kupujacy(self.button_frame)
+            self.button_dodaj_sklep(self.button_frame) 
+
+        elif frame == "kategorie":
+            self.button_dodaj_kategoria(self.button_frame) 
+            self.button_zmiana_nazwa_kategoria(self.button_frame)
+            self.button_usun_kategorie(self.button_frame)
+
+        elif frame == 'tworzenie_artykuly':
+            self.button_zatwierdz_artykul(self.button_frame)
+            self.button_dodaj_firma(self.button_frame)
+            self.button_dodaj_kategoria(self.button_frame) 
+
+        elif frame == 'modyfikacja_artykuly':
+            self.button_zatwierdz_edycje_artykul(self.button_frame)
+            self.button_dodaj_firma(self.button_frame)
+            self.button_dodaj_kategoria(self.button_frame) 
+
+        elif frame == "wyjdź_z_cena_ilosc":
+            self.button_zatwierdz_dodanie_artykulu(self.button_cena_ilosc_frame)
+            self.button_anuluj_dodanie_artykulu(self.button_cena_ilosc_frame)
+
+        if frame != 'main':
+            self.button_back_pack(self.button_frame, back_target)
+        self.main_frame.grid(row=0, column=1, columnspan=3, rowspan=5, sticky="nsew", padx=5, pady=5)
+
+    def inicjalizacja_frame(self):
+        self.main_frame = self.view.main_frame
+        self.button_frame = self.view.button_frame
+        self.zamowienia_frame = self.view.zamowienia_frame
+        self.zamowienia_tree = self.view.main_frame
+        self.zamowienie_id = None
+
+        self.pokaz_start_frame()
+
+    def pokaz_start_frame(self):
+        self.zamowienia_tree = self.view.zamowienie_tree(parent_frame=self.zamowienia_frame, label_text='Zamówienia') 
+        self.button_manager(frame="main", startup = True)
+        
+        self.view.zamowienia_grid_setting()
+        self.zamowienia_tree.bind("<Double-1>", self.on_double_click_otwieranie_zamowienia)
+
 
     def json_language(self, language_code):
         try:
@@ -64,102 +208,787 @@ class Controller:
             config = self.json_setting(status="read")
             config[key] = value
 
-
     def button_dodaj_sklep(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_dodaj_sklep", self.stworz_sklep, icon=View.add_sklep_icon)
+        leksykon = self.leksykon_programu["button_dodaj_sklep"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.stworz_sklep, icon=self.view.add_sklep_icon, leksykon_programu=leksykon)
 
     def button_zmiana_nazwa_sklep(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_zmiana_nazwa_sklep", self.zmien_nazwa_sklep, icon=View.edit_sklep_icon)
+        leksykon = self.leksykon_programu["button_zmiana_nazwa_sklep"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.zmien_nazwa_sklep, icon=self.view.edit_sklep_icon, leksykon_programu=leksykon)
 
     def button_usun_sklep(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_usun_sklep", self.usun_sklep, icon=View.delete_sklep_icon)
+        leksykon = self.leksykon_programu["button_usun_sklep"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.usun_sklep, icon=self.view.delete_sklep_icon, leksykon_programu=leksykon)
 
     def button_dodaj_firma(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_dodaj_firma", self.stworz_firma, icon=View.add_firma_icon)
+        leksykon = self.leksykon_programu["button_dodaj_firma"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.stworz_firma, icon=self.view.add_firma_icon, leksykon_programu=leksykon)
 
     def button_zmiana_nazwa_firma(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_zmiana_nazwa_firma", self.zmien_nazwa_firma, icon=View.edit_firma_icon)
+        leksykon = self.leksykon_programu["button_zmiana_nazwa_firma"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.zmien_nazwa_firma, icon=self.view.edit_firma_icon, leksykon_programu=leksykon)
 
     def button_usun_firma(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_usun_firma", self.usun_firma, icon=View.delete_firma_icon)
+        leksykon = self.leksykon_programu["button_usun_firma"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.usun_firma, icon=self.view.delete_firma_icon, leksykon_programu=leksykon)
 
     def button_dodaj_kategoria(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_dodaj_kategoria", self.stworz_kategoria, icon=View.add_kategoria_icon)
+        leksykon = self.leksykon_programu["button_usun_firma"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.stworz_kategoria, icon=self.view.add_kategoria_icon, leksykon_programu=leksykon)
 
     def button_zmiana_nazwa_kategoria(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_zmiana_nazwa_kategoria", self.zmien_nazwa_kategoria, icon=View.edit_kategoria_icon)
+        leksykon = self.leksykon_programu["button_zmiana_nazwa_kategoria"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.zmien_nazwa_kategoria, icon=self.view.edit_kategoria_icon, leksykon_programu=leksykon)
 
     def button_usun_kategorie(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_usun_kategorie", self.usun_kategorie, icon=View.delete_kategoria_icon)
+        leksykon = self.leksykon_programu["button_usun_kategorie"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.usun_kategorie, icon=self.view.delete_kategoria_icon, leksykon_programu=leksykon)
 
     def button_dodaj_kupujacy(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_dodaj_kupujacy", self.stworz_kupujacy, icon=View.add_kupujacy_icon)
+        leksykon = self.leksykon_programu["button_dodaj_kupujacy"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.stworz_kupujacy, icon=self.view.add_kupujacy_icon, leksykon_programu=leksykon)
 
     def button_zmiana_nazwa_kupujacy(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_zmiana_nazwa_kupujacy", self.zmien_nazwa_kupujacy, icon=View.edit_kupujacy_icon)
+        leksykon = self.leksykon_programu["button_zmiana_nazwa_kupujacy"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.zmien_nazwa_kupujacy, icon=self.view.edit_kupujacy_icon, leksykon_programu=leksykon)
 
     def button_usun_kupujacy(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_usun_kupujacy", self.usun_kupujacego, icon=View.delete_kupujacy_icon)
+        leksykon = self.leksykon_programu["button_usun_kupujacy"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.usun_kupujacego, icon=self.view.delete_kupujacy_icon, leksykon_programu=leksykon)
 
     def button_dodaj_zamowienie(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_dodaj_zamowienie", self.dodaj_modyfikuj_zamowienie, icon=View.add_zamowienie_icon)
+        leksykon = self.leksykon_programu["button_dodaj_zamowienie"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.dodaj_modyfikuj_zamowienie, icon=self.view.add_zamowienie_icon, leksykon_programu=leksykon)
 
     def button_modyfikuj_zamowienie(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_modyfikuj_zamowienie", lambda: self.dodaj_modyfikuj_zamowienie(commend="modyfikuj"), icon=View.edit_zamowienie_icon)
+        leksykon = self.leksykon_programu["button_modyfikuj_zamowienie"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, lambda: self.dodaj_modyfikuj_zamowienie(commend="modyfikuj"), icon=self.view.edit_zamowienie_icon, leksykon_programu=leksykon)
 
     def button_usun_zamowienie(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_usun_zamowienie", self.usun_zamowienie, side='bottom', pady=(3,30), icon=View.delete_zamowienie_icon)
+        leksykon = self.leksykon_programu["button_usun_zamowienie"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.usun_zamowienie, side='bottom', pady=(3,30), icon=self.view.delete_zamowienie_icon, leksykon_programu=leksykon)
 
     def button_lista_artykulow(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_lista_artykulow", self.list_artykulow, pady=(30,30), icon=View.lista_artykulow_icon)
+        leksykon = self.leksykon_programu["button_lista_artykulow"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.list_artykulow, pady=(30,30), icon=self.view.lista_artykulow_icon, leksykon_programu=leksykon)
 
     def button_lista_sklepow(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_lista_sklepow", self.list_sklepy, icon=View.lista_sklepy_icon)
+        leksykon = self.leksykon_programu["button_lista_sklepow"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.list_sklepy, icon=self.view.lista_sklepy_icon, leksykon_programu=leksykon)
 
     def button_lista_firm(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_lista_firm", self.list_firmy, icon=View.lista_firmy_icon)
+        leksykon = self.leksykon_programu["button_lista_firm"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.list_firmy, icon=self.view.lista_firmy_icon, leksykon_programu=leksykon)
 
     def button_lista_kupujacych(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_lista_kupujacych", self.list_kupujacy, icon=View.lista_kupujacy_icon)
+        leksykon = self.leksykon_programu["button_lista_kupujacych"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.list_kupujacy, icon=self.view.lista_kupujacy_icon, leksykon_programu=leksykon)
 
     def button_lista_kategorii(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_lista_kategorii", self.list_kategorie, icon=View.lista_kategorie_icon)
+        leksykon = self.leksykon_programu["button_lista_kategorii"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.list_kategorie, icon=self.view.lista_kategorie_icon, leksykon_programu=leksykon)
 
     def button_refresh_zamowienia(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_refresh_zamowienia", self.load_zamowienia_daemon, side='bottom', icon=View.refresh_icon)
+        leksykon = self.leksykon_programu["button_refresh_zamowienia"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.load_zamowienia_daemon, side='bottom', icon=self.view.refresh_icon, leksykon_programu=leksykon)
 
     def button_stworz_artykul(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_stworz_artykul", self.stworz_modyfikuj_artykul, icon=View.add_artykul_icon)
+        leksykon = self.leksykon_programu["button_stworz_artykul"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.stworz_modyfikuj_artykul, icon=self.view.add_artykul_icon, leksykon_programu=leksykon)
 
     def button_modyfikuj_artykul(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_modyfikuj_artykul", lambda: self.stworz_modyfikuj_artykul(commend="modyfikuj"), icon=View.edit_artykul_icon)
+        leksykon = self.leksykon_programu["button_modyfikuj_artykul"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, lambda: self.stworz_modyfikuj_artykul(commend="modyfikuj"), icon=self.view.edit_artykul_icon, leksykon_programu=leksykon)
 
     def button_zatwierdz_artykul(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_zatwierdz_artykul", self.zatwierdz_nowy_modyfikuj_artykul, pady=(3,30), icon=View.add_artykul_icon)
+        leksykon = self.leksykon_programu["button_zatwierdz_artykul"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.zatwierdz_nowy_modyfikuj_artykul, pady=(3,30), icon=self.view.add_artykul_icon, leksykon_programu=leksykon)
 
     def button_zatwierdz_edycje_artykul(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_zatwierdz_edycje_artykul", lambda: self.zatwierdz_nowy_modyfikuj_artykul(commend="modyfikuj"), pady=(3,30), icon=View.edit_artykul_icon)
+        leksykon = self.leksykon_programu["button_zatwierdz_edycje_artykul"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, lambda: self.zatwierdz_nowy_modyfikuj_artykul(commend="modyfikuj"), pady=(3,30), icon=self.view.edit_artykul_icon, leksykon_programu=leksykon)
 
     def button_zniszcz_artykul(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_zniszcz_artykul", self.zniszcz_artykul, icon=View.delete_artykul_icon)
+        leksykon = self.leksykon_programu["button_zniszcz_artykul"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.zniszcz_artykul, icon=self.view.delete_artykul_icon, leksykon_programu=leksykon)
 
     def button_dodaj_artykul_zamowienie(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_dodaj_artykul_zamowienie", self.dodaj_list_artykulow, icon=View.add_artykul_zamowienie_icon)
+        leksykon = self.leksykon_programu["button_dodaj_artykul_zamowienie"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.dodaj_list_artykulow, icon=self.view.add_artykul_zamowienie_icon, leksykon_programu=leksykon)
 
     def button_zatwierdz_dodanie_artykulu(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_zatwierdz_dodanie_artykulu", self.cena_ilosc_dodanie, icon=View.add_artykul_zamowienie_icon)
+        leksykon = self.leksykon_programu["button_zatwierdz_dodanie_artykulu"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.cena_ilosc_dodanie, icon=self.view.add_artykul_zamowienie_icon, leksykon_programu=leksykon)
 
     def button_anuluj_dodanie_artykulu(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_anuluj_dodanie_artykulu", self.window.destroy, icon=View.backButton_icon)
+        leksykon = self.leksykon_programu["button_anuluj_dodanie_artykulu"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, print("self.window.destroy"), icon=self.view.backButton_icon, leksykon_programu=leksykon)
 
     def button_usun_artykul_zamowienie(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_usun_artykul_zamowienie", self.usun_artykul_zamowienie, icon=View.delete_artykul_zamowienie_icon)
+        leksykon = self.leksykon_programu["button_usun_artykul_zamowienie"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.usun_artykul_zamowienie, icon=self.view.delete_artykul_zamowienie_icon, leksykon_programu=leksykon)
 
     def button_zatwierdz_edycje_zamowienie(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_zatwierdz_edycje_zamowienie", lambda: self.zatwierdz_nowy_modyfikuj_zamowienie(commend="modyfikuj"), pady=(3,30), icon=View.edit_zamowienie_icon)
+        leksykon = self.leksykon_programu["button_zatwierdz_edycje_zamowienie"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, lambda: self.zatwierdz_nowy_modyfikuj_zamowienie(commend="modyfikuj"), pady=(3,30), icon=self.view.edit_zamowienie_icon, leksykon_programu=leksykon)
 
     def button_ustawienia(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "button_ustawienia", self.ustawienia_programu, pady=5, side='bottom', icon=View.setting_icon)
+        leksykon = self.leksykon_programu["button_ustawienia"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.ustawienia_programu, pady=5, side='bottom', icon=self.view.setting_icon, leksykon_programu=leksykon)
 
     def buttons_zatwierdz_zamowienia(self, frame):
-        self.dodaj_button = View.utworz_przycisk(frame, "buttons_zatwierdz_zamowienia", self.zatwierdz_nowy_modyfikuj_zamowienie, pady=(3,30), icon=View.add_zamowienie_icon)
+        leksykon = self.leksykon_programu["buttons_zatwierdz_zamowienia"]
+        self.dodaj_button = self.view.utworz_przycisk(frame, self.zatwierdz_nowy_modyfikuj_zamowienie, pady=(3,30), icon=self.view.add_zamowienie_icon, leksykon_programu=leksykon)
+
+    def button_back_pack(self, frame, commend = "main"):
+        if commend == "main":
+            commend = self.pokaz_main_frame
+        elif commend == "lista_artykułów":
+            commend = self.powrot_do_lista_artykulow
+        elif commend == "zamówienie":
+            commend = lambda: self.load_inside_zamowienie(self.zamowienie_id)
+
+        leksykon = self.leksykon_programu["button_back_pack"]    
+        self.dodaj_button = self.view.utworz_przycisk(frame, commend, side='bottom', padx=5, pady=5, leksykon_programu=leksykon)
+
+
+
+    def dodaj_modyfikuj_zamowienie(self, commend = "stworz"):
+        if commend == "stworz":
+            self.button_manager("dodaj_zamowienie")
+            self.view.dodaj_zamowienie_view()
+
+        elif commend == "modyfikuj":
+            selected_item = self.zamowienia_tree.selection()
+            if not selected_item:
+                # self.error_sound_demon()
+                # messagebox.showerror("Błąd", "Brak wybranego zamówienia! Wybierz zamówienie.")
+                print("Brak wybranego zamówienia! Wybierz zamówienie.")
+                return
+
+            self.zamowienie_id = self.zamowienia_tree.item(selected_item[0], 'values')[0]
+            self.view.modyfikuj_zamowienie_view(1, 1)
+            
+            # self.wczytaj_informacje_zamowienie(self.zamowienie_id)
+
+
+            self.button_manager("modyfikuj_zamowienie")
+
+        self.zamowienia_frame.grid_remove()
+
+
+        self.kupujacy_tree = self.view.name_tree(self.view.main_frame, "Kupujacy", True)
+        self.sklepy_tree = self.view.name_tree(self.view.secend_frame, "Sklepy", True)
+
+
+        if commend == "modyfikuj":
+            self.view.date_entry.set_date(self.zamowienie_data_modyfikacja)
+
+
+
+        self.load_kupujacy()
+        self.load_sklepy()
+
+        if commend == "modyfikuj":
+            self.zaznacz_wiersz_z_wartoscia(self.kupujacy_tree, 'id', self.zamowienie_kupujacy_id)
+            self.zaznacz_wiersz_z_wartoscia(self.sklepy_tree, 'id', self.zamowienie_sklep_id)
+
+           
+    def list_kupujacy(self):
+        self.zamowienia_frame.grid_remove()
+        self.button_manager("kupujacy")
+        self.kupujacy_tree = self.view.name_tree(self.main_frame, "Kupujacy", True)
+        self.load_kupujacy()
+
+    def list_firmy(self):
+        self.zamowienia_frame.grid_remove()
+        self.button_manager(frame="firmy")
+        self.firma_tree = self.view.name_tree(self.main_frame, "Firmy", True)
+        self.load_firmy()
+
+    def list_sklepy(self):
+        self.zamowienia_frame.grid_remove()
+        self.button_manager("sklepy")
+        self.sklepy_tree = self.view.name_tree(self.main_frame, "Sklepy", True)
+        self.load_sklepy()
+
+    def list_kategorie(self):
+        self.zamowienia_frame.grid_remove()
+        self.button_manager(frame="kategorie")
+        self.kategorie_tree = self.view.name_tree(self.main_frame, "Kategorie", True)
+
+        self.load_kategorie()
+
+    def list_artykulow(self, backTarget = 'main'):
+        self.zamowienia_frame.grid_remove()
+        self.secend_frame = ttk.Frame(self.master, padding=5)
+
+        self.button_manager("lista_artykuly", back_target=backTarget)
+        self.main_frame.grid(row=0, column=1, columnspan=1, rowspan=5, sticky="nsew", padx=5, pady=5)
+        self.secend_frame.grid(row=0, column=2, columnspan=2, rowspan=5, sticky="nsew", padx=5, pady=5)
+        
+        self.kategorie_tree = self.view.name_tree(self.main_frame, "Kategorie Lista", True)
+        self.artykuly_tree = self.stworz_artykuly_tree(self.secend_frame, "Artykuły Lista")
+        
+        self.load_kategorie()
+        self.load_artykuly()
+        
+        self.kategorie_tree.bind("<Double-1>", self.on_double_click_filtrowanie_kategoria)
+        self.kategorie_tree.bind("<Double-3>", self.on_double_click_filtrowanie_kategoria_resetowanie)
+
+    def stworz_sklep(self):
+        sklep_name = simpledialog.askstring("Dodaj Sklep", "Podaj nazwę SKLEPU: \t\t\t")
+        if sklep_name is not None:
+            sklep = Sklep(nazwa=sklep_name)
+            self.db_session.add(sklep)
+            self.db_session.commit()
+            self.load_sklepy()    
+
+    def usun_zamowienie(self):
+        selected_item = self.zamowienia_tree.selection()
+        if not selected_item:
+            return
+
+        dialog = simpledialog.askstring(
+            "Usuń", "Czy jesteś pewien usunięcia zamówienia:\n\n"
+                    "Czynność NIEodwracalna\n\n"
+                    "Napisz YES lub TAK \t\t\t"
+        )
+
+        if dialog and dialog.lower() in ["yes", "tak"]:
+            zamowienie_id = self.zamowienia_tree.item(selected_item[0], 'values')[0]
+            
+            self.db_session.query(Zamowienie).filter_by(id=zamowienie_id).delete(synchronize_session=False)
+            self.db_session.commit()
+            self.load_zamowienia_daemon()  
+
+    def zmien_nazwa_kupujacy(self):
+        selected_item = self.kupujacy_tree.selection()
+        if not selected_item:
+            return
+
+        element_value = self.kupujacy_tree.item(selected_item[0], 'values')
+        kupujacy_id = element_value[0]
+        stara_nazwa = element_value[1]
+
+        new_value = simpledialog.askstring("Edit",'Nowa wartość\t\t\t', initialvalue=stara_nazwa)
+
+        if new_value and new_value.strip():
+            kupujacy = self.db_session.query(Kupujacy).filter_by(id=kupujacy_id).first()
+
+            if kupujacy:
+                kupujacy.nazwa = new_value 
+                self.db_session.commit()
+                self.load_zamowienia_daemon()
+                self.load_kupujacy() 
+        
+    def zmien_nazwa_sklep(self):
+        selected_item = self.sklepy_tree.selection()
+        if not selected_item:
+            return
+
+        element_value = self.sklepy_tree.item(selected_item[0], 'values')
+        sklep_id = element_value[0]
+        stara_nazwa = element_value[1]
+
+        new_value = simpledialog.askstring("Edit",'Nowa wartość\t\t\t', initialvalue=stara_nazwa)
+
+        if new_value and new_value.strip():
+            sklep = self.db_session.query(Sklep).filter_by(id=sklep_id).first()
+
+            if sklep:
+                sklep.nazwa = new_value 
+                self.db_session.commit()
+                self.load_zamowienia_daemon(widok = "ukryj")
+                self.load_sklepy()
+
+    def zmien_nazwa_firma(self):
+        selected_item = self.firma_tree.selection()
+        if not selected_item:
+            return
+
+        element_value = self.firma_tree.item(selected_item[0], 'values')
+        firma_id = element_value[0]
+        stara_nazwa = element_value[1]
+
+        new_value = simpledialog.askstring("Edit",'Nowa wartość\t\t\t', initialvalue=stara_nazwa)
+
+        if new_value and new_value.strip():
+            firma = self.db_session.query(Firma).filter_by(id=firma_id).first()
+
+            if firma:
+                firma.nazwa = new_value 
+                self.db_session.commit()
+                self.load_zamowienia_daemon()
+                self.load_firmy() 
+
+    def zmien_nazwa_kategoria(self):
+        selected_item = self.kategorie_tree.selection()
+        if not selected_item:
+            return
+
+        element_value = self.kategorie_tree.item(selected_item[0], 'values')
+        kategoria_id = element_value[0]
+        stara_nazwa = element_value[1]
+
+        new_value = simpledialog.askstring("Edit",'Nowa wartość\t\t\t', initialvalue=stara_nazwa)
+
+        if new_value and new_value.strip():
+            kategoria = self.db_session.query(Kategoria).filter_by(id=kategoria_id).first()
+
+            if kategoria:
+                kategoria.nazwa = new_value 
+                self.db_session.commit()
+                self.load_zamowienia_daemon()
+                self.load_kategorie() 
+
+    def usun_zamowienie(self):
+        selected_item = self.zamowienia_tree.selection()
+        if not selected_item:
+            return
+
+        dialog = simpledialog.askstring(
+            "Usuń", "Czy jesteś pewien usunięcia zamówienia:\n\n"
+                    "Czynność NIEodwracalna\n\n"
+                    "Napisz YES lub TAK \t\t\t"
+        )
+
+        if dialog and dialog.lower() in ["yes", "tak"]:
+            zamowienie_id = self.zamowienia_tree.item(selected_item[0], 'values')[0]
+            
+            self.db_session.query(Zamowienie).filter_by(id=zamowienie_id).delete(synchronize_session=False)
+            self.db_session.commit()
+            self.load_zamowienia_daemon()  
+
+    def usun_artykul_zamowienie(self):
+        selected_item = self.inside_tree.selection()
+        if not selected_item:
+            return
+        
+        relacja_name = self.inside_tree.item(self.inside_tree.selection()[0], 'values')
+        dialog = simpledialog.askstring("Usuń folder", "Czy jesteś pewien usunięcia projektu:\n\nCzynność NIE odwracalna\n\nNapisz YES lub TAK \t\t\t")
+        if dialog == "YES" or dialog == "TAK" or dialog == "tak" or dialog == "yes":
+            self.db_session.execute(
+                artykuly_relacja.delete()
+                .where(artykuly_relacja.c.zamowienie_id == self.zamowienie_id,
+                artykuly_relacja.c.artykul_id == relacja_name[0],
+                artykuly_relacja.c.ilosc_artykulu == relacja_name[2]
+                )
+            )
+            self.db_session.commit()
+            self.load_inside_zamowienie(self.zamowienie_id)
+
+        self.load_zamowienia_daemon()
+
+
+    def usun_kupujacego(self):
+        selected_item = self.kupujacy_tree.selection()
+        if not selected_item:
+            return
+        
+        dialog = simpledialog.askstring(
+            "Usuń", "Czy jesteś pewien usunięcia kupującego:\n\n"
+                    "Czynność NIEodwracalna\n\n"
+                    "Napisz YES lub TAK \t\t\t"
+        )
+
+        if dialog and dialog.lower() in ["yes", "tak"]:
+            kupujacy_id = self.kupujacy_tree.item(self.kupujacy_tree.selection()[0], 'values')[0]
+            obj = self.db_session.query(Kupujacy).filter_by(id=kupujacy_id).first()
+            self.db_session.delete(obj)
+            self.db_session.commit()
+            self.load_zamowienia_daemon()
+            self.load_kupujacy()   
+
+    def usun_sklep(self):
+        selected_item = self.sklepy_tree.selection()
+        if not selected_item:
+            return
+        
+        dialog = simpledialog.askstring(
+            "Usuń", "Czy jesteś pewien usunięcia sklepu:\n\n"
+                    "Czynność NIEodwracalna\n\n"
+                    "Napisz YES lub TAK \t\t\t"
+        )
+
+        if dialog and dialog.lower() in ["yes", "tak"]:
+            sklep_id = self.sklepy_tree.item(self.sklepy_tree.selection()[0], 'values')[0]
+            obj = self.db_session.query(Sklep).filter_by(id=sklep_id).first()
+            self.db_session.delete(obj)
+            self.db_session.commit()
+            self.load_sklepy()   
+
+    def usun_firma(self):
+        selected_item = self.firma_tree.selection()
+        if not selected_item:
+            return
+        
+        dialog = simpledialog.askstring(
+            "Usuń", "Czy jesteś pewien usunięcia firmy:\n\n"
+                    "Czynność NIEodwracalna\n\n"
+                    "Napisz YES lub TAK \t\t\t"
+        )
+
+        if dialog and dialog.lower() in ["yes", "tak"]:
+            firma_id = self.firma_tree.item(self.firma_tree.selection()[0], 'values')[0]
+            obj = self.db_session.query(Firma).filter_by(id=firma_id).first()
+            self.db_session.delete(obj)
+            self.db_session.commit()
+            self.load_firmy()    
+
+    def usun_kategorie(self):
+        selected_item = self.kategorie_tree.selection()
+        if not selected_item:
+            return
+        
+        dialog = simpledialog.askstring(
+            "Usuń", "Czy jesteś pewien usunięcia kategorii:\n\n"
+                    "Czynność NIEodwracalna\n\n"
+                    "Napisz YES lub TAK \t\t\t"
+        )
+
+        if dialog and dialog.lower() in ["yes", "tak"]:
+            kategoria_id = self.kategorie_tree.item(self.kategorie_tree.selection()[0], 'values')[0]
+            obj = self.db_session.query(Kategoria).filter_by(id=kategoria_id).first()
+            self.db_session.delete(obj)
+            self.db_session.commit()
+            self.load_kategorie()                
+
+
+    def pokaz_main_frame(self):
+        if not self.zamowienia_frame.winfo_ismapped():
+            self.usun_all_widgets()
+            self.zamowienia_frame.grid()
+            self.button_manager(frame="main", startup=True)
+
+
+    def on_double_click_otwieranie_zamowienia(self, event):
+        selected_item = self.zamowienia_tree.selection()
+        self.zamowienie_id = selected_item
+
+        if selected_item:
+            self.zamowienie_id = self.zamowienia_tree.item(selected_item[0], 'values')[0]
+            self.load_inside_zamowienie(self.zamowienie_id)
+
+
+    def stworz_modyfikuj_artykul(self, commend = "stworz"):
+        self.zamowienia_frame.grid_remove()
+
+        if commend == "stworz":
+            self.usun_all_widgets()
+
+            self.nazwa_artykulu_string = None
+            self.kolor_artykulu_string = None
+            self.szczegoly_artykulu_string = None
+            self.button_manager("tworzenie_artykuly", back_target = 'lista_artykułów' )
+
+        elif commend == "modyfikuj":
+            selected_item = self.artykuly_tree.selection()
+            if not selected_item:
+                self.error_sound_demon()
+                messagebox.showerror("Błąd", "Brak wybranego artykułu! Wybierz artykuł.")
+                return
+        
+            self.artykul_modyfikacja_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
+            self.wczytaj_informacje_artykul(self.artykul_modyfikacja_id)
+            self.usun_all_widgets()
+            self.button_manager("modyfikacja_artykuly", back_target = 'lista_artykułów' )
+
+        self.secend_frame = ttk.Frame(self.master, padding=5)
+        self.third_frame = ttk.Frame(self.master, padding=5)
+
+        self.main_frame.grid(row=0, column=1, columnspan=5, rowspan=2, sticky="nsew", padx=5, pady=5)
+        self.secend_frame.grid(row=2, column=1, columnspan=5, rowspan=2, sticky="nsew", padx=5, pady=5)
+        self.third_frame.grid(row=0, column=6, columnspan=1, rowspan=4, sticky="nsew", padx=5, pady=5)
+        
+        self.firma_tree = self.stworz_name_tree(self.main_frame, "Lista Firm", True)
+        self.kategorie_tree = self.stworz_name_tree(self.secend_frame, "Kategorie Lista", True)
+
+        nazwa_label = ttk.Label(self.third_frame, text = 'Nazwa artykułu:', font=('calibre', 10, 'bold'), anchor='center')
+        kolor_label = ttk.Label(self.third_frame, text = 'Ewentualny kolor:', font=('calibre', 10, 'bold'), anchor='center')
+        szczegoly_label = ttk.Label(self.third_frame, text = 'Ewentualne szczegoły:', font=('calibre', 10, 'bold'), anchor='w')
+        
+        self.nazwa_artykulu_string = tk.StringVar(value=self.nazwa_artykulu_string)
+        self.kolor_artykulu_string = tk.StringVar(value=self.kolor_artykulu_string)
+        self.szczegoly_artykulu_string = tk.StringVar(value=self.szczegoly_artykulu_string)
+
+        nazwa_entry = ttk.Entry(self.third_frame, textvariable = self.nazwa_artykulu_string, font=('calibre',10,'normal'), width=30)
+        kolor_entry = ttk.Entry(self.third_frame, textvariable = self.kolor_artykulu_string, font=('calibre',10,'normal'), width=30)
+        szczegoly_entry = ttk.Entry(self.third_frame, textvariable = self.szczegoly_artykulu_string, font=('calibre',10,'normal'), width=30)
+
+        self.third_frame.grid_rowconfigure(0, weight=80)
+        self.third_frame.grid_rowconfigure(1, weight=1)
+        self.third_frame.grid_rowconfigure(2, weight=1)
+        self.third_frame.grid_rowconfigure(3, weight=1)
+        self.third_frame.grid_rowconfigure(4, weight=80)
+
+        self.third_frame.grid_columnconfigure(0, weight=1)
+        self.third_frame.grid_columnconfigure(1, weight=10)
+        
+        nazwa_label.grid(row=1,column=0)
+        kolor_label.grid(row=2,column=0)
+        szczegoly_label.grid(row=3,column=0)
+
+        nazwa_entry.grid(row=1,column=1)
+        kolor_entry.grid(row=2,column=1)
+        szczegoly_entry.grid(row=3,column=1)
+
+        self.load_kategorie()
+        self.load_firmy()
+
+        if commend == "modyfikuj":
+            self.zaznacz_wiersz_z_wartoscia(self.firma_tree, 'id', self.firma_id_artykulu)
+            self.zaznacz_wiersz_z_wartoscia(self.kategorie_tree, 'id', self.kategoria_id_artykulu)
+
+
+    def zatwierdz_nowy_modyfikuj_artykul(self, commend = "stworz"):
+        selected_item = self.firma_tree.selection()
+        if not selected_item:
+            self.error_sound_demon()
+            messagebox.showerror("Błąd", "Brak wybranej firmy! Wybierz firmę.")
+            return
+        
+        selected_item = self.kategorie_tree.selection()
+        if not selected_item:
+            self.error_sound_demon()
+            messagebox.showerror("Błąd", "Brak wybranej kategori artykulu! Wybierz kategorie.")
+            return
+
+        nazwa = self.nazwa_artykulu_string.get()
+        if not nazwa:
+            self.error_sound_demon()
+            messagebox.showerror("Błąd", "Brak nazwy artykułu! Wpisz nazwę.")
+            return
+       
+        firma_id = int(self.firma_tree.item(self.firma_tree.selection()[0], 'values')[0])
+        kategoria_id = int(self.kategorie_tree.item(self.kategorie_tree.selection()[0], 'values')[0])
+        if commend == "stworz":      
+            artykul = Artykul_Lista(kategoria_id=kategoria_id, firma_id=firma_id, nazwa=nazwa, kolor = self.kolor_artykulu_string.get(), szczegoly=self.szczegoly_artykulu_string.get())
+            self.db_session.add(artykul)
+        elif commend == "modyfikuj":
+            artykul = self.db_session.query(Artykul_Lista).filter_by(id=self.artykul_modyfikacja_id).first()
+        
+            if artykul:
+                artykul.nazwa = nazwa 
+                artykul.kolor = self.kolor_artykulu_string.get()
+                artykul.szczegoly = self.szczegoly_artykulu_string.get()
+                artykul.kategoria_id = kategoria_id 
+                artykul.firma_id = firma_id
+
+        self.db_session.commit()
+        self.powrot_do_lista_artykulow()
+
+
+    def zniszcz_artykul(self):
+        selected_item = self.artykuly_tree.selection()
+        if not selected_item:
+            return
+
+        dialog = simpledialog.askstring(
+            "Usuń", "Czy jesteś pewien usunięcia artykułu:\n\n"
+                    "Czynność NIEodwracalna\n\n"
+                    "Napisz YES lub TAK \t\t\t"
+        )
+
+        if dialog and dialog.lower() in ["yes", "tak"]:
+            artykul_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
+            self.db_session.query(Artykul_Lista).filter_by(id=artykul_id).delete(synchronize_session=False)
+            self.db_session.commit()
+            self.powrot_do_lista_artykulow()
+
+    def dodaj_list_artykulow(self):
+        self.list_artykulow(backTarget='zamówienie')
+
+        self.artykuly_tree.bind("<Double-1>", self.on_double_click_dodawanie_artykulu_do_zamowienia)
+    
+    def cena_ilosc_dodanie(self):
+        try:
+            cena_artykulu_var = float(self.cena_artykulu_var.get())
+        except ValueError:
+            self.error_sound_demon()
+            messagebox.showerror("Błąd", "Nieprawidłowa wartość d! Wpisz liczbę.")
+            return
+
+        try:
+            ilosc_artykulu_var =  float(self.ilosc_artykulu_var.get())
+        except ValueError:
+            self.error_sound_demon()
+            messagebox.showerror("Błąd", "Nieprawidłowa wartość f! Wpisz liczbę.")
+            return
+
+        zamowienie_id = self.zamowienie_dodawanie_artykulu_id
+        self.dodaj_artykul_do_zamowienie(zamowienie_id, self.cena_ilosc_select_item, cena_artykulu_var, ilosc_artykulu_var)
+        
+        self.load_zamowienia_daemon()
+        self.load_inside_zamowienie(zamowienie_id)
+        self.window.destroy()
+
+    def zatwierdz_nowy_modyfikuj_zamowienie(self, commend = "stworz"):
+        selected_item = self.kupujacy_tree.selection()
+        if not selected_item:
+            self.error_sound_demon()
+            messagebox.showerror("Błąd", "Brak wybranego kupującego! Wybierz kupującego.")
+            return
+        
+        selected_item = self.sklepy_tree.selection()
+        if not selected_item:
+            self.error_sound_demon()
+            messagebox.showerror("Błąd", "Brak wybranego sklepu! Wybierz sklep.")
+            return
+
+        try:
+            rabat_j = self.view.rabat_j_var.get()
+        except tk.TclError:
+            # self.error_sound_demon()
+            # messagebox.showerror("Błąd", "Nieprawidłowa wartość rabatu! Wpisz liczbę.")
+            return
+
+        try:
+            rabat_procentowy = self.view.rabat_p_var.get()
+        except tk.TclError:
+            # self.error_sound_demon()
+            # messagebox.showerror("Błąd", "Nieprawidłowa wartość rabatu! Wpisz liczbę.")
+            return
+       
+        try:
+            data = self.konwersja_string_do_data(self.view.zamowienie_data.get())
+        except ValueError:
+            # self.error_sound_demon()
+            # messagebox.showerror("Błąd", "Nieprawidłowa data! Wpisz date.\n             RRRR-MM-DD")
+            return
+        
+        kupujacy_id = int(self.kupujacy_tree.item(self.kupujacy_tree.selection()[0], 'values')[0])
+        sklep_id = int(self.sklepy_tree.item(self.sklepy_tree.selection()[0], 'values')[0])
+        
+        if commend == "stworz":
+            zamowienie = Zamowienie(data=data, kupujacy_id=kupujacy_id, sklep_id=sklep_id, rabat_j=rabat_j, rabat_procent=rabat_procentowy)
+            self.session.add(zamowienie)
+            
+        elif commend == "modyfikuj":
+            zamowienie = self.session.query(Zamowienie).filter_by(id=self.zamowienie_id).first()
+        
+            if zamowienie:
+                zamowienie.data = data
+                zamowienie.rabat_j = rabat_j
+                zamowienie.rabat_procent = rabat_procentowy
+                zamowienie.kupujacy_id = kupujacy_id
+                zamowienie.sklep_id = sklep_id
+
+        self.session.commit()
+        self.powrot_do_glownego_okna()
+
+    def stworz_kupujacy(self):
+        kupujacy_name = simpledialog.askstring("Dodaj Kupującego", "Podaj nazwę KUPUJĄCEGO: \t\t\t")
+        if kupujacy_name is not None:
+            kupujacy = Kupujacy(nazwa=kupujacy_name)
+            self.db_session.add(kupujacy)
+            self.db_session.commit()
+            self.load_kupujacy()    
+
+    def stworz_kategoria(self):
+        kategoria_name = simpledialog.askstring("Dodaj kategorie", "Podaj nazwę KATEGORII: \t\t\t")
+        if kategoria_name is not None:
+            kategoria = Kategoria(nazwa=kategoria_name)
+            self.db_session.add(kategoria)
+            self.db_session.commit()
+            self.load_kategorie() 
+
+    def stworz_firma(self):
+        firma_name = simpledialog.askstring("Dodaj firme", "Podaj nazwę FIRMY: \t\t\t")
+        if firma_name is not None:
+            firma = Firma(nazwa=firma_name)
+            self.db_session.add(firma)
+            self.db_session.commit()
+            self.load_firmy()    
+
+    def load_sklepy(self):
+        sklepy = self.session.query(Sklep).all()
+        sklepy_data = []
+
+        for sklep in sklepy:
+            sklep_id = sklep.id
+            sklep_nazwa = sklep.nazwa
+            sklepy_data.append((sklep_id, sklep_nazwa))
+
+        self.sklepy_tree.delete(*self.sklepy_tree.get_children())
+        sklepy_data.sort(key=lambda x: x[1].lower())
+
+        for sklep_id, sklep_nazwa in sklepy_data:
+            self.sklepy_tree.insert('', 'end', values=(sklep_id, sklep_nazwa))
+
+    def load_kupujacy(self):
+        kupujacy = self.session.query(Kupujacy).all()
+        kupujacy_data = []
+
+        for kup in kupujacy:
+            kup_id = kup.id
+            kup_nazwa = kup.nazwa
+            kupujacy_data.append((kup_id, kup_nazwa))
+
+        self.kupujacy_tree.delete(*self.kupujacy_tree.get_children())
+        kupujacy_data.sort(key=lambda x:x[1])
+
+        for kup_id, kup_nazwa in kupujacy_data:
+            self.kupujacy_tree.insert('', 'end', values=(kup_id, kup_nazwa))
+
+    def load_kategorie(self):
+        kategorie = self.session.query(Kategoria).all()
+        kategorie_data = []
+
+        for kategoria in kategorie:
+            kategoria_id = kategoria.id
+            kategoria_name = kategoria.nazwa
+            kategorie_data.append((kategoria_id, kategoria_name))
+
+        self.kategorie_tree.delete(*self.kategorie_tree.get_children())
+        kategorie_data.sort(key=lambda x:x[1])
+
+        for kategoria_id, kategoria_name in kategorie_data:
+            self.kategorie_tree.insert('', 'end', values=(kategoria_id, kategoria_name))    
+
+    def load_firmy(self):
+        firmy = self.session.query(Firma).all()
+        firmy_data = []
+
+        for firma in firmy:
+            firma_id = firma.id
+            firma_name = firma.nazwa
+            firmy_data.append((firma_id, firma_name))
+
+        self.firma_tree.delete(*self.firma_tree.get_children())
+        firmy_data.sort(key=lambda x:x[1])
+
+        for firma_id, firma_name in firmy_data:
+            self.firma_tree.insert('', 'end', values=(firma_id, firma_name))  
+
+    def konwersja_string_do_data(self, date):
+        format = "%Y-%m-%d"
+        date = datetime.datetime.strptime(date, format).date()
+        return date
+    
+    def powrot_do_glownego_okna(self):
+        self.pokaz_main_frame()
+        self.load_zamowienia_daemon()
+
+    def usun_all_widgets(self):
+        try:
+            if self.view.secend_frame:
+                self.view.secend_frame.destroy()
+            if self.view.third_frame:
+                self.view.third_frame.destroy()
+        except AttributeError:
+            pass
+
+        for widget in self.view.main_frame.winfo_children():
+            widget.destroy()
+
+        for widget in self.view.button_frame.winfo_children():
+            widget.destroy()
+
+    def show_message_async_demon(self):
+        print("show_message_async_demon")
+        threading.Thread(target=self.view.show_message_async, daemon=True).start()
+
+    def hide_message_async_demon(self):
+        print("hide_message_async_demon")
+        threading.Thread(target=self.view.ukryj_message_async, daemon=True).start()

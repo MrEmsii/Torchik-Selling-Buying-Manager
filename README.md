@@ -69,5 +69,5 @@ def Test(session):
 Projekt stworzony przez **MrEmsii**.
 
 ## Licencja
-MIT License
+CC BY-NC-ND 4.0
 

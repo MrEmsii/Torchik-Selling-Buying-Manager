@@ -31,6 +31,10 @@ class Controller:
         self.inicjalizacja_frame()
 
         self.load_zamowienia_daemon()
+        # self.load_sklepy_daemon()
+        # self.load_kupujacy_daemon()
+        # self.load_kategorie_daemon()
+        # self.load_firmy_deaemon()
 
     def run(self):
         self.view.master.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -50,6 +54,159 @@ class Controller:
         print("load_zamowienia_daemon")
         commend = self.load_zamowienia(widok = widok)
         threading.Thread(target=lambda: commend, daemon=True).start()
+
+    def load_sklepy_daemon(self, widok = "pokaz"):
+        print("load_sklepy_daemon")
+        commend = self.load_sklepy(widok = widok)
+        threading.Thread(target=lambda: commend, daemon=True).start()
+
+    def load_kupujacy_daemon(self, widok = "pokaz"):
+        print("load_kupujacy_daemon")
+        commend = self.load_kupujacy(widok = widok)
+        threading.Thread(target=lambda: commend, daemon=True).start()
+
+    def load_kategorie_daemon(self, widok = "pokaz"):
+        print("load_kategorie_daemon")
+        commend = self.load_kategorie(widok = widok)
+        threading.Thread(target=lambda: commend, daemon=True).start()
+
+    def load_firmy_deaemon(self, widok = "pokaz"):
+        print("load_firmy_deaemon")
+        commend = self.load_firmy(widok = widok)
+        threading.Thread(target=lambda: commend, daemon=True).start()
+
+    def load_sklepy(self, widok):
+        if widok == "pokaz":
+            self.view.show_message_async()
+
+        def task():
+            sklepy = self.session.query(Sklep).all()
+            sklepy_data = []
+
+            for sklep in sklepy:
+                sklep_id = sklep.id
+                sklep_nazwa = sklep.nazwa
+                sklepy_data.append((sklep_id, sklep_nazwa))
+
+            sklepy_data.sort(key=lambda x: x[1].lower())
+
+            def update_gui():
+                self.sklepy_tree.delete(*self.sklepy_tree.get_children())
+                for sklep_id, sklep_nazwa in sklepy_data:
+                    self.sklepy_tree.insert('', 'end', values=(sklep_id, sklep_nazwa))
+                self.view.ukryj_message_async()
+            
+            self.master.after(0, update_gui)
+
+        threading.Thread(target=task, daemon=True).start()
+
+    def load_artykuly(self, widok, kategoria_id = None):
+        if widok == "pokaz":
+            self.view.show_message_async()
+
+        def task():
+            if not kategoria_id:
+                artykuly = self.db_session.query(Artykul_Lista).all()
+            else:
+                artykuly = self.db_session.query(Artykul_Lista).filter_by(kategoria_id=kategoria_id).all()
+            
+            artykuly_data = []
+
+            for art in artykuly:
+                art_id = art.id
+                art_kategoria = art.kategoria.nazwa if art.kategoria else  " "
+                art_firma = art.firma.nazwa if art.firma else  " "
+                art_nazwa = art.nazwa
+                art_kolor = art.kolor if art.kolor else  " "
+                art_szczegoly = art.szczegoly if art.szczegoly else  " "
+                artykuly_data.append((art_id, art_kategoria, art_firma, art_nazwa, art_kolor, art_szczegoly))
+
+            artykuly_data.sort(key=lambda x:x[3])
+
+            def update_gui():
+                self.artykuly_tree.delete(*self.artykuly_tree.get_children())
+                for id, kategoria, firma, nazwa, kolor, szczegoly in artykuly_data:
+                    self.artykuly_tree.insert('', 'end', values=(id, kategoria, firma, nazwa, kolor, szczegoly))
+                
+                self.view.ukryj_message_async()
+            self.master.after(0, update_gui)
+        threading.Thread(target=task, daemon=True).start()
+
+    def load_kupujacy(self, widok):
+        if widok == "pokaz":
+            self.view.show_message_async()
+
+        def task():
+            kupujacy = self.session.query(Kupujacy).all()
+            kupujacy_data = []
+
+            for kup in kupujacy:
+                kup_id = kup.id
+                kup_nazwa = kup.nazwa
+                kupujacy_data.append((kup_id, kup_nazwa))
+
+            kupujacy_data.sort(key=lambda x:x[1])
+
+            def update_gui():
+                self.kupujacy_tree.delete(*self.kupujacy_tree.get_children())
+                for kup_id, kup_nazwa in kupujacy_data:
+                    self.kupujacy_tree.insert('', 'end', values=(kup_id, kup_nazwa))
+                
+                self.view.ukryj_message_async()
+            self.master.after(0, update_gui)
+
+        threading.Thread(target=task, daemon=True).start()
+
+    def load_kategorie(self, widok):
+        if widok == "pokaz":
+            self.view.show_message_async()
+
+        def task():
+            kategorie = self.session.query(Kategoria).all()
+            kategorie_data = []
+
+            for kategoria in kategorie:
+                kategoria_id = kategoria.id
+                kategoria_name = kategoria.nazwa
+                kategorie_data.append((kategoria_id, kategoria_name))
+
+            kategorie_data.sort(key=lambda x:x[1])
+
+            def update_gui():
+                self.kategorie_tree.delete(*self.kategorie_tree.get_children())
+                for kategoria_id, kategoria_name in kategorie_data:
+                    self.kategorie_tree.insert('', 'end', values=(kategoria_id, kategoria_name))    
+                self.view.ukryj_message_async()
+
+            self.master.after(0, update_gui)
+
+        threading.Thread(target=task, daemon=True).start()
+
+    def load_firmy(self, widok):
+        if widok == "pokaz":
+            self.view.show_message_async()
+
+        def task():
+            firmy = self.session.query(Firma).all()
+            firmy_data = []
+
+            for firma in firmy:
+                firma_id = firma.id
+                firma_name = firma.nazwa
+                firmy_data.append((firma_id, firma_name))
+
+            firmy_data.sort(key=lambda x:x[1])
+
+            def update_gui():
+                self.firma_tree.delete(*self.firma_tree.get_children())
+                for firma_id, firma_name in firmy_data:
+                    self.firma_tree.insert('', 'end', values=(firma_id, firma_name))  
+                self.view.ukryj_message_async()
+
+            self.master.after(0, update_gui)
+
+        threading.Thread(target=task, daemon=True).start()
+
 
     def load_zamowienia(self, widok):
         if widok == "pokaz":
@@ -175,7 +332,6 @@ class Controller:
         
         self.view.zamowienia_grid_setting()
         self.zamowienia_tree.bind("<Double-1>", self.on_double_click_otwieranie_zamowienia)
-
 
     def json_language(self, language_code):
         try:
@@ -351,8 +507,6 @@ class Controller:
         leksykon = self.leksykon_programu["button_back_pack"]    
         self.dodaj_button = self.view.utworz_przycisk(frame, commend, side='bottom', padx=5, pady=5, leksykon_programu=leksykon)
 
-
-
     def dodaj_modyfikuj_zamowienie(self, commend = "stworz"):
         if commend == "stworz":
             self.button_manager("dodaj_zamowienie")
@@ -371,66 +525,60 @@ class Controller:
             
             # self.wczytaj_informacje_zamowienie(self.zamowienie_id)
 
-
             self.button_manager("modyfikuj_zamowienie")
 
         self.zamowienia_frame.grid_remove()
 
-
         self.kupujacy_tree = self.view.name_tree(self.view.main_frame, "Kupujacy", True)
         self.sklepy_tree = self.view.name_tree(self.view.secend_frame, "Sklepy", True)
-
 
         if commend == "modyfikuj":
             self.view.date_entry.set_date(self.zamowienie_data_modyfikacja)
 
 
-
-        self.load_kupujacy()
-        self.load_sklepy()
+        self.load_kupujacy_daemon(widok="ukryj")
+        self.load_sklepy_daemon(widok="ukryj")
 
         if commend == "modyfikuj":
             self.zaznacz_wiersz_z_wartoscia(self.kupujacy_tree, 'id', self.zamowienie_kupujacy_id)
             self.zaznacz_wiersz_z_wartoscia(self.sklepy_tree, 'id', self.zamowienie_sklep_id)
-
            
     def list_kupujacy(self):
         self.zamowienia_frame.grid_remove()
         self.button_manager("kupujacy")
         self.kupujacy_tree = self.view.name_tree(self.main_frame, "Kupujacy", True)
-        self.load_kupujacy()
+        self.load_kupujacy_daemon()
 
     def list_firmy(self):
         self.zamowienia_frame.grid_remove()
         self.button_manager(frame="firmy")
         self.firma_tree = self.view.name_tree(self.main_frame, "Firmy", True)
-        self.load_firmy()
+        self.load_firmy_deaemon()
 
     def list_sklepy(self):
         self.zamowienia_frame.grid_remove()
         self.button_manager("sklepy")
         self.sklepy_tree = self.view.name_tree(self.main_frame, "Sklepy", True)
-        self.load_sklepy()
+        self.load_sklepy_daemon()
 
     def list_kategorie(self):
         self.zamowienia_frame.grid_remove()
         self.button_manager(frame="kategorie")
         self.kategorie_tree = self.view.name_tree(self.main_frame, "Kategorie", True)
-
-        self.load_kategorie()
+        self.load_kategorie_daemon()
 
     def list_artykulow(self, backTarget = 'main'):
         self.zamowienia_frame.grid_remove()
         self.secend_frame = ttk.Frame(self.master, padding=5)
+        
+        self.view.artykuly_lista_grid_setting()
 
         self.button_manager("lista_artykuly", back_target=backTarget)
-        self.main_frame.grid(row=0, column=1, columnspan=1, rowspan=5, sticky="nsew", padx=5, pady=5)
-        self.secend_frame.grid(row=0, column=2, columnspan=2, rowspan=5, sticky="nsew", padx=5, pady=5)
-        
+
         self.kategorie_tree = self.view.name_tree(self.main_frame, "Kategorie Lista", True)
         self.artykuly_tree = self.stworz_artykuly_tree(self.secend_frame, "Artykuły Lista")
         
-        self.load_kategorie()
+        self.load_kategorie_daemon(widok = "ukryj")
         self.load_artykuly()
         
         self.kategorie_tree.bind("<Double-1>", self.on_double_click_filtrowanie_kategoria)
@@ -442,7 +590,7 @@ class Controller:
             sklep = Sklep(nazwa=sklep_name)
             self.db_session.add(sklep)
             self.db_session.commit()
-            self.load_sklepy()    
+            self.load_sklepy_daemon(widok="ukryj")    
 
     def usun_zamowienie(self):
         selected_item = self.zamowienia_tree.selection()
@@ -480,7 +628,7 @@ class Controller:
                 kupujacy.nazwa = new_value 
                 self.db_session.commit()
                 self.load_zamowienia_daemon()
-                self.load_kupujacy() 
+                self.load_kupujacy_daemon(widok="ukryj") 
         
     def zmien_nazwa_sklep(self):
         selected_item = self.sklepy_tree.selection()
@@ -500,7 +648,7 @@ class Controller:
                 sklep.nazwa = new_value 
                 self.db_session.commit()
                 self.load_zamowienia_daemon(widok = "ukryj")
-                self.load_sklepy()
+                self.load_sklepy(widok = "ukryj")
 
     def zmien_nazwa_firma(self):
         selected_item = self.firma_tree.selection()
@@ -520,7 +668,7 @@ class Controller:
                 firma.nazwa = new_value 
                 self.db_session.commit()
                 self.load_zamowienia_daemon()
-                self.load_firmy() 
+                self.load_firmy_deaemon(widok = "ukryj") 
 
     def zmien_nazwa_kategoria(self):
         selected_item = self.kategorie_tree.selection()
@@ -540,25 +688,7 @@ class Controller:
                 kategoria.nazwa = new_value 
                 self.db_session.commit()
                 self.load_zamowienia_daemon()
-                self.load_kategorie() 
-
-    def usun_zamowienie(self):
-        selected_item = self.zamowienia_tree.selection()
-        if not selected_item:
-            return
-
-        dialog = simpledialog.askstring(
-            "Usuń", "Czy jesteś pewien usunięcia zamówienia:\n\n"
-                    "Czynność NIEodwracalna\n\n"
-                    "Napisz YES lub TAK \t\t\t"
-        )
-
-        if dialog and dialog.lower() in ["yes", "tak"]:
-            zamowienie_id = self.zamowienia_tree.item(selected_item[0], 'values')[0]
-            
-            self.db_session.query(Zamowienie).filter_by(id=zamowienie_id).delete(synchronize_session=False)
-            self.db_session.commit()
-            self.load_zamowienia_daemon()  
+                self.load_kategorie_daemon(widok = "ukryj") 
 
     def usun_artykul_zamowienie(self):
         selected_item = self.inside_tree.selection()
@@ -598,7 +728,7 @@ class Controller:
             self.db_session.delete(obj)
             self.db_session.commit()
             self.load_zamowienia_daemon()
-            self.load_kupujacy()   
+            self.load_kupujacy_daemon(widok = "ukryj")   
 
     def usun_sklep(self):
         selected_item = self.sklepy_tree.selection()
@@ -616,7 +746,7 @@ class Controller:
             obj = self.db_session.query(Sklep).filter_by(id=sklep_id).first()
             self.db_session.delete(obj)
             self.db_session.commit()
-            self.load_sklepy()   
+            self.load_sklepy_daemon(widok = "ukryj")   
 
     def usun_firma(self):
         selected_item = self.firma_tree.selection()
@@ -634,7 +764,7 @@ class Controller:
             obj = self.db_session.query(Firma).filter_by(id=firma_id).first()
             self.db_session.delete(obj)
             self.db_session.commit()
-            self.load_firmy()    
+            self.load_firmy_deaemon(widok = "ukryj")    
 
     def usun_kategorie(self):
         selected_item = self.kategorie_tree.selection()
@@ -652,7 +782,7 @@ class Controller:
             obj = self.db_session.query(Kategoria).filter_by(id=kategoria_id).first()
             self.db_session.delete(obj)
             self.db_session.commit()
-            self.load_kategorie()                
+            self.load_kategorie_daemon(widok = "ukryj")                
 
 
     def pokaz_main_frame(self):
@@ -883,7 +1013,7 @@ class Controller:
             kupujacy = Kupujacy(nazwa=kupujacy_name)
             self.db_session.add(kupujacy)
             self.db_session.commit()
-            self.load_kupujacy()    
+            self.load_kupujacy_daemon()    
 
     def stworz_kategoria(self):
         kategoria_name = simpledialog.askstring("Dodaj kategorie", "Podaj nazwę KATEGORII: \t\t\t")
@@ -900,66 +1030,6 @@ class Controller:
             self.db_session.add(firma)
             self.db_session.commit()
             self.load_firmy()    
-
-    def load_sklepy(self):
-        sklepy = self.session.query(Sklep).all()
-        sklepy_data = []
-
-        for sklep in sklepy:
-            sklep_id = sklep.id
-            sklep_nazwa = sklep.nazwa
-            sklepy_data.append((sklep_id, sklep_nazwa))
-
-        self.sklepy_tree.delete(*self.sklepy_tree.get_children())
-        sklepy_data.sort(key=lambda x: x[1].lower())
-
-        for sklep_id, sklep_nazwa in sklepy_data:
-            self.sklepy_tree.insert('', 'end', values=(sklep_id, sklep_nazwa))
-
-    def load_kupujacy(self):
-        kupujacy = self.session.query(Kupujacy).all()
-        kupujacy_data = []
-
-        for kup in kupujacy:
-            kup_id = kup.id
-            kup_nazwa = kup.nazwa
-            kupujacy_data.append((kup_id, kup_nazwa))
-
-        self.kupujacy_tree.delete(*self.kupujacy_tree.get_children())
-        kupujacy_data.sort(key=lambda x:x[1])
-
-        for kup_id, kup_nazwa in kupujacy_data:
-            self.kupujacy_tree.insert('', 'end', values=(kup_id, kup_nazwa))
-
-    def load_kategorie(self):
-        kategorie = self.session.query(Kategoria).all()
-        kategorie_data = []
-
-        for kategoria in kategorie:
-            kategoria_id = kategoria.id
-            kategoria_name = kategoria.nazwa
-            kategorie_data.append((kategoria_id, kategoria_name))
-
-        self.kategorie_tree.delete(*self.kategorie_tree.get_children())
-        kategorie_data.sort(key=lambda x:x[1])
-
-        for kategoria_id, kategoria_name in kategorie_data:
-            self.kategorie_tree.insert('', 'end', values=(kategoria_id, kategoria_name))    
-
-    def load_firmy(self):
-        firmy = self.session.query(Firma).all()
-        firmy_data = []
-
-        for firma in firmy:
-            firma_id = firma.id
-            firma_name = firma.nazwa
-            firmy_data.append((firma_id, firma_name))
-
-        self.firma_tree.delete(*self.firma_tree.get_children())
-        firmy_data.sort(key=lambda x:x[1])
-
-        for firma_id, firma_name in firmy_data:
-            self.firma_tree.insert('', 'end', values=(firma_id, firma_name))  
 
     def konwersja_string_do_data(self, date):
         format = "%Y-%m-%d"

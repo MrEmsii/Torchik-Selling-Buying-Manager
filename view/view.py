@@ -23,8 +23,8 @@ class View:
 
         self.main_frame = ttk.Frame(self.master, padding=5)
         self.zamowienia_frame = ttk.Frame(self.master, padding=5)
-        # self.secend_frame = ttk.Frame(self.master, padding=5)
-        # self.third_frame = ttk.Frame(self.master, padding=5)
+        self.secend_frame = ttk.Frame(self.master, padding=5)
+        self.third_frame = ttk.Frame(self.master, padding=5)
 
         self.button_frame.grid(row=0, column=0, rowspan=5, sticky="nsew", padx=5, pady=5)
 
@@ -70,7 +70,10 @@ class View:
     def zamowienia_grid_setting(self):
         self.zamowienia_frame.grid(row=0, column=1, columnspan=3, rowspan=5, sticky="nsew", padx=5, pady=5)
 
-
+    def artykuly_lista_grid_setting(self):
+        self.main_frame.grid(row=0, column=1, columnspan=1, rowspan=5, sticky="nsew", padx=5, pady=5)
+        self.secend_frame.grid(row=0, column=2, columnspan=2, rowspan=5, sticky="nsew", padx=5, pady=5)
+        
     def inside_tree(self, parent_frame, label_text):
         label = ttk.Label(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)

@@ -10,7 +10,7 @@ from model.models import SQLconnect, select, Kupujacy, Kategoria, Sklep, Firma, 
 
 def Test(session):
     lista = []
-    d = 1000 # Liczba artykułów, kupujących, sklepów, firm i kategorii
+    d = 10 # Liczba artykułów, kupujących, sklepów, firm i kategorii
     b = 100 # Liczba zamówień
     g = 200 # Liczba artykułów w zamówieniach
 

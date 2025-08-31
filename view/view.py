@@ -27,7 +27,7 @@ class View:
         self.third_frame = ttk.Frame(self.master, padding=5)
 
         self.button_frame.grid(row=0, column=0, rowspan=5, sticky="nsew", padx=5, pady=5)
-
+        self.main_frame.grid(row=0, column=1, columnspan=5, rowspan=5, sticky="nsew", padx=5, pady=5)
 
     def setup_styles(self, dsc):
         self.style = ttk.Style()
@@ -55,25 +55,26 @@ class View:
         self.master.grid_columnconfigure(2, weight=2000)
         self.master.grid_columnconfigure(3, weight=2000)
 
-    def messagebox(self, type, language_code = None):
-        if type == "error":
-            messagebox.showerror("Błąd", "Wystąpił błąd. Proszę spróbować ponownie.")
+    def messagebox(self, type, language_code = None, heading = None, text = None, value = None):
+        if type == "error" or type == "language" and language_code:
+            return messagebox.showerror(heading, text)
         elif type == "info":
-            messagebox.showinfo("Informacja", "Operacja zakończona pomyślnie.")
-        elif type == "warning":
-            messagebox.showwarning("Ostrzeżenie", "Proszę sprawdzić wprowadzone dane.")
-        elif type == "language" and language_code:
-            messagebox.showerror("Błąd", f"Plik językowy '{language_code}.json' nie został znaleziony.")
+            return messagebox.showinfo(heading, text)
         elif type == "close":
-            return messagebox.askokcancel("Zamknij", "Czy na pewno chcesz zamknąć aplikację?")
+            return messagebox.askokcancel(heading, text)
+        elif type == "ask":
+            return simpledialog.askstring(heading, text, initialvalue=value)
 
     def zamowienia_grid_setting(self):
         self.zamowienia_frame.grid(row=0, column=1, columnspan=3, rowspan=5, sticky="nsew", padx=5, pady=5)
 
-    def artykuly_lista_grid_setting(self):
+    def artukuly_list_grid_setting(self):
         self.main_frame.grid(row=0, column=1, columnspan=1, rowspan=5, sticky="nsew", padx=5, pady=5)
         self.secend_frame.grid(row=0, column=2, columnspan=2, rowspan=5, sticky="nsew", padx=5, pady=5)
-        
+    
+    def start_grid_setting(self):
+        self.main_frame.grid(row=0, column=1, columnspan=5, rowspan=5, sticky="nsew", padx=5, pady=5)
+
     def inside_tree(self, parent_frame, label_text):
         label = ttk.Label(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)
@@ -162,8 +163,6 @@ class View:
         tree.column('szczegoly', width=100, anchor='w')
         tree.heading('szczegoly', text='Szczegoly', anchor='w')
        
-        tree.pack(expand=True, fill='both')
-
         return tree       
 
     def name_tree(self, parent_frame, label_text, status):
@@ -272,43 +271,40 @@ class View:
             self.edit_artykul_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_artykul_zamowienie_icon.png")).subsample(8, 8)
             self.delete_artykul_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_artykul_zamowienie_icon.png")).subsample(8, 8)
             
-            self.lista_artykulow_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_artykulow_icon.png")).subsample(8, 8)
-            self.lista_kategorie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_kategorie_icon.png")).subsample(8, 8)
-            self.lista_kupujacy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_kupujacy_icon.png")).subsample(8, 8)
-            self.lista_zamowien_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_zamowien_icon.png")).subsample(8, 8)
-            self.lista_sklepy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_sklepy_icon.png")).subsample(8, 8)
             self.lista_firmy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_firmy_icon.png")).subsample(8, 8)
+            self.lista_sklepy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_sklepy_icon.png")).subsample(8, 8)
+            self.lista_zamowien_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_zamowien_icon.png")).subsample(8, 8)
+            self.lista_kupujacy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_kupujacy_icon.png")).subsample(8, 8)
+            self.lista_kategorie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_kategorie_icon.png")).subsample(8, 8)
+            self.lista_artykulow_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_artykulow_icon.png")).subsample(8, 8)
 
-            self.backButton_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "backButton_icon.png")).subsample(8, 8)
             self.refresh_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "refresh_icon.png")).subsample(8, 8)
             self.setting_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "setting_icon.png")).subsample(8, 8)
+            self.backButton_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "backButton_icon.png")).subsample(8, 8)
 
     def utworz_przycisk(self, frame, command, side='top', padx=1, pady=3, icon=None, leksykon_programu=None):
-        leksykon = leksykon_programu
         przycisk = ttk.Button(
             frame,
-            text=leksykon["text"],
+            text=leksykon_programu["text"],
             command=command,
             width=10,
             image=icon or self.refresh_icon,
             compound="left"
         )
         przycisk.pack(side=side, padx=padx, pady=pady)
-        ToolTip(przycisk, msg=leksykon["toolTip"], follow=True)
+        ToolTip(przycisk, msg=leksykon_programu["toolTip"], follow=True)
         return przycisk
 
-    def dodaj_zamowienie_view(self):
-        self.rabat_j_var = tk.DoubleVar()
-        self.rabat_p_var = tk.DoubleVar()
+    def dodaj_modyfikuj_zamowienie_view(self, zamowienie_rabat_j=0, zamowienie_rabat_procentowy=0):
+        self.rabat_j_var = tk.DoubleVar(value=zamowienie_rabat_j)
+        self.rabat_p_var = tk.DoubleVar(value=zamowienie_rabat_procentowy)
         self.zamowienie_data = tk.StringVar()
         self.zamowienie_view()
 
-    def modyfikuj_zamowienie_view(self, zamowienie_rabat_j, zamowienie_rabat_procentowy):
-        self.rabat_j_var = tk.DoubleVar(value=zamowienie_rabat_j)
-        self.rabat_p_var = tk.DoubleVar(value=zamowienie_rabat_procentowy)
-        self.zamowienie_view()
-
-    def zamowienie_view(self ):
+    def artykuly_lista_view(self):
+        self.secend_frame = ttk.Frame(self.master, padding=5)
+        
+    def zamowienie_view(self):
         self.secend_frame = ttk.Frame(self.master, padding=5)
         self.third_frame = ttk.Frame(self.master, padding=5)
 
@@ -345,7 +341,6 @@ class View:
         self.secend_frame.grid(row=1, column=1, columnspan=5, rowspan=3, sticky="nsew", padx=5, pady=5)
         self.third_frame.grid(row=0, column=6, columnspan=1, rowspan=4, sticky="nsew", padx=5, pady=5)
         
-
     def show_message_async(self):
         def pokaz_okno():
             self.msg_windows = tk.Toplevel(self.master)

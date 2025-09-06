@@ -62,14 +62,14 @@ class Controller:
         commend = self.load_kupujacy(widok = widok, select_item=select_item)
         threading.Thread(target=lambda: commend, daemon=True).start()
 
-    def load_kategorie_daemon(self, widok = "pokaz"):
+    def load_kategorie_daemon(self, widok = "pokaz", select_item = None):
         print("load_kategorie_daemon")
-        commend = self.load_kategorie(widok = widok)
+        commend = self.load_kategorie(widok = widok, select_item=select_item)
         threading.Thread(target=lambda: commend, daemon=True).start()
 
-    def load_firmy_deaemon(self, widok = "pokaz"):
+    def load_firmy_deaemon(self, widok = "pokaz", select_item = None):
         print("load_firmy_deaemon")
-        commend = self.load_firmy(widok = widok)
+        commend = self.load_firmy(widok = widok, select_item=select_item)
         threading.Thread(target=lambda: commend, daemon=True).start()
 
     def load_artykuly_deaemon(self, widok = "pokaz"):
@@ -103,7 +103,7 @@ class Controller:
 
         threading.Thread(target=task, daemon=True).start()
 
-    def load_artykuly(self, widok = None, kategoria_id = None):
+    def load_artykuly(self, widok, kategoria_id = None):
         if widok == "pokaz":
             self.view.show_message_async()
 
@@ -162,7 +162,7 @@ class Controller:
 
         threading.Thread(target=task, daemon=True).start()
 
-    def load_kategorie(self, widok=None):
+    def load_kategorie(self, widok, select_item):
         if widok == "pokaz":
             self.view.show_message_async()
 
@@ -181,13 +181,14 @@ class Controller:
                 self.kategorie_tree.delete(*self.kategorie_tree.get_children())
                 for kategoria_id, kategoria_name in kategorie_data:
                     self.kategorie_tree.insert('', 'end', values=(kategoria_id, kategoria_name))    
+                self.zaznacz_wiersz_z_wartoscia(self.kategorie_tree, 'id', select_item)
                 self.view.ukryj_message_async()
 
             self.master.after(0, update_gui)
 
         threading.Thread(target=task, daemon=True).start()
 
-    def load_firmy(self, widok):
+    def load_firmy(self, widok, select_item):
         if widok == "pokaz":
             self.view.show_message_async()
 
@@ -206,12 +207,12 @@ class Controller:
                 self.firma_tree.delete(*self.firma_tree.get_children())
                 for firma_id, firma_name in firmy_data:
                     self.firma_tree.insert('', 'end', values=(firma_id, firma_name))  
+                self.zaznacz_wiersz_z_wartoscia(self.firma_tree, 'id', select_item)
                 self.view.ukryj_message_async()
 
             self.master.after(0, update_gui)
 
         threading.Thread(target=task, daemon=True).start()
-
 
     def load_zamowienia(self, widok):
         if widok == "pokaz":
@@ -365,11 +366,11 @@ class Controller:
     # --- ARTYKUŁY ---
     def button_stworz_artykul(self, frame):
         leksykon = self.leksykon_programu["button_stworz_artykul"]
-        self.view.utworz_przycisk(frame, self.stworz_modyfikuj_artykul, icon=self.view.add_artykul_icon, leksykon_programu=leksykon)
+        self.view.utworz_przycisk(frame, self.dodaj_modyfikuj_artykul, icon=self.view.add_artykul_icon, leksykon_programu=leksykon)
 
     def button_modyfikuj_artykul(self, frame):
         leksykon = self.leksykon_programu["button_modyfikuj_artykul"]
-        self.view.utworz_przycisk(frame, lambda: self.stworz_modyfikuj_artykul(commend="modyfikuj"), icon=self.view.edit_artykul_icon, leksykon_programu=leksykon)
+        self.view.utworz_przycisk(frame, lambda: self.dodaj_modyfikuj_artykul(commend="modyfikuj"), icon=self.view.edit_artykul_icon, leksykon_programu=leksykon)
 
     def button_zatwierdz_artykul(self, frame):
         leksykon = self.leksykon_programu["button_zatwierdz_artykul"]
@@ -452,7 +453,7 @@ class Controller:
 
     # --- KATEGORIE ---
     def button_dodaj_kategoria(self, frame):
-        leksykon = self.leksykon_programu["button_usun_firma"]  # <- tu chyba literówka, powinno być button_dodaj_kategoria
+        leksykon = self.leksykon_programu["button_dodaj_kategoria"]
         self.view.utworz_przycisk(frame, self.stworz_kategoria, icon=self.view.add_kategoria_icon, leksykon_programu=leksykon)
 
     def button_zmiana_nazwa_kategoria(self, frame):
@@ -518,51 +519,6 @@ class Controller:
         leksykon = self.leksykon_programu["button_back_pack"]    
         self.view.utworz_przycisk(frame, commend, side='bottom', padx=5, pady=5, leksykon_programu=leksykon)
 
-    def dodaj_modyfikuj_zamowienie(self, commend = "stworz"):
-        if commend == "stworz":
-            self.button_manager("dodaj_zamowienie")
-            self.view.dodaj_modyfikuj_zamowienie_view()
-            select_kupujacy = None
-            select_sklep = None
-
-        elif commend == "modyfikuj":
-            selected_item = self.zamowienia_tree.selection()
-            if not selected_item:
-                # self.error_sound_demon()
-                leksykon = self.leksykon_programu["error_messagebox"]
-                View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["order"])
-                return
-
-            self.zamowienie_id = self.zamowienia_tree.item(selected_item[0], 'values')[0]
-            info = self.wczytaj_informacje_zamowienie(self.zamowienie_id)
-            
-            self.button_manager("modyfikuj_zamowienie")
-            self.view.dodaj_modyfikuj_zamowienie_view(info[1], info[2])
-
-            self.view.date_entry.set_date(info[0])
-            select_kupujacy = info[3]
-            select_sklep = info[4]
-
-        self.zamowienia_frame.grid_remove()
-
-        self.kupujacy_tree = self.view.name_tree(self.view.main_frame, "Kupujacy", True)
-        self.sklepy_tree = self.view.name_tree(self.view.secend_frame, "Sklepy", True)
-
-        self.load_kupujacy_daemon(widok="ukryj", select_item = select_kupujacy)
-        self.load_sklepy_daemon(widok="pokaz", select_item = select_sklep)
-    
-    def wczytaj_informacje_zamowienie(self, zamowienie_id):
-        zamowienie = self.db_session.query(Zamowienie).filter_by(id=zamowienie_id).first()
-
-        zamowienie_data_modyfikacja = zamowienie.data #0
-        zamowienie_rabat_j = zamowienie.rabat_j #1
-        zamowienie_rabat_procentowy = zamowienie.rabat_procent #2
-        zamowienie_kupujacy_id = zamowienie.kupujacy_id #3
-        zamowienie_sklep_id = zamowienie.sklep_id #4
-
-        return (zamowienie_data_modyfikacja, zamowienie_rabat_j, zamowienie_rabat_procentowy, zamowienie_kupujacy_id, zamowienie_sklep_id)
-
-
     def zaznacz_wiersz_z_wartoscia(self, treeview, kolumna, wartosc):
         for item in treeview.get_children():
             if treeview.set(item, kolumna) == str(wartosc):
@@ -617,23 +573,6 @@ class Controller:
         self.button_manager(frame="kategorie")
         self.kategorie_tree = self.view.name_tree(self.main_frame, "Kategorie", True)
         self.load_kategorie_daemon()
-
-    def list_artykulow2(self, backTarget = 'main'):
-        self.zamowienia_frame.grid_remove()
-        # self.secend_frame = ttk.Frame(self.master, padding=5)
-        
-        self.view.artykuly_lista_grid_setting()
-
-        self.button_manager("lista_artykuly", back_target=backTarget)
-
-        self.kategorie_tree = self.view.name_tree(self.main_frame, "Kategorie Lista", True)
-        self.artykuly_tree = self.stworz_artykuly_tree(self.secend_frame, "Artykuły Lista")
-        
-        self.load_kategorie_daemon(widok = "pokaz")
-        self.load_artykuly()
-        
-        self.kategorie_tree.bind("<Double-1>", self.on_double_click_filtrowanie_kategoria)
-        self.kategorie_tree.bind("<Double-3>", self.on_double_click_filtrowanie_kategoria_resetowanie)
 
     def stworz_sklep(self, value=None):
         leksykon = self.leksykon_programu["add_messagebox"]
@@ -938,16 +877,17 @@ class Controller:
             self.db_session.commit()
             self.powrot_do_lista_artykulow()
 
-    def stworz_modyfikuj_artykul(self, commend = "stworz"):
+    def dodaj_modyfikuj_artykul(self, commend = "stworz"):
         self.zamowienia_frame.grid_remove()
 
         if commend == "stworz":
             self.usun_all_widgets()
 
-            self.nazwa_artykulu_string = None
-            self.kolor_artykulu_string = None
-            self.szczegoly_artykulu_string = None
             self.button_manager("tworzenie_artykuly", back_target = 'lista_artykułów' )
+            self.view.dodaj_modyfikuj_artykul_view()
+            nazwa_artykulu_string = None
+            kolor_artykulu_string = None
+            szczegoly_artykulu_string = None
 
         elif commend == "modyfikuj":
             selected_item = self.artykuly_tree.selection()
@@ -956,126 +896,81 @@ class Controller:
                 leksykon = self.leksykon_programu["error_messagebox"]
                 View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["select_art"])
                 return
-        
+                    
             self.artykul_modyfikacja_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
-            self.wczytaj_informacje_artykul(self.artykul_modyfikacja_id)
+            info = self.wczytaj_informacje_artykul(self.artykul_modyfikacja_id)
+
             self.usun_all_widgets()
+
             self.button_manager("modyfikacja_artykuly", back_target = 'lista_artykułów' )
+            self.view.dodaj_modyfikuj_artykul_view()
 
-        self.secend_frame = ttk.Frame(self.master, padding=5)
-        self.third_frame = ttk.Frame(self.master, padding=5)
 
-        self.main_frame.grid(row=0, column=1, columnspan=5, rowspan=2, sticky="nsew", padx=5, pady=5)
-        self.secend_frame.grid(row=2, column=1, columnspan=5, rowspan=2, sticky="nsew", padx=5, pady=5)
-        self.third_frame.grid(row=0, column=6, columnspan=1, rowspan=4, sticky="nsew", padx=5, pady=5)
-        
-        self.firma_tree = self.stworz_name_tree(self.main_frame, "Lista Firm", True)
-        self.kategorie_tree = self.stworz_name_tree(self.secend_frame, "Kategorie Lista", True)
+        self.firma_tree = self.view.name_tree(self.view.main_frame, "Lista Firm", True)
+        self.kategorie_tree = self.view.name_tree(self.view.secend_frame, "Kategorie Lista", True)
 
-        nazwa_label = ttk.Label(self.third_frame, text = 'Nazwa artykułu:', font=('calibre', 10, 'bold'), anchor='center')
-        kolor_label = ttk.Label(self.third_frame, text = 'Ewentualny kolor:', font=('calibre', 10, 'bold'), anchor='center')
-        szczegoly_label = ttk.Label(self.third_frame, text = 'Ewentualne szczegoły:', font=('calibre', 10, 'bold'), anchor='w')
-        
-        self.nazwa_artykulu_string = tk.StringVar(value=self.nazwa_artykulu_string)
-        self.kolor_artykulu_string = tk.StringVar(value=self.kolor_artykulu_string)
-        self.szczegoly_artykulu_string = tk.StringVar(value=self.szczegoly_artykulu_string)
-
-        nazwa_entry = ttk.Entry(self.third_frame, textvariable = self.nazwa_artykulu_string, font=('calibre',10,'normal'), width=30)
-        kolor_entry = ttk.Entry(self.third_frame, textvariable = self.kolor_artykulu_string, font=('calibre',10,'normal'), width=30)
-        szczegoly_entry = ttk.Entry(self.third_frame, textvariable = self.szczegoly_artykulu_string, font=('calibre',10,'normal'), width=30)
-
-        self.third_frame.grid_rowconfigure(0, weight=80)
-        self.third_frame.grid_rowconfigure(1, weight=1)
-        self.third_frame.grid_rowconfigure(2, weight=1)
-        self.third_frame.grid_rowconfigure(3, weight=1)
-        self.third_frame.grid_rowconfigure(4, weight=80)
-
-        self.third_frame.grid_columnconfigure(0, weight=1)
-        self.third_frame.grid_columnconfigure(1, weight=10)
-        
-        nazwa_label.grid(row=1,column=0)
-        kolor_label.grid(row=2,column=0)
-        szczegoly_label.grid(row=3,column=0)
-
-        nazwa_entry.grid(row=1,column=1)
-        kolor_entry.grid(row=2,column=1)
-        szczegoly_entry.grid(row=3,column=1)
-
-        self.load_kategorie()
-        self.load_firmy()
 
         if commend == "modyfikuj":
-            self.zaznacz_wiersz_z_wartoscia(self.firma_tree, 'id', self.firma_id_artykulu)
-            self.zaznacz_wiersz_z_wartoscia(self.kategorie_tree, 'id', self.kategoria_id_artykulu)
+            firma_id_artykulu = info[4]
+            kategoria_id_artykulu = info[3]
 
-    def zatwierdz_nowy_modyfikuj_artykul(self, commend = "stworz"):
-        selected_item = self.firma_tree.selection()
-        if not selected_item:
-            # self.error_sound_demon()
-            leksykon = self.leksykon_programu["error_messagebox"]
-            View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["company"])
-            return
-        
-        selected_item = self.kategorie_tree.selection()
-        if not selected_item:
-            # self.error_sound_demon()
-            leksykon = self.leksykon_programu["error_messagebox"]
-            View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["category"])
-            return
+        self.load_kategorie_daemon(widok = "ukryj", select_item = kategoria_id_artykulu)
+        self.load_firmy_deaemon(select_item = firma_id_artykulu)
 
-        nazwa = self.nazwa_artykulu_string.get()
-        if not nazwa:
-            # self.error_sound_demon()
-            leksykon = self.leksykon_programu["error_messagebox"]
-            View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
-            return
-       
-        firma_id = int(self.firma_tree.item(self.firma_tree.selection()[0], 'values')[0])
-        kategoria_id = int(self.kategorie_tree.item(self.kategorie_tree.selection()[0], 'values')[0])
-        if commend == "stworz":      
-            artykul = Artykul_Lista(kategoria_id=kategoria_id, firma_id=firma_id, nazwa=nazwa, kolor = self.kolor_artykulu_string.get(), szczegoly=self.szczegoly_artykulu_string.get())
-            self.db_session.add(artykul)
+    def wczytaj_informacje_artykul(self, artykul_id):
+        artykul = self.db_session.query(Artykul_Lista).filter_by(id=artykul_id).first()
+
+        nazwa_artykulu_string = artykul.nazwa #0
+        kolor_artykulu_string = artykul.kolor #1
+        szczegoly_artykulu_string = artykul.szczegoly #2
+        kategoria_id_artykulu = artykul.kategoria_id #3
+        firma_id_artykulu = artykul.firma_id #4
+
+        return (nazwa_artykulu_string, kolor_artykulu_string, szczegoly_artykulu_string, kategoria_id_artykulu, firma_id_artykulu)
+
+    def wczytaj_informacje_zamowienie(self, zamowienie_id):
+        zamowienie = self.db_session.query(Zamowienie).filter_by(id=zamowienie_id).first()
+
+        zamowienie_data_modyfikacja = zamowienie.data #0
+        zamowienie_rabat_j = zamowienie.rabat_j #1
+        zamowienie_rabat_procentowy = zamowienie.rabat_procent #2
+        zamowienie_kupujacy_id = zamowienie.kupujacy_id #3
+        zamowienie_sklep_id = zamowienie.sklep_id #4
+
+        return (zamowienie_data_modyfikacja, zamowienie_rabat_j, zamowienie_rabat_procentowy, zamowienie_kupujacy_id, zamowienie_sklep_id)
+
+    def dodaj_modyfikuj_zamowienie(self, commend = "stworz"):
+        if commend == "stworz":
+            self.button_manager("dodaj_zamowienie")
+            self.view.dodaj_modyfikuj_zamowienie_view()
+            select_kupujacy = None
+            select_sklep = None
+
         elif commend == "modyfikuj":
-            artykul = self.db_session.query(Artykul_Lista).filter_by(id=self.artykul_modyfikacja_id).first()
-        
-            if artykul:
-                artykul.nazwa = nazwa 
-                artykul.kolor = self.kolor_artykulu_string.get()
-                artykul.szczegoly = self.szczegoly_artykulu_string.get()
-                artykul.kategoria_id = kategoria_id 
-                artykul.firma_id = firma_id
+            selected_item = self.zamowienia_tree.selection()
+            if not selected_item:
+                # self.error_sound_demon()
+                leksykon = self.leksykon_programu["error_messagebox"]
+                View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["order"])
+                return
 
-        self.db_session.commit()
-        self.powrot_do_lista_artykulow()
+            self.zamowienie_id = self.zamowienia_tree.item(selected_item[0], 'values')[0]
+            info = self.wczytaj_informacje_zamowienie(self.zamowienie_id)
+            
+            self.button_manager("modyfikuj_zamowienie")
+            self.view.dodaj_modyfikuj_zamowienie_view(info[1], info[2])
 
-    def dodaj_list_artykulow(self):
-        self.list_artykulow(backTarget='zamówienie')
+            self.view.date_entry.set_date(info[0])
+            select_kupujacy = info[3]
+            select_sklep = info[4]
 
-        self.artykuly_tree.bind("<Double-1>", self.on_double_click_dodawanie_artykulu_do_zamowienia)
-    
-    def cena_ilosc_dodanie(self):
-        try:
-            cena_artykulu_var = float(self.cena_artykulu_var.get())
-        except ValueError:
-            # self.error_sound_demon()
-            leksykon = self.leksykon_programu["error_messagebox"]
-            View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["price"])
-            return
+        self.zamowienia_frame.grid_remove()
 
-        try:
-            ilosc_artykulu_var =  float(self.ilosc_artykulu_var.get())
-        except ValueError:
-            # self.error_sound_demon()
-            leksykon = self.leksykon_programu["error_messagebox"]
-            View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["amount"])
-            return
+        self.kupujacy_tree = self.view.name_tree(self.view.main_frame, "Kupujacy", True)
+        self.sklepy_tree = self.view.name_tree(self.view.secend_frame, "Sklepy", True)
 
-        zamowienie_id = self.zamowienie_dodawanie_artykulu_id
-        self.dodaj_artykul_do_zamowienie(zamowienie_id, self.cena_ilosc_select_item, cena_artykulu_var, ilosc_artykulu_var)
-        
-        self.load_zamowienia_daemon()
-        self.load_inside_zamowienie(zamowienie_id)
-        self.window.destroy()
+        self.load_kupujacy_daemon(widok="ukryj", select_item = select_kupujacy)
+        self.load_sklepy_daemon(widok="pokaz", select_item = select_sklep)
 
     def zatwierdz_nowy_modyfikuj_zamowienie(self, commend = "stworz"):
         selected_item = self.kupujacy_tree.selection()
@@ -1135,6 +1030,75 @@ class Controller:
 
         self.db_session.commit()
         self.powrot_do_glownego_okna()
+
+    def zatwierdz_nowy_modyfikuj_artykul(self, commend = "stworz"):
+        selected_item = self.firma_tree.selection()
+        if not selected_item:
+            # self.error_sound_demon()
+            leksykon = self.leksykon_programu["error_messagebox"]
+            View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["company"])
+            return
+        
+        selected_item = self.kategorie_tree.selection()
+        if not selected_item:
+            # self.error_sound_demon()
+            leksykon = self.leksykon_programu["error_messagebox"]
+            View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["category"])
+            return
+
+        nazwa = self.view.nazwa_artykulu_string.get()
+        if not nazwa:
+            # self.error_sound_demon()
+            leksykon = self.leksykon_programu["error_messagebox"]
+            View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            return
+       
+        firma_id = int(self.firma_tree.item(self.firma_tree.selection()[0], 'values')[0])
+        kategoria_id = int(self.kategorie_tree.item(self.kategorie_tree.selection()[0], 'values')[0])
+        if commend == "stworz":      
+            artykul = Artykul_Lista(kategoria_id=kategoria_id, firma_id=firma_id, nazwa=nazwa, kolor = self.view.kolor_artykulu_string.get(), szczegoly=self.view.szczegoly_artykulu_string.get())
+            self.db_session.add(artykul)
+        elif commend == "modyfikuj":
+            artykul = self.db_session.query(Artykul_Lista).filter_by(id=self.artykul_modyfikacja_id).first()
+        
+            if artykul:
+                artykul.nazwa = nazwa 
+                artykul.kolor = self.kolor_artykulu_string.get()
+                artykul.szczegoly = self.szczegoly_artykulu_string.get()
+                artykul.kategoria_id = kategoria_id 
+                artykul.firma_id = firma_id
+
+        self.db_session.commit()
+        self.powrot_do_lista_artykulow()
+
+    def dodaj_list_artykulow(self):
+        self.list_artykuly(backTarget='zamówienie')
+
+        self.artykuly_tree.bind("<Double-1>", self.on_double_click_dodawanie_artykulu_do_zamowienia)
+    
+    def cena_ilosc_dodanie(self):
+        try:
+            cena_artykulu_var = float(self.cena_artykulu_var.get())
+        except ValueError:
+            # self.error_sound_demon()
+            leksykon = self.leksykon_programu["error_messagebox"]
+            View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["price"])
+            return
+
+        try:
+            ilosc_artykulu_var =  float(self.ilosc_artykulu_var.get())
+        except ValueError:
+            # self.error_sound_demon()
+            leksykon = self.leksykon_programu["error_messagebox"]
+            View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["amount"])
+            return
+
+        zamowienie_id = self.zamowienie_dodawanie_artykulu_id
+        self.dodaj_artykul_do_zamowienie(zamowienie_id, self.cena_ilosc_select_item, cena_artykulu_var, ilosc_artykulu_var)
+        
+        self.load_zamowienia_daemon()
+        self.load_inside_zamowienie(zamowienie_id)
+        self.window.destroy()
     
     def specjalne_znaki(self, text: str) -> bool:
         if text == None:
@@ -1156,6 +1120,10 @@ class Controller:
     def powrot_do_glownego_okna(self):
         self.pokaz_main_frame()
         self.load_zamowienia_daemon()
+
+    def powrot_do_lista_artykulow(self):
+        self.usun_all_widgets()
+        self.list_artykuly()
 
     def usun_all_widgets(self):
         try:

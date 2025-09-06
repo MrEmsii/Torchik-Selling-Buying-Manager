@@ -301,22 +301,60 @@ class View:
         self.zamowienie_data = tk.StringVar()
         self.zamowienie_view()
 
+    def dodaj_modyfikuj_artykul_view(self, nazwa_artykulu_string = None, kolor_artykulu_string = None, szczegoly_artykulu_string = None):
+        self.nazwa_artykulu_string = tk.StringVar(value=nazwa_artykulu_string)
+        self.kolor_artykulu_string = tk.StringVar(value=kolor_artykulu_string)
+        self.szczegoly_artykulu_string = tk.StringVar(value=szczegoly_artykulu_string)
+        self.artykul_view()
+
     def artykuly_lista_view(self):
         self.secend_frame = ttk.Frame(self.master, padding=5)
         
+    def artykul_view(self):
+        self.secend_frame = ttk.Frame(self.master, padding=5)
+        self.third_frame = ttk.Frame(self.master, padding=5)
+
+        nazwa_label = ttk.Label(self.third_frame, text = 'Nazwa artykułu:', font=('calibre', 10, 'bold'), anchor='center')
+        kolor_label = ttk.Label(self.third_frame, text = 'Ewentualny kolor:', font=('calibre', 10, 'bold'), anchor='center')
+        szczegoly_label = ttk.Label(self.third_frame, text = 'Ewentualne szczegoły:', font=('calibre', 10, 'bold'), anchor='w')
+
+        nazwa_entry = ttk.Entry(self.third_frame, textvariable = self.nazwa_artykulu_string, font=('calibre',10,'normal'), width=30)
+        kolor_entry = ttk.Entry(self.third_frame, textvariable = self.kolor_artykulu_string, font=('calibre',10,'normal'), width=30)
+        szczegoly_entry = ttk.Entry(self.third_frame, textvariable = self.szczegoly_artykulu_string, font=('calibre',10,'normal'), width=30)
+
+        self.third_frame.grid_rowconfigure(0, weight=80)
+        self.third_frame.grid_rowconfigure(1, weight=1)
+        self.third_frame.grid_rowconfigure(2, weight=1)
+        self.third_frame.grid_rowconfigure(3, weight=1)
+        self.third_frame.grid_rowconfigure(4, weight=80)
+
+        self.third_frame.grid_columnconfigure(0, weight=1)
+        self.third_frame.grid_columnconfigure(1, weight=10)
+        
+        nazwa_label.grid(row=1,column=0)
+        kolor_label.grid(row=2,column=0)
+        szczegoly_label.grid(row=3,column=0)
+
+        nazwa_entry.grid(row=1,column=1)
+        kolor_entry.grid(row=2,column=1)
+        szczegoly_entry.grid(row=3,column=1)
+
+        self.main_frame.grid(row=0, column=1, columnspan=5, rowspan=2, sticky="nsew", padx=5, pady=5)
+        self.secend_frame.grid(row=2, column=1, columnspan=5, rowspan=2, sticky="nsew", padx=5, pady=5)
+        self.third_frame.grid(row=0, column=6, columnspan=1, rowspan=4, sticky="nsew", padx=5, pady=5)
+        
+
     def zamowienie_view(self):
         self.secend_frame = ttk.Frame(self.master, padding=5)
         self.third_frame = ttk.Frame(self.master, padding=5)
 
-        self.date_label = ttk.Label(self.third_frame, text = 'Data:', font=('calibre', 10, 'bold'), anchor='w')
+        date_label = ttk.Label(self.third_frame, text = 'Data:', font=('calibre', 10, 'bold'), anchor='w')
        
-        self.rabat_j_label = ttk.Label(self.third_frame, text = 'Rabat jednostkowy:', font=('calibre', 10, 'bold'), anchor='w')
-        self.rabat_p_label = ttk.Label(self.third_frame, text = 'Rabat procentowy:', font=('calibre',10, 'bold'), anchor='w')
+        rabat_j_label = ttk.Label(self.third_frame, text = 'Rabat jednostkowy:', font=('calibre', 10, 'bold'), anchor='w')
+        rabat_p_label = ttk.Label(self.third_frame, text = 'Rabat procentowy:', font=('calibre',10, 'bold'), anchor='w')
 
-        self.rabat_j_entry = ttk.Entry(self.third_frame, textvariable = self.rabat_j_var, font=('calibre',10,'normal'), width=10)
-        self.rabat_p_entry = ttk.Entry(self.third_frame, textvariable = self.rabat_p_var, font=('calibre',10,'normal'), width=10)
-
-        self.zamowienie_data = tk.StringVar()
+        rabat_j_entry = ttk.Entry(self.third_frame, textvariable = self.rabat_j_var, font=('calibre',10,'normal'), width=10)
+        rabat_p_entry = ttk.Entry(self.third_frame, textvariable = self.rabat_p_var, font=('calibre',10,'normal'), width=10)
 
         self.date_entry = DateEntry(self.third_frame, localestr='pl_PL', date_pattern="yyyy-mm-dd", textvariable=self.zamowienie_data, width=10, set_date=datetime.date(2023,4,2))
 
@@ -329,13 +367,13 @@ class View:
         self.third_frame.grid_columnconfigure(0, weight=1)
         self.third_frame.grid_columnconfigure(1, weight=10)
 
-        self.date_label.grid(row=1,column=0)
-        self.rabat_j_label.grid(row=2,column=0)
-        self.rabat_p_label.grid(row=3,column=0)
+        date_label.grid(row=1,column=0)
+        rabat_j_label.grid(row=2,column=0)
+        rabat_p_label.grid(row=3,column=0)
 
         self.date_entry.grid(row=1,column=1)
-        self.rabat_j_entry.grid(row=2,column=1)
-        self.rabat_p_entry.grid(row=3,column=1)
+        rabat_j_entry.grid(row=2,column=1)
+        rabat_p_entry.grid(row=3,column=1)
 
         self.main_frame.grid(row=0, column=1, columnspan=5, rowspan=1, sticky="nsew", padx=5, pady=5)
         self.secend_frame.grid(row=1, column=1, columnspan=5, rowspan=3, sticky="nsew", padx=5, pady=5)

@@ -10,7 +10,6 @@ import os
 class View:
     def __init__(self, master, dsc=None):
         self.master = master
-        self.master.title("Torchik Selling-Buying Manager")
         self.master.geometry("1280x720+0+0")
         self.master.resizable(True, True)
 
@@ -75,7 +74,7 @@ class View:
     def start_grid_setting(self):
         self.main_frame.grid(row=0, column=1, columnspan=5, rowspan=5, sticky="nsew", padx=5, pady=5)
 
-    def inside_tree(self, parent_frame, label_text):
+    def inside_tree(self, parent_frame, label_text, columns_names):
         label = ttk.Label(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)
 
@@ -86,7 +85,7 @@ class View:
 
         tree = ttk.Treeview(
             container, 
-            columns=("id_artykul", 'Cena', 'Ilosc', "Kategoria", 'Marka', 'Artykul', 'Kolor', 'Szczegoly'), 
+            columns=columns_names, 
             show='headings',
             yscrollcommand=scrollbar.set
             )
@@ -97,34 +96,34 @@ class View:
         tree.pack( expand=True, fill='both')
 
         tree.column('id_artykul', width=50, anchor='e')
-        tree.heading('id_artykul', text='ID', anchor='center')
+        tree.heading('id_artykul', text='ID:', anchor='e')
 
-        tree.column('Cena', width=100, anchor='e')
-        tree.heading('Cena', text='Cena', anchor='center')
+        tree.column(columns_names[1], width=100, anchor='e')
+        tree.heading(columns_names[1], text=columns_names[1], anchor='e')
 
-        tree.column('Ilosc', width=100, anchor='e')
-        tree.heading('Ilosc', text='Ilosc', anchor='center')
+        tree.column(columns_names[2], width=100, anchor='e')
+        tree.heading(columns_names[2], text=columns_names[2], anchor='e')
 
-        tree.column('Kategoria', width=100, anchor='e')
-        tree.heading('Kategoria', text='Kategoria', anchor='center')
+        tree.column(columns_names[3], width=100, anchor='e')
+        tree.heading(columns_names[3], text=columns_names[3], anchor='e')
 
-        tree.column('Marka', width=100, anchor='e')
-        tree.heading('Marka', text='Marka', anchor='center')
+        tree.column(columns_names[4], width=100, anchor='e')
+        tree.heading(columns_names[4], text=columns_names[4], anchor='e')
 
-        tree.column('Artykul', width=100, anchor='e')
-        tree.heading('Artykul', text='Artykul', anchor='center')     
+        tree.column(columns_names[5], width=100, anchor='e')
+        tree.heading(columns_names[5], text=columns_names[5], anchor='e')     
 
-        tree.column('Kolor', width=100, anchor='e')
-        tree.heading('Kolor', text='Kolor', anchor='center')   
+        tree.column(columns_names[6], width=100, anchor='e')
+        tree.heading(columns_names[6], text=columns_names[6], anchor='e')   
 
-        tree.column('Szczegoly', width=300, anchor='e')
-        tree.heading('Szczegoly', text='Szczegoly', anchor='center')
+        tree.column(columns_names[7], width=300, anchor='e')
+        tree.heading(columns_names[7], text=columns_names[7], anchor='e')
 
         tree.pack(expand=True, fill='both')
 
         return tree  
 
-    def artykuly_tree(self, parent_frame, label_text):
+    def artykuly_tree(self, parent_frame, label_text, columns_names):
         label = ttk.Label(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)
 
@@ -135,7 +134,7 @@ class View:
 
         tree = ttk.Treeview(
             container, 
-            columns=("id_artykułu", 'Kategoria', 'Firma', 'artykul','Kolor','szczegoly'), 
+            columns=columns_names,
             show='headings',
             yscrollcommand=scrollbar.set
             )
@@ -165,7 +164,7 @@ class View:
        
         return tree       
 
-    def name_tree(self, parent_frame, label_text, status):
+    def name_tree(self, parent_frame, label_text, status, columns_names):
         label = ttk.Label(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)
 
@@ -176,7 +175,7 @@ class View:
 
         tree = ttk.Treeview(
             container, 
-            columns=('id', 'name'), 
+            columns=columns_names, 
             show='headings', 
             yscrollcommand=scrollbar.set
             )
@@ -195,7 +194,7 @@ class View:
 
         return tree  
 
-    def zamowienie_tree(self, parent_frame, label_text):
+    def zamowienie_tree(self, parent_frame, label_text, columns_names):
         label = ttk.Label(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)
 
@@ -206,7 +205,7 @@ class View:
 
         tree = ttk.Treeview(
             container,
-            columns=("id_zamowiania", 'Data', 'Kupujacy', 'Sklep', 'Rabat jednostkowy', 'Rabat procentowy', 'Cena', "Cena_po_rabacie"),
+            columns=columns_names,
             show='headings',
             yscrollcommand=scrollbar.set,
         )
@@ -343,7 +342,6 @@ class View:
         self.secend_frame.grid(row=2, column=1, columnspan=5, rowspan=2, sticky="nsew", padx=5, pady=5)
         self.third_frame.grid(row=0, column=6, columnspan=1, rowspan=4, sticky="nsew", padx=5, pady=5)
         
-
     def zamowienie_view(self):
         self.secend_frame = ttk.Frame(self.master, padding=5)
         self.third_frame = ttk.Frame(self.master, padding=5)
@@ -379,6 +377,58 @@ class View:
         self.secend_frame.grid(row=1, column=1, columnspan=5, rowspan=3, sticky="nsew", padx=5, pady=5)
         self.third_frame.grid(row=0, column=6, columnspan=1, rowspan=4, sticky="nsew", padx=5, pady=5)
         
+    def cena_ilosc_view(self, cena_artykulu_var = 0, ilosc_artykulu_var = 1):
+        self.cena_artykulu_var_old = cena_artykulu_var
+        self.ilosc_artykulu_var_old = ilosc_artykulu_var
+
+        self.button_cena_ilosc_frame = ttk.Frame(self.window, padding=5)
+        self.filament_frame = ttk.Frame(self.window, padding=5)
+
+        self.button_cena_ilosc_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+        self.filament_frame.grid(row=0, column=1, columnspan=2, sticky="nsew", padx=5, pady=5)
+
+        cena_label = ttk.Label(self.filament_frame, text = 'Cena:', font=('calibre', 10, 'bold'), anchor='center')
+        waluta_label = ttk.Label(self.filament_frame, text = 'PLN', font=('calibre', 10, 'bold'), anchor='e')
+        ilosc_label = ttk.Label(self.filament_frame, text = 'Ilość:', font=('calibre', 10, 'bold'), anchor='w')
+        
+        self.cena_artykulu_var = tk.StringVar(value=cena_artykulu_var)
+        self.ilosc_artykulu_var = tk.StringVar(value=ilosc_artykulu_var)
+
+        cena_entry = ttk.Entry(self.filament_frame, textvariable = self.cena_artykulu_var, font=('calibre',10,'normal'), width=15)
+        ilosc_entry = ttk.Entry(self.filament_frame, textvariable = self.ilosc_artykulu_var, font=('calibre',10,'normal'), width=15)
+
+        cena_label.grid(row=1, column=1)
+        ilosc_label.grid(row=2, column=1)
+
+        cena_entry.grid(row=1, column=2)
+        ilosc_entry.grid(row=2, column=2)
+
+        waluta_label.grid(row=1, column=3)
+
+        self.window.grid_rowconfigure(0, weight=4)
+        self.window.grid_rowconfigure(1, weight=4)
+
+        self.window.grid_columnconfigure(0, weight=1)
+        self.window.grid_columnconfigure(1, weight=2000)
+
+        self.filament_frame.grid_rowconfigure(0, weight=80)
+        self.filament_frame.grid_rowconfigure(1, weight=1)
+        self.filament_frame.grid_rowconfigure(2, weight=1)
+        self.filament_frame.grid_rowconfigure(3, weight=80)
+
+    def cena_ilosc_window(self, dsc, title, relacja = 1, cena = 0, id = None):
+        self.window = tk.Toplevel(self.master)
+        self.window.geometry("400x180+500+300")
+        self.window.title(title)
+
+        self.window.iconbitmap(os.path.join(dsc, "resources", "image", "icon.ico"))
+        self.background_label = tk.Label(self.window, image=self.background_image)
+        self.background_label.place(x=0, y=0, relwidth=1, relheight=1) 
+
+        self.id_artykulu = id
+
+        self.cena_ilosc_view(cena_artykulu_var=cena, ilosc_artykulu_var=relacja)
+
     def show_message_async(self):
         def pokaz_okno():
             self.msg_windows = tk.Toplevel(self.master)

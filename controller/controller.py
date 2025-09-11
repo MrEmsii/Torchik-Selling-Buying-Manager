@@ -103,7 +103,7 @@ class Controller:
 
         threading.Thread(target=task, daemon=True).start()
 
-    def load_artykuly(self, widok, kategoria_id = None):
+    def load_artykuly(self, widok = None, kategoria_id = None):
         if widok == "pokaz":
             self.view.show_message_async()
 
@@ -162,7 +162,7 @@ class Controller:
 
         threading.Thread(target=task, daemon=True).start()
 
-    def load_kategorie(self, widok, select_item):
+    def load_kategorie(self, widok = None, select_item = None):
         if widok == "pokaz":
             self.view.show_message_async()
 
@@ -268,6 +268,7 @@ class Controller:
 
         elif frame == "lista dodanych do zamowienia":
             self.button_dodaj_artykul_zamowienie(self.button_frame)
+            self.button_edytuj_artykul_zamowienie(self.button_frame)
             self.button_usun_artykul_zamowienie(self.button_frame)
 
         elif frame == "kupujacy":
@@ -315,9 +316,14 @@ class Controller:
             self.button_dodaj_firma(self.button_frame)
             self.button_dodaj_kategoria(self.button_frame) 
 
-        elif frame == "wyjdź_z_cena_ilosc":
-            self.button_zatwierdz_dodanie_artykulu(self.button_cena_ilosc_frame)
-            self.button_anuluj_dodanie_artykulu(self.button_cena_ilosc_frame)
+        elif frame == "wyjdź_z_cena_ilosc_dodawanie":
+            self.button_zatwierdz_dodanie_artykulu(self.view.button_cena_ilosc_frame)
+            self.button_anuluj_dodanie_artykulu(self.view.button_cena_ilosc_frame)
+
+        elif frame == "wyjdź_z_cena_ilosc_edycja":
+            self.button_zatwierdz_edycje_artykulu(self.view.button_cena_ilosc_frame)
+            self.button_anuluj_dodanie_artykulu(self.view.button_cena_ilosc_frame)
+
 
         if frame != 'main':
             self.button_back_pack(self.button_frame, back_target)
@@ -388,6 +394,10 @@ class Controller:
         leksykon = self.leksykon_programu["button_dodaj_artykul_zamowienie"]
         self.view.utworz_przycisk(frame, self.dodaj_list_artykulow, icon=self.view.add_artykul_zamowienie_icon, leksykon_programu=leksykon)
 
+    def button_edytuj_artykul_zamowienie(self, frame):
+        leksykon = self.leksykon_programu["button_modyfikuj_artykul_zamowienie"]
+        self.view.utworz_przycisk(frame, self.edytuj_artykul_zamowienie, icon=self.view.edit_artykul_zamowienie_icon, leksykon_programu=leksykon)
+
     def button_usun_artykul_zamowienie(self, frame):
         leksykon = self.leksykon_programu["button_usun_artykul_zamowienie"]
         self.view.utworz_przycisk(frame, self.usun_artykul_zamowienie, icon=self.view.delete_artykul_zamowienie_icon, leksykon_programu=leksykon)
@@ -396,9 +406,13 @@ class Controller:
         leksykon = self.leksykon_programu["button_zatwierdz_dodanie_artykulu"]
         self.view.utworz_przycisk(frame, self.cena_ilosc_dodanie, icon=self.view.add_artykul_zamowienie_icon, leksykon_programu=leksykon)
 
+    def button_zatwierdz_edycje_artykulu(self, frame):
+        leksykon = self.leksykon_programu["button_modyfikuj_artykul_zamowienie"]
+        self.view.utworz_przycisk(frame, self.cena_ilosc_edycja, icon=self.view.add_artykul_zamowienie_icon, leksykon_programu=leksykon)
+
     def button_anuluj_dodanie_artykulu(self, frame):
         leksykon = self.leksykon_programu["button_anuluj_dodanie_artykulu"]
-        self.view.utworz_przycisk(frame, print("self.window.destroy"), icon=self.view.backButton_icon, leksykon_programu=leksykon)
+        self.view.utworz_przycisk(frame, self.anuluj_dodanie_artykulu_zamowienie, icon=self.view.backButton_icon, leksykon_programu=leksykon)
 
 
     # --- ZAMÓWIENIA ---
@@ -772,6 +786,7 @@ class Controller:
                 artykuly_relacja.delete()
                 .where(artykuly_relacja.c.zamowienie_id == self.zamowienie_id,
                 artykuly_relacja.c.artykul_id == relacja_name[0],
+                artykuly_relacja.c.cena_jednostkowa == relacja_name[1],
                 artykuly_relacja.c.ilosc_artykulu == relacja_name[2]
                 )
             )
@@ -779,7 +794,6 @@ class Controller:
             self.load_inside_zamowienie(self.zamowienie_id)
 
         self.load_zamowienia_daemon()
-
 
     def usun_kupujacego(self):
         selected_item = self.kupujacy_tree.selection()
@@ -883,11 +897,10 @@ class Controller:
         if commend == "stworz":
             self.usun_all_widgets()
 
-            self.button_manager("tworzenie_artykuly", back_target = 'lista_artykułów' )
+            self.button_manager("tworzenie_artykuly", back_target = 'lista_artykułów')
             self.view.dodaj_modyfikuj_artykul_view()
-            nazwa_artykulu_string = None
-            kolor_artykulu_string = None
-            szczegoly_artykulu_string = None
+            firma_id_artykulu = None
+            kategoria_id_artykulu = None
 
         elif commend == "modyfikuj":
             selected_item = self.artykuly_tree.selection()
@@ -897,13 +910,13 @@ class Controller:
                 View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["select_art"])
                 return
                     
-            self.artykul_modyfikacja_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
-            info = self.wczytaj_informacje_artykul(self.artykul_modyfikacja_id)
+            artykul_modyfikacja_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
+            info = self.wczytaj_informacje_artykul(artykul_modyfikacja_id)
 
             self.usun_all_widgets()
 
             self.button_manager("modyfikacja_artykuly", back_target = 'lista_artykułów' )
-            self.view.dodaj_modyfikuj_artykul_view()
+            self.view.dodaj_modyfikuj_artykul_view(nazwa_artykulu_string = info[0], kolor_artykulu_string = info[1], szczegoly_artykulu_string = info[2])
 
 
         self.firma_tree = self.view.name_tree(self.view.main_frame, "Lista Firm", True)
@@ -927,6 +940,10 @@ class Controller:
         firma_id_artykulu = artykul.firma_id #4
 
         return (nazwa_artykulu_string, kolor_artykulu_string, szczegoly_artykulu_string, kategoria_id_artykulu, firma_id_artykulu)
+
+
+    def wczytaj_informacje_artykul_inside(self, arty):
+        return
 
     def wczytaj_informacje_zamowienie(self, zamowienie_id):
         zamowienie = self.db_session.query(Zamowienie).filter_by(id=zamowienie_id).first()
@@ -1058,27 +1075,92 @@ class Controller:
         if commend == "stworz":      
             artykul = Artykul_Lista(kategoria_id=kategoria_id, firma_id=firma_id, nazwa=nazwa, kolor = self.view.kolor_artykulu_string.get(), szczegoly=self.view.szczegoly_artykulu_string.get())
             self.db_session.add(artykul)
+
         elif commend == "modyfikuj":
             artykul = self.db_session.query(Artykul_Lista).filter_by(id=self.artykul_modyfikacja_id).first()
         
             if artykul:
                 artykul.nazwa = nazwa 
-                artykul.kolor = self.kolor_artykulu_string.get()
-                artykul.szczegoly = self.szczegoly_artykulu_string.get()
+                artykul.kolor = self.view.kolor_artykulu_string.get()
+                artykul.szczegoly = self.view.szczegoly_artykulu_string.get()
                 artykul.kategoria_id = kategoria_id 
                 artykul.firma_id = firma_id
 
         self.db_session.commit()
         self.powrot_do_lista_artykulow()
 
+    def load_inside_zamowienie(self, id_zamowienia):
+        self.zamowienia_frame.grid_remove()
+        self.usun_all_widgets()
+        self.button_manager("lista dodanych do zamowienia")
+        self.inside_tree = self.view.inside_tree(self.main_frame, 'Lista artykułów dodatych do zamówienia', columns_name=self.leksykon_programu["inside_tree_column"]["columns_name"]) 
+        self.inside_tree.delete(*self.inside_tree.get_children())
+
+        wynik_all = self.db_session.execute(
+            select(
+                artykuly_relacja.c.artykul_id,
+                artykuly_relacja.c.cena_jednostkowa,
+                artykuly_relacja.c.ilosc_artykulu
+            )
+            .where(
+                artykuly_relacja.c.zamowienie_id == id_zamowienia
+                )
+        ).fetchall()
+
+        existing_iids = set(self.inside_tree.get_children())
+
+        artykul_data = []
+
+        for wynik in wynik_all:
+            id_art = wynik.artykul_id
+            cena = f"{wynik.cena_jednostkowa if wynik.cena_jednostkowa else 0:.2f} PLN"
+            ilosc = wynik.ilosc_artykulu if wynik.ilosc_artykulu else 1
+
+            artykul = self.db_session.query(Artykul_Lista).filter_by(id=id_art).first()
+            kategoria = artykul.kategoria.nazwa if artykul.kategoria else None
+            firma = artykul.firma.nazwa if artykul.firma else None
+            nazwa = artykul.nazwa
+            kolor = artykul.kolor
+            szczegoly = artykul.szczegoly
+
+            unique_id = f"{id_art}-{ilosc}"
+            counter = 1
+            while unique_id in existing_iids:
+                unique_id = f"{id_art}-{ilosc}-{counter}"
+                counter += 1
+
+            existing_iids.add(unique_id)
+            artykul_data.append((unique_id, id_art, cena, ilosc, kategoria, firma, nazwa, kolor, szczegoly))
+
+        artykul_data.sort(key=lambda x: x[6].lower())
+
+        for row in artykul_data:
+            self.inside_tree.insert('', 'end', iid=row[0], values=row[1:])
+
+    def edytuj_artykul_zamowienie(self):
+        selected_item = self.inside_tree.selection()
+        if not selected_item:
+            return 
+        
+        relacja_name = self.inside_tree.item(self.inside_tree.selection()[0], 'values')
+        cena = float(relacja_name[1].replace(" PLN", ""))
+        print(relacja_name, cena)
+
+        leksykon = self.leksykon_programu["edit_messagebox"]
+        self.view.cena_ilosc_window(dsc = self.dsc, title=leksykon["heading"], id = relacja_name[0], relacja=relacja_name[2], cena = cena)
+        self.button_manager("wyjdź_z_cena_ilosc_edycja", back_target = 'lista_artykułów')
+        
+        zamowienie_id = self.zamowienie_id
+        self.load_inside_zamowienie(zamowienie_id)
+
     def dodaj_list_artykulow(self):
         self.list_artykuly(backTarget='zamówienie')
 
         self.artykuly_tree.bind("<Double-1>", self.on_double_click_dodawanie_artykulu_do_zamowienia)
     
-    def cena_ilosc_dodanie(self):
+    def cena_ilosc_edycja(self):
         try:
-            cena_artykulu_var = float(self.cena_artykulu_var.get())
+            cena_artykulu_var = float(self.view.cena_artykulu_var.get())
         except ValueError:
             # self.error_sound_demon()
             leksykon = self.leksykon_programu["error_messagebox"]
@@ -1086,7 +1168,56 @@ class Controller:
             return
 
         try:
-            ilosc_artykulu_var =  float(self.ilosc_artykulu_var.get())
+            ilosc_artykulu_var =  float(self.view.ilosc_artykulu_var.get())
+        except ValueError:
+            # self.error_sound_demon()
+            leksykon = self.leksykon_programu["error_messagebox"]
+            View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["amount"])
+            return
+
+        text = ["start", (self.zamowienie_id, self.view.id_artykulu, cena_artykulu_var, ilosc_artykulu_var), "end", (self.view.cena_artykulu_var_old, self.view.ilosc_artykulu_var_old)]
+        for i in text:
+            print(i)
+        
+        self.db_session.execute(
+            artykuly_relacja.update()
+            .where(
+                artykuly_relacja.c.zamowienie_id == self.zamowienie_id,
+                artykuly_relacja.c.artykul_id == self.view.id_artykulu,
+                artykuly_relacja.c.cena_jednostkowa == self.view.cena_artykulu_var_old,
+                artykuly_relacja.c.ilosc_artykulu == self.view.ilosc_artykulu_var_old
+                )
+            .values(
+                cena_jednostkowa = cena_artykulu_var, 
+                ilosc_artykulu = ilosc_artykulu_var
+                )
+        )
+
+        self.db_session.commit()
+
+        zamowienie_id = self.zamowienie_id
+        self.load_inside_zamowienie(zamowienie_id)
+        self.view.window.destroy()
+
+        return
+
+    def anuluj_dodanie_artykulu_zamowienie(self):
+        self.view.window.destroy()
+        zamowienie_id = self.zamowienie_id
+
+        self.load_inside_zamowienie(zamowienie_id)
+
+    def cena_ilosc_dodanie(self):
+        try:
+            cena_artykulu_var = float(self.view.cena_artykulu_var.get())
+        except ValueError:
+            # self.error_sound_demon()
+            leksykon = self.leksykon_programu["error_messagebox"]
+            View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["price"])
+            return
+
+        try:
+            ilosc_artykulu_var =  float(self.view.ilosc_artykulu_var.get())
         except ValueError:
             # self.error_sound_demon()
             leksykon = self.leksykon_programu["error_messagebox"]
@@ -1098,8 +1229,19 @@ class Controller:
         
         self.load_zamowienia_daemon()
         self.load_inside_zamowienie(zamowienie_id)
-        self.window.destroy()
+        self.view.window.destroy()
     
+    def dodaj_artykul_do_zamowienie(self, zamowienie, id_art, cena, ilosc):
+        self.db_session.execute(
+            artykuly_relacja.insert().values(
+                zamowienie_id = zamowienie,
+                artykul_id = id_art,
+                cena_jednostkowa = cena,
+                ilosc_artykulu = ilosc
+            )
+        )
+        self.db_session.commit()
+
     def specjalne_znaki(self, text: str) -> bool:
         if text == None:
             return
@@ -1147,6 +1289,26 @@ class Controller:
     def hide_message_async_demon(self):
         print("hide_message_async_demon")
         threading.Thread(target=self.view.ukryj_message_async, daemon=True).start()
+
+    def on_double_click_dodawanie_artykulu_do_zamowienia(self, event):
+        try:
+            self.view.window.destroy()
+        except AttributeError:
+            pass
+        
+        selected_item = self.artykuly_tree.selection()
+        self.zamowienie_dodawanie_artykulu_id = self.zamowienie_id
+        if selected_item:
+            artykul_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
+            self.cena_ilosc_select_item = artykul_id
+
+            leksykon = self.leksykon_programu["add_messagebox"]
+            self.view.cena_ilosc_window(dsc = self.dsc, title=leksykon["heading"])
+
+            self.button_manager(frame="wyjdź_z_cena_ilosc_dodawanie", back_target="wyjdź_z_cena_ilosc_dodawanie")
+            
+            zamowienie_id = self.zamowienie_dodawanie_artykulu_id
+            self.load_inside_zamowienie(zamowienie_id)
 
     def on_double_click_otwieranie_zamowienia(self, event):
         selected_item = self.zamowienia_tree.selection()

@@ -4,6 +4,21 @@
     "language_name": "Polish",
     "language_description": "Polish language for the application",
     
+    "inside_tree_columns": {
+        "columns_name": ["id_artykul", "Cena:", "Ilosc:", "Kategoria:", "Marka:", "Artykul:", "Kolor:", "Szczegoly:"]
+    },
+    "artykuly_tree": {
+        "columns_name": ["id_artykułu", "Kategoria", "Firma", "artykul","Kolor","szczegoly"]
+    },
+    "name_tree_columns":{
+        "columns_name": ["id", "name"]
+    },
+    "zamowienia_tree_columns": {
+        "columns_name": ["id_zamowiania", "Data", "Kupujacy", "Sklep", "Rabat jednostkowy", "Rabat procentowy", "Cena", "Cena_po_rabacie"]
+    },
+
+
+    
     "button_back_pack": {
         "text": "Wróć",
         "toolTip": "Wróć do poprzedniego okna (głównego, listy artykułów lub zamówienia)"
@@ -75,6 +90,10 @@
     "button_dodaj_artykul_zamowienie": {
         "text": "Dodaj\nartykuł do\nzamowienia",
         "toolTip": "Dodaj artykuł do zamówienia"
+    },
+    "button_modyfikuj_artykul_zamowienie": {
+        "text": "Modyfikuj\nartykuł",
+        "toolTip": "Modyfikuj artykuł w zamówieniu"
     },
     "button_zatwierdz_dodanie_artykulu": {
         "text": "Dodaj\nartykuł do\nzamowienia",

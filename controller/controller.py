@@ -1,5 +1,6 @@
 from model.models import SQLconnect, select, Kupujacy, Kategoria, Sklep, Firma, Zamowienie, Artykul_Lista, artykuly_relacja
 from view.view import View
+from view.view import SoundView
 
 import os
 import string
@@ -7,15 +8,12 @@ import string
 from tkinterdnd2 import DND_FILES, TkinterDnD
 import tkinter as tk
 
-from pygame import mixer
 import threading
 import json
 import datetime as datetime
 
 class Controller:
     def __init__(self):
-        mixer.init()
-
         self.dsc = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
         self.master = TkinterDnD.Tk()
         self.db_session = SQLconnect()
@@ -24,12 +22,13 @@ class Controller:
             self.json_setting(status = "create")
             print("Setting file created.")
         
-        self.konfiguracja_programu = self.json_setting(status="read")
-        self.leksykon_programu = self.json_language(self.konfiguracja_programu["language"])
+        konfiguracja_programu = self.json_setting(status="read")
+        
+        self.leksykon_programu = self.json_language(konfiguracja_programu["language"])
+        
+        self.view = View(self.master, dsc=self.dsc, leksykon=self.leksykon_programu, konfiguracja_programu=konfiguracja_programu)
 
-        self.view    = View(self.master, dsc=self.dsc, leksykon=self.leksykon_programu)
-
-        # self.play_sound_on_start_demon()
+        self.sound = SoundView(self.dsc, konfiguracja_programu)
         self.inicjalizacja_frame()
 
     def run(self):
@@ -41,8 +40,6 @@ class Controller:
                 
         if View.messagebox(self, type="close", heading=leksykon["heading"], text=leksykon["text"]):
             self.db_session.close()
-            # self.play_sound_on_close_demon()
-
             self.view.master.destroy()
 
     def ustawienia_programu(self):
@@ -356,8 +353,9 @@ class Controller:
                 "volume": 0.1, 
                 "language": "pl_PL",
                 "start_sound": "start_sound.wav",
-                "click_sound": "click_sound.wav",
-                "error_sound": "error_sound.wav"
+                "info_sound": "info_sound.wav",
+                "error_sound": "error_sound.wav",
+                "confirm_sound": "confirm_sound.wav"
             }
 
             with open(os.path.join(self.dsc, "resources", "setting.json"), 'w', encoding='utf-8') as settings:
@@ -617,6 +615,7 @@ class Controller:
         leksykon = self.leksykon_programu["add_messagebox"]
         name = View.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["buyer"]+"\t\t\t\t", value=value)
         if name == "" or self.specjalne_znaki(name) :
+            
             leksykon = self.leksykon_programu["error_messagebox"]
             View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.stworz_kupujacy(value=name)
@@ -631,6 +630,7 @@ class Controller:
         leksykon = self.leksykon_programu["add_messagebox"]
         name = View.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["category"]+"\t\t\t\t", value=value)
         if name == "" or self.specjalne_znaki(name):
+            
             leksykon = self.leksykon_programu["error_messagebox"]
             View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.stworz_kategoria(value=name)
@@ -645,6 +645,7 @@ class Controller:
         leksykon = self.leksykon_programu["add_messagebox"]
         name = View.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["company"]+"\t\t\t\t", value=value)
         if name == "" or self.specjalne_znaki(name) :
+            
             leksykon = self.leksykon_programu["error_messagebox"]
             View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.stworz_firma(value=name)
@@ -916,13 +917,12 @@ class Controller:
         elif commend == "modyfikuj":
             selected_item = self.artykuly_tree.selection()
             if not selected_item:
-                # self.error_sound_demon()
                 leksykon = self.leksykon_programu["error_messagebox"]
                 View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["select_art"])
                 return
                     
-            artykul_modyfikacja_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
-            info = self.wczytaj_informacje_artykul(artykul_modyfikacja_id)
+            self.artykul_modyfikacja_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
+            info = self.wczytaj_informacje_artykul(self.artykul_modyfikacja_id)
 
             self.usun_all_widgets()
 
@@ -977,7 +977,6 @@ class Controller:
         elif commend == "modyfikuj":
             selected_item = self.zamowienia_tree.selection()
             if not selected_item:
-                # self.error_sound_demon()
                 leksykon = self.leksykon_programu["error_messagebox"]
                 View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["order"])
                 return
@@ -1003,14 +1002,12 @@ class Controller:
     def zatwierdz_nowy_modyfikuj_zamowienie(self, commend = "stworz"):
         selected_item = self.kupujacy_tree.selection()
         if not selected_item:
-            # self.error_sound_demon()
             leksykon = self.leksykon_programu["error_messagebox"]
             View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["buyer"])
             return
         
         selected_item = self.sklepy_tree.selection()
         if not selected_item:
-            # self.error_sound_demon()
             leksykon = self.leksykon_programu["error_messagebox"]
             View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["shop"])
             return
@@ -1018,23 +1015,30 @@ class Controller:
         try:
             rabat_j = float(self.view.rabat_j_var.get().replace(',', '.'))
         except tk.TclError:
-            # self.error_sound_demon()
             leksykon = self.leksykon_programu["error_messagebox"]
             View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["unit_discount"])
             return
-
+        
+        except ValueError:
+            leksykon = self.leksykon_programu["error_messagebox"]
+            View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["unit_discount"])
+            return
+        
         try:
             rabat_procentowy = float(self.view.rabat_p_var.get().replace(',', '.'))
         except tk.TclError:
-            # self.error_sound_demon()
             leksykon = self.leksykon_programu["error_messagebox"]
             View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["proc_discount"])
             return
        
+        except ValueError:
+            leksykon = self.leksykon_programu["error_messagebox"]
+            View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["proc_discount"])
+            return
+
         try:
             data = self.konwersja_string_do_data(self.view.zamowienie_data.get())
         except ValueError:
-            # self.error_sound_demon()
             leksykon = self.leksykon_programu["error_messagebox"]
             View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["date"])
             return
@@ -1056,27 +1060,26 @@ class Controller:
                 zamowienie.kupujacy_id = kupujacy_id
                 zamowienie.sklep_id = sklep_id
 
+        self.sound.play_confirm_sound()
+
         self.db_session.commit()
         self.powrot_do_glownego_okna()
 
     def zatwierdz_nowy_modyfikuj_artykul(self, commend = "stworz"):
         selected_item = self.firma_tree.selection()
         if not selected_item:
-            # self.error_sound_demon()
             leksykon = self.leksykon_programu["error_messagebox"]
             View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["company"])
             return
         
         selected_item = self.kategorie_tree.selection()
         if not selected_item:
-            # self.error_sound_demon()
             leksykon = self.leksykon_programu["error_messagebox"]
             View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["category"])
             return
 
         nazwa = self.view.nazwa_artykulu_string.get()
         if not nazwa:
-            # self.error_sound_demon()
             leksykon = self.leksykon_programu["error_messagebox"]
             View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             return
@@ -1096,6 +1099,8 @@ class Controller:
                 artykul.szczegoly = self.view.szczegoly_artykulu_string.get()
                 artykul.kategoria_id = kategoria_id 
                 artykul.firma_id = firma_id
+
+        self.sound.play_confirm_sound()
 
         self.db_session.commit()
         self.powrot_do_lista_artykulow()
@@ -1175,7 +1180,6 @@ class Controller:
         try:
             cena_artykulu_var = float(self.view.cena_artykulu_var.get().replace(",", "."))
         except ValueError:
-            # self.error_sound_demon()
             leksykon = self.leksykon_programu["error_messagebox"]
             View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["price"])
             return
@@ -1183,7 +1187,6 @@ class Controller:
         try:
             ilosc_artykulu_var =  float(self.view.ilosc_artykulu_var.get().replace(",", "."))
         except ValueError:
-            # self.error_sound_demon()
             leksykon = self.leksykon_programu["error_messagebox"]
             View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["amount"])
             return
@@ -1224,7 +1227,6 @@ class Controller:
         try:
             cena_artykulu_var = float(self.view.cena_artykulu_var.get().replace(",", "."))
         except ValueError:
-            # self.error_sound_demon()
             leksykon = self.leksykon_programu["error_messagebox"]
             View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["price"])
             return
@@ -1232,7 +1234,6 @@ class Controller:
         try:
             ilosc_artykulu_var =  float(self.view.ilosc_artykulu_var.get().replace(",", "."))
         except ValueError:
-            # self.error_sound_demon()
             leksykon = self.leksykon_programu["error_messagebox"]
             View.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["amount"])
             return

@@ -1,14 +1,14 @@
 from tkinter import ttk, messagebox, simpledialog, PhotoImage
 import tkinter as tk
 import datetime
+from view.soundview import SoundView
 
 from TkToolTip import ToolTip
 from tkcalendar import DateEntry
 import os
 
-
 class View:
-    def __init__(self, master, dsc=None, leksykon = None):
+    def __init__(self, master, dsc=None, leksykon = None, konfiguracja_programu = None):
         self.master = master
         self.master.geometry("1280x720+0+0")
         self.master.resizable(True, True)
@@ -18,6 +18,9 @@ class View:
         self.button_icon_pack(dsc)
         self.setup_styles(dsc)
         self.setup_frames()
+
+        self.sound = SoundView(dsc, konfiguracja_programu)
+        self.sound.play_start_sound()
 
     def setup_frames(self):
         self.button_frame = ttk.Frame(self.master, padding=5)
@@ -58,12 +61,16 @@ class View:
 
     def messagebox(self, type, language_code = None, heading = None, text = None, value = None):
         if type == "error" or type == "language" and language_code:
+            self.sound.play_error_sound()
             return messagebox.showerror(heading, text)
         elif type == "info":
+            self.sound.play_info_sound()
             return messagebox.showinfo(heading, text)
         elif type == "close":
+            self.sound.play_info_sound()
             return messagebox.askokcancel(heading, text)
         elif type == "ask":
+            self.sound.play_info_sound()
             return simpledialog.askstring(heading, text, initialvalue=value)
 
     def zamowienia_grid_setting(self):

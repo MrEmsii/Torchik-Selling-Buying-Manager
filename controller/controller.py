@@ -1,6 +1,6 @@
 from model.models import SQLconnect, select, Kupujacy, Kategoria, Sklep, Firma, Zamowienie, Artykul_Lista, artykuly_relacja
-from view.view import View
-from view.view import SoundView
+from view.orderview import View
+from view.soundview import SoundView
 
 import os
 import string

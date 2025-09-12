@@ -7,7 +7,7 @@ from TkToolTip import ToolTip
 from tkcalendar import DateEntry
 import os
 
-class View:
+class ViewOrder:
     def __init__(self, master, dsc=None, leksykon = None, konfiguracja_programu = None):
         self.master = master
         self.master.geometry("1280x720+0+0")

@@ -1,3 +1,4 @@
 main.py
 *.pyc
 *.db
+test_DB_alfa.py

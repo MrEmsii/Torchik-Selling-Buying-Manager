@@ -4,21 +4,36 @@
     "language_name": "Polish",
     "language_description": "Polish language for the application",
     
-    "inside_tree_columns": {
-        "columns_name": ["id_artykul", "Cena:", "Ilosc:", "Kategoria:", "Marka:", "Artykul:", "Kolor:", "Szczegoly:"]
-    },
-    "artykuly_tree": {
-        "columns_name": ["id_artykułu", "Kategoria", "Firma", "artykul","Kolor","szczegoly"]
-    },
-    "name_tree_columns":{
-        "columns_name": ["id", "name"]
-    },
-    "zamowienia_tree_columns": {
-        "columns_name": ["id_zamowiania", "Data", "Kupujacy", "Sklep", "Rabat jednostkowy", "Rabat procentowy", "Cena", "Cena_po_rabacie"]
-    },
-
-
+    "currency": "PLN",
     
+    "labels": {
+        "date": "Data: ",
+        "proc_discount": "Rabat procentowy: ",
+        "unit_discount": "Rabat jednostkowy: ",
+        "price": "Cena: ",
+        "amount": "Ilość: ",
+        "name": "Nazwa: ",
+        "color": "Ewentualny kolor: ",
+        "details": "Ewentualne szczegóły: "
+    },
+
+    "columns":{
+        "inside_tree_columns": ["id", "Cena: ", "Ilosc: ", "Kategoria: ", "Marka: ", "Artykul: ", "Kolor: ", "Szczegoly: "],
+        "artykuly_tree_columns": ["id", "Kategoria: ", "Firma: ", "Artykuł: ","Kolor: ","Szczegóły: "],
+        "name_tree_columns": ["id", "Nazwa: "],
+        "zamowienia_tree_columns": ["id", "Data: ", "Kupujący: ", "Sklep: ", "Rabat jednostkowy: ", "Rabat procentowy: ", "Cena: ", "Cena po rabacie: "]
+    },
+
+    "names_list":{
+        "shop": "Lista sklepów",
+        "buyer": "Lista kupujących",
+        "order": "Lista zamówień",
+        "category": "Lista kategorii",
+        "company": "Lista firm",
+        "select_art": "Lista artykułów",
+        "select_art_to_order": "Lista artykułów w zamówieniu"
+    },
+
     "button_back_pack": {
         "text": "Wróć",
         "toolTip": "Wróć do poprzedniego okna (głównego, listy artykułów lub zamówienia)"
@@ -179,6 +194,10 @@
     "info_messagebox":{
         "heading": "Informacja",
         "text": "Operacja zakończona pomyślnie."
+    },
+    "info_initializing": {
+        "heading": "Inicjalizacja operacji",
+        "text": "Inicjalizacja operacji, proszę poczekaj"
     },
     "language_messagebox":{
         "heading": "Błąd",

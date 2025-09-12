@@ -1,0 +1,256 @@
+{
+  "language": "English",
+  "language_code": "en_US",
+  "language_name": "English",
+  "language_description": "English language for the application",
+  
+  "labels": {
+    "date": "Date: ",
+    "proc_discount": "Percent discount: ",
+    "unit_discount": "Unit discount: ",
+    "": ""
+  },
+  "columns": {
+    "inside_tree_columns": [
+      "id",
+      "Price: ",
+      "Amount: ",
+      "Category: ",
+      "Brand: ",
+      "Article: ",
+      "Color: ",
+      "Details: "
+    ],
+    "artykuly_tree_columns": [
+      "id",
+      "Category: ",
+      "Company: ",
+      "Article: ",
+      "Color: ",
+      "Details: "
+    ],
+    "name_tree_columns": [
+      "id",
+      "Name: "
+    ],
+    "zamowienia_tree_columns": [
+      "id",
+      "Date: ",
+      "Buyer: ",
+      "Store: ",
+      "Unit discount: ",
+      "Percent discount: ",
+      "Price: ",
+      "Price after discount: "
+    ]
+  },
+  "names_list": {
+    "shop": "Store list",
+    "buyer": "Buyer list",
+    "order": "Order list",
+    "category": "Category list",
+    "company": "Company list",
+    "select_art": "Article list"
+  },
+  "button_back_pack": {
+    "text": "Back",
+    "toolTip": "Return to the previous window (main, article list, or order)"
+  },
+  "button_ustawienia": {
+    "text": "Settings",
+    "toolTip": "Button to open program settings"
+  },
+  "button_dodaj_zamowienie": {
+    "text": "Add\nOrder",
+    "toolTip": "Add a new order"
+  },
+  "button_modyfikuj_zamowienie": {
+    "text": "Edit\nOrder",
+    "toolTip": "Edit the selected order"
+  },
+  "button_usun_zamowienie": {
+    "text": "Delete\nOrder",
+    "toolTip": "Delete the selected order"
+  },
+  "buttons_zatwierdz_zamowienia": {
+    "text": "Confirm\nOrder",
+    "toolTip": "Confirm the created order"
+  },
+  "button_zatwierdz_edycje_zamowienie": {
+    "text": "Confirm\nOrder\nEdit",
+    "toolTip": "Confirm the edited order"
+  },
+  "button_lista_artykulow": {
+    "text": "Article\nList",
+    "toolTip": "Go to the article list"
+  },
+  "button_lista_sklepow": {
+    "text": "Store\nList",
+    "toolTip": "Go to the store list"
+  },
+  "button_lista_firm": {
+    "text": "Company\nList",
+    "toolTip": "Go to the company list"
+  },
+  "button_lista_kupujacych": {
+    "text": "Buyer\nList",
+    "toolTip": "Go to the buyer list"
+  },
+  "button_lista_kategorii": {
+    "text": "Category\nList",
+    "toolTip": "Go to the category list"
+  },
+  "button_stworz_artykul": {
+    "text": "Create\nArticle",
+    "toolTip": "Create a new article"
+  },
+  "button_modyfikuj_artykul": {
+    "text": "Edit\nArticle",
+    "toolTip": "Edit the selected article"
+  },
+  "button_zatwierdz_artykul": {
+    "text": "Confirm\nArticle",
+    "toolTip": "Confirm the new article"
+  },
+  "button_zatwierdz_edycje_artykul": {
+    "text": "Confirm\nArticle\nEdit",
+    "toolTip": "Confirm the edited article"
+  },
+  "button_zniszcz_artykul": {
+    "text": "Delete\nArticle",
+    "toolTip": "Delete the selected article"
+  },
+  "button_dodaj_artykul_zamowienie": {
+    "text": "Add\nArticle to\nOrder",
+    "toolTip": "Add article to the order"
+  },
+  "button_modyfikuj_artykul_zamowienie": {
+    "text": "Edit\nArticle",
+    "toolTip": "Edit article in the order"
+  },
+  "button_zatwierdz_dodanie_artykulu": {
+    "text": "Add\nArticle to\nOrder",
+    "toolTip": "Confirm adding article to the order"
+  },
+  "button_anuluj_dodanie_artykulu": {
+    "text": "Cancel\nAdding\nArticle to\nOrder",
+    "toolTip": "Cancel adding article to the order"
+  },
+  "button_usun_artykul_zamowienie": {
+    "text": "Remove\nArticle from\nOrder",
+    "toolTip": "Remove article from the current order"
+  },
+  "button_dodaj_kupujacy": {
+    "text": "Add\nBuyer",
+    "toolTip": "Add a new buyer"
+  },
+  "button_zmiana_nazwa_kupujacy": {
+    "text": "Change\nBuyer\nName",
+    "toolTip": "Change the name of the selected buyer"
+  },
+  "button_usun_kupujacy": {
+    "text": "Delete\nBuyer",
+    "toolTip": "Delete the selected buyer"
+  },
+  "button_dodaj_sklep": {
+    "text": "Add\nStore",
+    "toolTip": "Add a new store"
+  },
+  "button_zmiana_nazwa_sklep": {
+    "text": "Change\nStore\nName",
+    "toolTip": "Change the name of the selected store"
+  },
+  "button_usun_sklep": {
+    "text": "Delete\nStore",
+    "toolTip": "Delete the selected store"
+  },
+  "button_dodaj_firma": {
+    "text": "Add\nCompany",
+    "toolTip": "Add a new company"
+  },
+  "button_zmiana_nazwa_firma": {
+    "text": "Change\nCompany\nName",
+    "toolTip": "Change the name of the selected company"
+  },
+  "button_usun_firma": {
+    "text": "Delete\nCompany",
+    "toolTip": "Deletes the selected company. Works only if a company is selected!"
+  },
+  "button_dodaj_kategoria": {
+    "text": "Add\nCategory",
+    "toolTip": "Add a new category"
+  },
+  "button_zmiana_nazwa_kategoria": {
+    "text": "Change\nCategory\nName",
+    "toolTip": "Change the name of the selected category"
+  },
+  "button_usun_kategorie": {
+    "text": "Delete\nCategory",
+    "toolTip": "Delete the selected category"
+  },
+  "button_refresh_zamowienia": {
+    "text": "Refresh",
+    "toolTip": "Refresh the order list"
+  },
+  "error_messagebox": {
+    "heading": "Error",
+    "text": {
+      "shop": "No store selected! Please select a store.",
+      "buyer": "No buyer selected! Please select a buyer.",
+      "order": "No order selected! Please select an order.",
+      "unit_discount": "Invalid discount value! Enter a number.",
+      "proc_discount": "Invalid discount value! Enter a number.",
+      "date": "Invalid date! Enter a valid date.",
+      "category": "No category selected! Please select a category.",
+      "company": "No company selected! Please select a company.",
+      "price": "Invalid price value! Enter a number.",
+      "amount": "Invalid amount value! Enter a number.",
+      "name": "Invalid name! Correct the name.",
+      "select_art": "No article selected! Please select an article."
+    }
+  },
+  "info_messagebox": {
+    "heading": "Information",
+    "text": "Operation completed successfully."
+  },
+  "language_messagebox": {
+    "heading": "Error",
+    "text": "Language file not found."
+  },
+  "close_messagebox": {
+    "heading": "Close",
+    "text": "Are you sure you want to close the application?"
+  },
+  "edit_messagebox": {
+    "heading": "Edit",
+    "text": {
+      "shop": "Enter new store name:",
+      "buyer": "Enter new buyer name:",
+      "category": "Enter new category name:",
+      "company": "Enter new company name:"
+    }
+  },
+  "add_messagebox": {
+    "heading": "Add",
+    "text": {
+      "shop": "Enter store name:",
+      "buyer": "Enter buyer name:",
+      "category": "Enter category name:",
+      "company": "Enter company name:"
+    }
+  },
+  "delete_messagebox": {
+    "heading": "Delete",
+    "text": {
+      "shop": "Are you sure you want to delete the store from the list?\nThis action CANNOT be undone!\nType ",
+      "buyer": "Are you sure you want to delete the buyer from the list?\nThis action CANNOT be undone!\nType ",
+      "order": "Are you sure you want to delete the order from the list?\nThis action CANNOT be undone!\nType ",
+      "category": "Are you sure you want to delete the category from the list?\nThis action CANNOT be undone!\nType ",
+      "company": "Are you sure you want to delete the company from the list?\nThis action CANNOT be undone!\nType ",
+      "article": "Are you sure you want to delete the article from the list?\nThis action CANNOT be undone!\nType "
+    },
+    "agree": [
+      "YES"
+    ]
+  }
+}

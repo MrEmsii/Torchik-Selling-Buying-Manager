@@ -20,14 +20,15 @@ class Controller:
         self.master = TkinterDnD.Tk()
         self.db_session = SQLconnect()
         
-        self.view    = View(self.master, dsc=self.dsc)
-
         if os.path.exists(self.dsc + "/resources/setting.json") == False:
             self.json_setting(status = "create")
             print("Setting file created.")
         
         self.konfiguracja_programu = self.json_setting(status="read")
         self.leksykon_programu = self.json_language(self.konfiguracja_programu["language"])
+
+        self.view    = View(self.master, dsc=self.dsc, leksykon=self.leksykon_programu)
+
         # self.play_sound_on_start_demon()
         self.inicjalizacja_frame()
 
@@ -219,6 +220,8 @@ class Controller:
             self.view.show_message_async()
 
         def task():
+            currency = self.leksykon_programu["currency"]
+
             zamowienia = self.db_session.query(Zamowienie).all()
             zamowienia_data = []
 
@@ -227,10 +230,10 @@ class Controller:
                 zamow_data = zamow.data
                 zamow_kupujacy = zamow.kupujacy.nazwa if zamow.kupujacy else " "
                 zamow_sklep = zamow.sklep.nazwa if zamow.sklep else " "
-                rabat_j = f"{zamow.rabat_j:.2f} PLN"
+                rabat_j = f"{zamow.rabat_j:.2f} {currency}"
                 rabat_proc = f"{zamow.rabat_procent :.0f} %"
-                zamow_cena = f"{zamow.oblicz_cene(self.db_session):,.2f} PLN".replace(",", " ")
-                zamow_cena_rabat = f"{zamow.oblicz_cene_rabat(self.db_session):,.2f} PLN".replace(",", " ")
+                zamow_cena = f"{zamow.oblicz_cene(self.db_session):,.2f} {currency}".replace(",", " ")
+                zamow_cena_rabat = f"{zamow.oblicz_cene_rabat(self.db_session):,.2f} {currency}".replace(",", " ")
                 zamowienia_data.append((zamow_id, zamow_data, zamow_kupujacy, zamow_sklep, rabat_j, rabat_proc, zamow_cena, zamow_cena_rabat))
 
             zamowienia_data.sort(key=lambda x: x[0], reverse=True)
@@ -548,8 +551,11 @@ class Controller:
 
         self.view.artukuly_list_grid_setting()
 
-        self.artykuly_tree = self.view.artykuly_tree(parent_frame = self.view.secend_frame, label_text = "Artykuły Lista")
-        self.kategorie_tree = self.view.name_tree(self.view.main_frame, "Kategorie", True)
+        name = self.leksykon_programu["names_list"]
+
+
+        self.artykuly_tree = self.view.artykuly_tree(parent_frame = self.view.secend_frame, label_text = name["select_art"])
+        self.kategorie_tree = self.view.name_tree(self.view.main_frame, name["category"], True)
         
         self.load_artykuly_deaemon("ukryj")
         self.load_kategorie_daemon()
@@ -560,32 +566,37 @@ class Controller:
     def list_zamowienia(self):
         self.view.zamowienia_grid_setting()
         self.button_manager(frame="main", startup = True)
-        self.zamowienia_tree = self.view.zamowienie_tree(parent_frame=self.zamowienia_frame, label_text='Zamówienia') 
+        name = self.leksykon_programu["names_list"]["order"]
+        self.zamowienia_tree = self.view.zamowienie_tree(parent_frame=self.zamowienia_frame, label_text=name) 
         self.zamowienia_tree.bind("<Double-1>", self.on_double_click_otwieranie_zamowienia)
         self.load_zamowienia_daemon()
 
     def list_kupujacy(self):
         self.zamowienia_frame.grid_remove()
         self.button_manager("kupujacy")
-        self.kupujacy_tree = self.view.name_tree(self.main_frame, "Kupujacy", True)
+        name = self.leksykon_programu["names_list"]["buyer"]
+        self.kupujacy_tree = self.view.name_tree(self.main_frame, name, True)
         self.load_kupujacy_daemon()
 
     def list_firmy(self):
         self.zamowienia_frame.grid_remove()
         self.button_manager(frame="firmy")
-        self.firma_tree = self.view.name_tree(self.main_frame, "Firmy", True)
+        name = self.leksykon_programu["names_list"]["company"]
+        self.firma_tree = self.view.name_tree(self.main_frame, name, True)
         self.load_firmy_deaemon()
 
     def list_sklepy(self):
         self.zamowienia_frame.grid_remove()
         self.button_manager("sklepy")
-        self.sklepy_tree = self.view.name_tree(self.main_frame, "Sklepy", True)
+        name = self.leksykon_programu["names_list"]["shop"]
+        self.sklepy_tree = self.view.name_tree(self.main_frame, name, True)
         self.load_sklepy_daemon()
 
     def list_kategorie(self):
         self.zamowienia_frame.grid_remove()
         self.button_manager(frame="kategorie")
-        self.kategorie_tree = self.view.name_tree(self.main_frame, "Kategorie", True)
+        name = self.leksykon_programu["names_list"]["category"]
+        self.kategorie_tree = self.view.name_tree(self.main_frame, name, True)
         self.load_kategorie_daemon()
 
     def stworz_sklep(self, value=None):
@@ -1005,7 +1016,7 @@ class Controller:
             return
 
         try:
-            rabat_j = self.view.rabat_j_var.get()
+            rabat_j = float(self.view.rabat_j_var.get().replace(',', '.'))
         except tk.TclError:
             # self.error_sound_demon()
             leksykon = self.leksykon_programu["error_messagebox"]
@@ -1013,7 +1024,7 @@ class Controller:
             return
 
         try:
-            rabat_procentowy = self.view.rabat_p_var.get()
+            rabat_procentowy = float(self.view.rabat_p_var.get().replace(',', '.'))
         except tk.TclError:
             # self.error_sound_demon()
             leksykon = self.leksykon_programu["error_messagebox"]
@@ -1093,7 +1104,7 @@ class Controller:
         self.zamowienia_frame.grid_remove()
         self.usun_all_widgets()
         self.button_manager("lista dodanych do zamowienia")
-        self.inside_tree = self.view.inside_tree(self.main_frame, 'Lista artykułów dodatych do zamówienia', columns_name=self.leksykon_programu["inside_tree_column"]["columns_name"]) 
+        self.inside_tree = self.view.inside_tree(self.main_frame, 'Lista artykułów dodatych do zamówienia') 
         self.inside_tree.delete(*self.inside_tree.get_children())
 
         wynik_all = self.db_session.execute(
@@ -1111,9 +1122,11 @@ class Controller:
 
         artykul_data = []
 
+        currency = self.leksykon_programu["currency"]
+
         for wynik in wynik_all:
             id_art = wynik.artykul_id
-            cena = f"{wynik.cena_jednostkowa if wynik.cena_jednostkowa else 0:.2f} PLN"
+            cena = f"{wynik.cena_jednostkowa if wynik.cena_jednostkowa else 0:.2f} {currency}"
             ilosc = wynik.ilosc_artykulu if wynik.ilosc_artykulu else 1
 
             artykul = self.db_session.query(Artykul_Lista).filter_by(id=id_art).first()
@@ -1143,7 +1156,7 @@ class Controller:
             return 
         
         relacja_name = self.inside_tree.item(self.inside_tree.selection()[0], 'values')
-        cena = float(relacja_name[1].replace(" PLN", ""))
+        cena = float(relacja_name[1].replace(" {currency}", ""))
         print(relacja_name, cena)
 
         leksykon = self.leksykon_programu["edit_messagebox"]
@@ -1160,7 +1173,7 @@ class Controller:
     
     def cena_ilosc_edycja(self):
         try:
-            cena_artykulu_var = float(self.view.cena_artykulu_var.get())
+            cena_artykulu_var = float(self.view.cena_artykulu_var.get().replace(",", "."))
         except ValueError:
             # self.error_sound_demon()
             leksykon = self.leksykon_programu["error_messagebox"]
@@ -1168,7 +1181,7 @@ class Controller:
             return
 
         try:
-            ilosc_artykulu_var =  float(self.view.ilosc_artykulu_var.get())
+            ilosc_artykulu_var =  float(self.view.ilosc_artykulu_var.get().replace(",", "."))
         except ValueError:
             # self.error_sound_demon()
             leksykon = self.leksykon_programu["error_messagebox"]
@@ -1209,7 +1222,7 @@ class Controller:
 
     def cena_ilosc_dodanie(self):
         try:
-            cena_artykulu_var = float(self.view.cena_artykulu_var.get())
+            cena_artykulu_var = float(self.view.cena_artykulu_var.get().replace(",", "."))
         except ValueError:
             # self.error_sound_demon()
             leksykon = self.leksykon_programu["error_messagebox"]
@@ -1217,7 +1230,7 @@ class Controller:
             return
 
         try:
-            ilosc_artykulu_var =  float(self.view.ilosc_artykulu_var.get())
+            ilosc_artykulu_var =  float(self.view.ilosc_artykulu_var.get().replace(",", "."))
         except ValueError:
             # self.error_sound_demon()
             leksykon = self.leksykon_programu["error_messagebox"]

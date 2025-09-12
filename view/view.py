@@ -8,10 +8,12 @@ import os
 
 
 class View:
-    def __init__(self, master, dsc=None):
+    def __init__(self, master, dsc=None, leksykon = None):
         self.master = master
         self.master.geometry("1280x720+0+0")
         self.master.resizable(True, True)
+
+        self.leksykon = leksykon
 
         self.button_icon_pack(dsc)
         self.setup_styles(dsc)
@@ -74,7 +76,9 @@ class View:
     def start_grid_setting(self):
         self.main_frame.grid(row=0, column=1, columnspan=5, rowspan=5, sticky="nsew", padx=5, pady=5)
 
-    def inside_tree(self, parent_frame, label_text, columns_names):
+    def inside_tree(self, parent_frame, label_text):
+        columns_name = self.leksykon["columns"]["inside_tree_columns"]
+
         label = ttk.Label(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)
 
@@ -85,7 +89,7 @@ class View:
 
         tree = ttk.Treeview(
             container, 
-            columns=columns_names, 
+            columns=columns_name, 
             show='headings',
             yscrollcommand=scrollbar.set
             )
@@ -95,35 +99,37 @@ class View:
 
         tree.pack( expand=True, fill='both')
 
-        tree.column('id_artykul', width=50, anchor='e')
-        tree.heading('id_artykul', text='ID:', anchor='e')
+        tree.column(columns_name[0], width=50, anchor='e')
+        tree.heading(columns_name[0], text=columns_name[0], anchor='e')
 
-        tree.column(columns_names[1], width=100, anchor='e')
-        tree.heading(columns_names[1], text=columns_names[1], anchor='e')
+        tree.column(columns_name[1], width=100, anchor='e')
+        tree.heading(columns_name[1], text=columns_name[1], anchor='e')
 
-        tree.column(columns_names[2], width=100, anchor='e')
-        tree.heading(columns_names[2], text=columns_names[2], anchor='e')
+        tree.column(columns_name[2], width=100, anchor='e')
+        tree.heading(columns_name[2], text=columns_name[2], anchor='e')
 
-        tree.column(columns_names[3], width=100, anchor='e')
-        tree.heading(columns_names[3], text=columns_names[3], anchor='e')
+        tree.column(columns_name[3], width=100, anchor='e')
+        tree.heading(columns_name[3], text=columns_name[3], anchor='e')
 
-        tree.column(columns_names[4], width=100, anchor='e')
-        tree.heading(columns_names[4], text=columns_names[4], anchor='e')
+        tree.column(columns_name[4], width=100, anchor='e')
+        tree.heading(columns_name[4], text=columns_name[4], anchor='e')
 
-        tree.column(columns_names[5], width=100, anchor='e')
-        tree.heading(columns_names[5], text=columns_names[5], anchor='e')     
+        tree.column(columns_name[5], width=100, anchor='e')
+        tree.heading(columns_name[5], text=columns_name[5], anchor='e')     
 
-        tree.column(columns_names[6], width=100, anchor='e')
-        tree.heading(columns_names[6], text=columns_names[6], anchor='e')   
+        tree.column(columns_name[6], width=100, anchor='e')
+        tree.heading(columns_name[6], text=columns_name[6], anchor='e')   
 
-        tree.column(columns_names[7], width=300, anchor='e')
-        tree.heading(columns_names[7], text=columns_names[7], anchor='e')
+        tree.column(columns_name[7], width=300, anchor='e')
+        tree.heading(columns_name[7], text=columns_name[7], anchor='e')
 
         tree.pack(expand=True, fill='both')
 
         return tree  
 
-    def artykuly_tree(self, parent_frame, label_text, columns_names):
+    def artykuly_tree(self, parent_frame, label_text):
+        columns_name = self.leksykon["columns"]["artykuly_tree_columns"]
+
         label = ttk.Label(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)
 
@@ -134,7 +140,7 @@ class View:
 
         tree = ttk.Treeview(
             container, 
-            columns=columns_names,
+            columns=columns_name,
             show='headings',
             yscrollcommand=scrollbar.set
             )
@@ -144,27 +150,29 @@ class View:
 
         tree.pack( expand=True, fill='both')
 
-        tree.column('id_artykułu', width=20, anchor='e')
-        tree.heading('id_artykułu', text='id_artykułu', anchor='e')
+        tree.column(columns_name[0], width=20, anchor='e')
+        tree.heading(columns_name[0], text=columns_name[0], anchor='e')
 
-        tree.column('Kategoria', width=50, anchor='w')
-        tree.heading('Kategoria', text='Kategoria', anchor='w')
+        tree.column(columns_name[1], width=50, anchor='w')
+        tree.heading(columns_name[1], text=columns_name[1], anchor='w')
 
-        tree.column('Firma', width=50, anchor='w')
-        tree.heading('Firma', text='Firma', anchor='w')
+        tree.column(columns_name[2], width=50, anchor='w')
+        tree.heading(columns_name[2], text=columns_name[2], anchor='w')
 
-        tree.column('artykul', width=100, anchor='w')
-        tree.heading('artykul', text='Artykuł', anchor='w')        
+        tree.column(columns_name[3], width=100, anchor='w')
+        tree.heading(columns_name[3], text=columns_name[3], anchor='w')        
 
-        tree.column('Kolor', width=100, anchor='w')
-        tree.heading('Kolor', text='Kolor', anchor='w')
+        tree.column(columns_name[4], width=100, anchor='w')
+        tree.heading(columns_name[4], text=columns_name[4], anchor='w')
 
-        tree.column('szczegoly', width=100, anchor='w')
-        tree.heading('szczegoly', text='Szczegoly', anchor='w')
+        tree.column(columns_name[5], width=100, anchor='w')
+        tree.heading(columns_name[5], text=columns_name[5], anchor='w')
        
         return tree       
 
-    def name_tree(self, parent_frame, label_text, status, columns_names):
+    def name_tree(self, parent_frame, label_text, status):
+        columns_name = self.leksykon["columns"]["name_tree_columns"]
+
         label = ttk.Label(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)
 
@@ -175,7 +183,7 @@ class View:
 
         tree = ttk.Treeview(
             container, 
-            columns=columns_names, 
+            columns=columns_name, 
             show='headings', 
             yscrollcommand=scrollbar.set
             )
@@ -185,16 +193,17 @@ class View:
 
         tree.pack( expand=True, fill='both')
         
-        tree.column('id', width=10, anchor='e')
-        tree.heading('id', text='ID', anchor='e')
+        tree.column(columns_name[0], width=10, anchor='e')
+        tree.heading(columns_name[0], text=columns_name[0], anchor='e')
 
-        tree.column('name', width=100, anchor='w')
-        tree.heading('name', text='Nazwa', anchor='w')
+        tree.column(columns_name[1], width=100, anchor='w')
+        tree.heading(columns_name[1], text=columns_name[1], anchor='w')
         tree.pack(expand=status, fill='both')
 
         return tree  
 
-    def zamowienie_tree(self, parent_frame, label_text, columns_names):
+    def zamowienie_tree(self, parent_frame, label_text):
+        columns_name = self.leksykon["columns"]["zamowienia_tree_columns"]
         label = ttk.Label(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)
 
@@ -205,7 +214,7 @@ class View:
 
         tree = ttk.Treeview(
             container,
-            columns=columns_names,
+            columns=columns_name,
             show='headings',
             yscrollcommand=scrollbar.set,
         )
@@ -215,29 +224,29 @@ class View:
 
         tree.pack( expand=True, fill='both')
 
-        tree.column('id_zamowiania', width=50, anchor='e')
-        tree.heading('id_zamowiania', text='id_zamowiania', anchor='e')
+        tree.column(columns_name[0], width=50, anchor='e')
+        tree.heading(columns_name[0], text=columns_name[0], anchor='e')
 
-        tree.column('Data', width=100, anchor='w')
-        tree.heading('Data', text='Data', anchor='w')
+        tree.column(columns_name[1], width=100, anchor='w')
+        tree.heading(columns_name[1], text=columns_name[1], anchor='w')
 
-        tree.column('Kupujacy', width=100, anchor='w')
-        tree.heading('Kupujacy', text='Kupujacy', anchor='w')
+        tree.column(columns_name[2], width=100, anchor='w')
+        tree.heading(columns_name[2], text=columns_name[2], anchor='w')
 
-        tree.column('Sklep', width=100, anchor='w')
-        tree.heading('Sklep', text='Sklep', anchor='w')
+        tree.column(columns_name[3], width=100, anchor='w')
+        tree.heading(columns_name[3], text=columns_name[3], anchor='w')
 
-        tree.column('Rabat jednostkowy', width=100, anchor='e')
-        tree.heading('Rabat jednostkowy', text='Rabat jednostkowy', anchor='e')        
+        tree.column(columns_name[4], width=100, anchor='e')
+        tree.heading(columns_name[4], text=columns_name[4], anchor='e')        
 
-        tree.column('Rabat procentowy', width=100, anchor='e')
-        tree.heading('Rabat procentowy', text='Rabat procentowy', anchor='e')
+        tree.column(columns_name[5], width=100, anchor='e')
+        tree.heading(columns_name[5], text=columns_name[5], anchor='e')
 
-        tree.column('Cena', width=100, anchor='e')
-        tree.heading('Cena', text='Cena', anchor='e')
+        tree.column(columns_name[6], width=100, anchor='e')
+        tree.heading(columns_name[6], text=columns_name[6], anchor='e')
 
-        tree.column('Cena_po_rabacie', width=100, anchor='e')
-        tree.heading('Cena_po_rabacie', text='Cena po rabacie', anchor='e')
+        tree.column(columns_name[7], width=100, anchor='e')
+        tree.heading(columns_name[7], text=columns_name[7], anchor='e')
 
         return tree    
 
@@ -295,8 +304,8 @@ class View:
         return przycisk
 
     def dodaj_modyfikuj_zamowienie_view(self, zamowienie_rabat_j=0, zamowienie_rabat_procentowy=0):
-        self.rabat_j_var = tk.DoubleVar(value=zamowienie_rabat_j)
-        self.rabat_p_var = tk.DoubleVar(value=zamowienie_rabat_procentowy)
+        self.rabat_j_var = tk.StringVar(value=zamowienie_rabat_j)
+        self.rabat_p_var = tk.StringVar(value=zamowienie_rabat_procentowy)
         self.zamowienie_data = tk.StringVar()
         self.zamowienie_view()
 
@@ -310,12 +319,14 @@ class View:
         self.secend_frame = ttk.Frame(self.master, padding=5)
         
     def artykul_view(self):
+        label_name = self.leksykon["labels"]
+
         self.secend_frame = ttk.Frame(self.master, padding=5)
         self.third_frame = ttk.Frame(self.master, padding=5)
 
-        nazwa_label = ttk.Label(self.third_frame, text = 'Nazwa artykułu:', font=('calibre', 10, 'bold'), anchor='center')
-        kolor_label = ttk.Label(self.third_frame, text = 'Ewentualny kolor:', font=('calibre', 10, 'bold'), anchor='center')
-        szczegoly_label = ttk.Label(self.third_frame, text = 'Ewentualne szczegoły:', font=('calibre', 10, 'bold'), anchor='w')
+        nazwa_label = ttk.Label(self.third_frame, text = label_name["name"], font=('calibre', 10, 'bold'), anchor='center')
+        kolor_label = ttk.Label(self.third_frame, text = label_name["color"], font=('calibre', 10, 'bold'), anchor='center')
+        szczegoly_label = ttk.Label(self.third_frame, text = label_name["details"], font=('calibre', 10, 'bold'), anchor='w')
 
         nazwa_entry = ttk.Entry(self.third_frame, textvariable = self.nazwa_artykulu_string, font=('calibre',10,'normal'), width=30)
         kolor_entry = ttk.Entry(self.third_frame, textvariable = self.kolor_artykulu_string, font=('calibre',10,'normal'), width=30)
@@ -330,9 +341,9 @@ class View:
         self.third_frame.grid_columnconfigure(0, weight=1)
         self.third_frame.grid_columnconfigure(1, weight=10)
         
-        nazwa_label.grid(row=1,column=0)
-        kolor_label.grid(row=2,column=0)
-        szczegoly_label.grid(row=3,column=0)
+        nazwa_label.grid(row=1,column=0, sticky='e')
+        kolor_label.grid(row=2,column=0, sticky='e')
+        szczegoly_label.grid(row=3,column=0, sticky='e')
 
         nazwa_entry.grid(row=1,column=1)
         kolor_entry.grid(row=2,column=1)
@@ -343,18 +354,21 @@ class View:
         self.third_frame.grid(row=0, column=6, columnspan=1, rowspan=4, sticky="nsew", padx=5, pady=5)
         
     def zamowienie_view(self):
+        label_name = self.leksykon["labels"]
+        language_code = self.leksykon["language_code"]
+        
         self.secend_frame = ttk.Frame(self.master, padding=5)
         self.third_frame = ttk.Frame(self.master, padding=5)
 
-        date_label = ttk.Label(self.third_frame, text = 'Data:', font=('calibre', 10, 'bold'), anchor='w')
+        date_label = ttk.Label(self.third_frame, text = label_name["date"], font=('calibre', 10, 'bold'), anchor='center')
        
-        rabat_j_label = ttk.Label(self.third_frame, text = 'Rabat jednostkowy:', font=('calibre', 10, 'bold'), anchor='w')
-        rabat_p_label = ttk.Label(self.third_frame, text = 'Rabat procentowy:', font=('calibre',10, 'bold'), anchor='w')
+        rabat_j_label = ttk.Label(self.third_frame, text = label_name["unit_discount"], font=('calibre', 10, 'bold'), anchor='center')
+        rabat_p_label = ttk.Label(self.third_frame, text = label_name["proc_discount"], font=('calibre',10, 'bold'), anchor='center')
 
         rabat_j_entry = ttk.Entry(self.third_frame, textvariable = self.rabat_j_var, font=('calibre',10,'normal'), width=10)
         rabat_p_entry = ttk.Entry(self.third_frame, textvariable = self.rabat_p_var, font=('calibre',10,'normal'), width=10)
 
-        self.date_entry = DateEntry(self.third_frame, localestr='pl_PL', date_pattern="yyyy-mm-dd", textvariable=self.zamowienie_data, width=10, set_date=datetime.date(2023,4,2))
+        self.date_entry = DateEntry(self.third_frame, localestr=language_code, date_pattern="yyyy-mm-dd", textvariable=self.zamowienie_data, width=10, set_date=datetime.date(2023,4,2))
 
         self.third_frame.grid_rowconfigure(0, weight=80)
         self.third_frame.grid_rowconfigure(1, weight=1)
@@ -365,9 +379,9 @@ class View:
         self.third_frame.grid_columnconfigure(0, weight=1)
         self.third_frame.grid_columnconfigure(1, weight=10)
 
-        date_label.grid(row=1,column=0)
-        rabat_j_label.grid(row=2,column=0)
-        rabat_p_label.grid(row=3,column=0)
+        date_label.grid(row=1,column=0, sticky='e')
+        rabat_j_label.grid(row=2,column=0, sticky='e')
+        rabat_p_label.grid(row=3,column=0, sticky='e')
 
         self.date_entry.grid(row=1,column=1)
         rabat_j_entry.grid(row=2,column=1)
@@ -378,6 +392,9 @@ class View:
         self.third_frame.grid(row=0, column=6, columnspan=1, rowspan=4, sticky="nsew", padx=5, pady=5)
         
     def cena_ilosc_view(self, cena_artykulu_var = 0, ilosc_artykulu_var = 1):
+        label_name = self.leksykon["labels"]
+        currency = self.leksykon["currency"]
+
         self.cena_artykulu_var_old = cena_artykulu_var
         self.ilosc_artykulu_var_old = ilosc_artykulu_var
 
@@ -387,9 +404,9 @@ class View:
         self.button_cena_ilosc_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
         self.filament_frame.grid(row=0, column=1, columnspan=2, sticky="nsew", padx=5, pady=5)
 
-        cena_label = ttk.Label(self.filament_frame, text = 'Cena:', font=('calibre', 10, 'bold'), anchor='center')
-        waluta_label = ttk.Label(self.filament_frame, text = 'PLN', font=('calibre', 10, 'bold'), anchor='e')
-        ilosc_label = ttk.Label(self.filament_frame, text = 'Ilość:', font=('calibre', 10, 'bold'), anchor='w')
+        cena_label = ttk.Label(self.filament_frame, text = label_name["price"], font=('calibre', 10, 'bold'), anchor='center')
+        waluta_label = ttk.Label(self.filament_frame, text = currency, font=('calibre', 10, 'bold'), anchor='e')
+        ilosc_label = ttk.Label(self.filament_frame, text = label_name["amount"], font=('calibre', 10, 'bold'), anchor='w')
         
         self.cena_artykulu_var = tk.StringVar(value=cena_artykulu_var)
         self.ilosc_artykulu_var = tk.StringVar(value=ilosc_artykulu_var)
@@ -397,8 +414,8 @@ class View:
         cena_entry = ttk.Entry(self.filament_frame, textvariable = self.cena_artykulu_var, font=('calibre',10,'normal'), width=15)
         ilosc_entry = ttk.Entry(self.filament_frame, textvariable = self.ilosc_artykulu_var, font=('calibre',10,'normal'), width=15)
 
-        cena_label.grid(row=1, column=1)
-        ilosc_label.grid(row=2, column=1)
+        cena_label.grid(row=1, column=1, sticky='e')
+        ilosc_label.grid(row=2, column=1, sticky='e')
 
         cena_entry.grid(row=1, column=2)
         ilosc_entry.grid(row=2, column=2)
@@ -433,9 +450,9 @@ class View:
         def pokaz_okno():
             self.msg_windows = tk.Toplevel(self.master)
             self.msg_windows.geometry("300x50+340+160")
-            self.msg_windows.title("Inicjalizacja operacji")
+            self.msg_windows.title(self.leksykon["info_initializing"]["heading"])
 
-            label = tk.Label(self.msg_windows, text="Inicjalizacja operacji, proszę poczekaj", padx=20, pady=10)
+            label = tk.Label(self.msg_windows, text=self.leksykon["info_initializing"]["text"], padx=20, pady=10)
             label.pack()
 
         self.master.after(0, pokaz_okno)

@@ -4,6 +4,36 @@
     "language_name": "Polish",
     "language_description": "Polish language for the application",
     
+    "currency": "PLN",
+    
+    "labels": {
+        "date": "Data: ",
+        "proc_discount": "Rabat procentowy: ",
+        "unit_discount": "Rabat jednostkowy: ",
+        "price": "Cena: ",
+        "amount": "Ilość: ",
+        "name": "Nazwa: ",
+        "color": "Ewentualny kolor: ",
+        "details": "Ewentualne szczegóły: "
+    },
+
+    "columns":{
+        "inside_tree_columns": ["id", "Cena: ", "Ilosc: ", "Kategoria: ", "Marka: ", "Artykul: ", "Kolor: ", "Szczegoly: "],
+        "artykuly_tree_columns": ["id", "Kategoria: ", "Firma: ", "Artykuł: ","Kolor: ","Szczegóły: "],
+        "name_tree_columns": ["id", "Nazwa: "],
+        "zamowienia_tree_columns": ["id", "Data: ", "Kupujący: ", "Sklep: ", "Rabat jednostkowy: ", "Rabat procentowy: ", "Cena: ", "Cena po rabacie: "]
+    },
+
+    "names_list":{
+        "shop": "Lista sklepów",
+        "buyer": "Lista kupujących",
+        "order": "Lista zamówień",
+        "category": "Lista kategorii",
+        "company": "Lista firm",
+        "select_art": "Lista artykułów",
+        "select_art_to_order": "Lista artykułów w zamówieniu"
+    },
+
     "button_back_pack": {
         "text": "Wróć",
         "toolTip": "Wróć do poprzedniego okna (głównego, listy artykułów lub zamówienia)"
@@ -76,6 +106,10 @@
         "text": "Dodaj\nartykuł do\nzamowienia",
         "toolTip": "Dodaj artykuł do zamówienia"
     },
+    "button_modyfikuj_artykul_zamowienie": {
+        "text": "Modyfikuj\nartykuł",
+        "toolTip": "Modyfikuj artykuł w zamówieniu"
+    },
     "button_zatwierdz_dodanie_artykulu": {
         "text": "Dodaj\nartykuł do\nzamowienia",
         "toolTip": "Zatwierdź dodanie artykułu do zamówienia"
@@ -139,5 +173,69 @@
     "button_refresh_zamowienia": {
         "text": "Odśwież",
         "toolTip": "Odśwież listę zamówień"
+    },
+    "error_messagebox":{
+        "heading": "Błąd",
+        "text": {
+            "shop": "Brak wybranego sklepu! Wybierz sklep.",
+            "buyer": "Brak wybranego kupującego! Wybierz kupującego.",
+            "order": "Brak wybranego zamówienia! Wybierz zamówienie.",
+            "unit_discount": "Nieprawidłowa wartość rabatu! Wpisz liczbę.",
+            "proc_discount": "Nieprawidłowa wartość rabatu! Wpisz liczbę.",
+            "date": "Nieprawidłowa data! Wpisz poprawną datę.",
+            "category": "Brak wybranego kategorii! Wybierz kategorii.",
+            "company": "Brak wybranej firmy! Wybierz firmy.",
+            "price": "Nieprawidłowa wartość ceny! Wpisz liczbę.",
+            "amount": "Nieprawidłowa wartość ilości! Wpisz liczbę.",
+            "name": "Nieprawidłowa nazwa! Popraw nazwę.",
+            "select_art": "Brak wybranego artykułu! Wybierz artykuł."
+        }
+    },
+    "info_messagebox":{
+        "heading": "Informacja",
+        "text": "Operacja zakończona pomyślnie."
+    },
+    "info_initializing": {
+        "heading": "Inicjalizacja operacji",
+        "text": "Inicjalizacja operacji, proszę poczekaj"
+    },
+    "language_messagebox":{
+        "heading": "Błąd",
+        "text": "Plik językowy nie został znaleziony."
+    },
+    "close_messagebox":{
+        "heading": "Zamknij",
+        "text": "Czy na pewno chcesz zamknąć aplikację?"
+    },
+    "edit_messagebox":{
+        "heading": "Edycja",
+        "text": {
+            "shop": "Podaj nową nazwe sklepu:",
+            "buyer": "Podaj nową nazwe kupującego:",
+            "category": "Podaj nową nazwe kategorii:",
+            "company": "Podaj nową nazwe firmy:"
+        }
+    },
+    "add_messagebox":{
+        "heading": "Dodawanie",
+        "text": {
+            "shop": "Podaj nazwe sklepu:",
+            "buyer": "Podaj nazwe kupującego:",
+            "category": "Podaj nazwe kategorii:",
+            "company": "Podaj nazwe firmy:"
+        }
+    },
+    "delete_messagebox":{
+        "heading": "Usuń",
+        "text": {
+            "shop": "Napewno chcesz usunąć sklep z listy? \nCzynność NIE odwracalna!\nWpisz ",
+            "buyer": "Napewno chcesz usunąć kupującego z listy? \nCzynność NIE odwracalna!\nWpisz ",
+            "order": "Napewno chcesz usunąć zamówienie z listy? \nCzynność NIE odwracalna!\nWpisz ",
+            "category": "Napewno chcesz usunąć kategorię z listy? \nCzynność NIE odwracalna!\nWpisz ",
+            "company": "Napewno chcesz usunąć firmę z listy? \nCzynność NIE odwracalna!\nWpisz ",
+            "article": "Napewno chcesz usunąć artykuł z listy? \nCzynność NIE odwracalna!\nWpisz "
+        },
+        "agree": ["TAK", "YES"]
     }
+    
 }

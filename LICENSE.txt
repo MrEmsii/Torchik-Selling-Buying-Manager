@@ -1,0 +1,11 @@
+Copyright (c) 2025 Patryk Szczepanik/MrEmsii
+
+Ten program jest udostępniany wyłącznie do użytku osobistego i niekomercyjnego.
+
+Zabrania się:
+- modyfikowania kodu źródłowego,
+- tworzenia dzieł pochodnych,
+- użycia komercyjnego (w tym sprzedaży, sublicencjonowania, włączania w inne projekty komercyjne),
+- udostępniania zmodyfikowanych wersji programu.
+
+Program dostarczany jest „tak jak jest” bez żadnych gwarancji.

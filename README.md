@@ -1,73 +1,108 @@
-# SellingBuyingManager - System zarządzania zamówieniami
+# SellingBuyingManager – System zarządzania zamówieniami
 
-## Opis
-SellingBuyingManager to system do zarządzania zamówieniami, kupującymi oraz produktami. Wykorzystuje SQLAlchemy do interakcji z bazą danych SQLite, a relacje między obiektami są zarządzane poprzez modele ORM.
+## 🧾 Opis
 
-## Funkcje
-- Tworzenie kupujących, firm i sklepów
-- Kategoryzacja artykułów na podstawie typów
-- Powiązanie artykułów z firmami
-- Tworzenie zamówień powiązanych ze sklepami i kupującymi
-- Przechowywanie listy artykułów w zamówieniu wraz z ilością i ceną jednostkową
+SellingBuyingManager to aplikacja desktopowa typu CRUD służąca do zarządzania zamówieniami, kupującymi, artykułami i produktami. Wykorzystuje SQLAlchemy do obsługi bazy danych SQLite oraz interfejs graficzny zbudowany w oparciu o Tkinter i tkinterDnD2. Relacje między obiektami odwzorowane są za pomocą modeli ORM.
 
-## Struktura bazy danych
-Projekt wykorzystuje modele ORM:
-- **Kupujacy** - Klient składający zamówienia
-- **Firma** - Producent artykułów
-- **Sklep** - Miejsce zakupu
-- **Kategoria** - Klasyfikacja artykułów
-- **Typ** - Podkategoria artykułów
-- **Artykul_Lista** - Lista artykułów dostępnych do zamówienia
-- **Zamowienie** - Zamówienie powiązane z kupującym i sklepem
-- **Tabela pomocnicza `lista_dodanie`** - Przechowuje relacje artykułów do zamówień wraz z ceną jednostkową i ilością
+Aplikacja wspiera import danych, posiada warstwę GUI z ikonami, tooltipami i kalendarzem, oraz system dźwiękowy do powiadomień.
 
-## Instalacja i uruchomienie
-1. **Klonowanie repozytorium**:
-    ```sh
-    git clone https://github.com/MrEmsii/SellingBuyingManager.git
-    cd SellingBuyingManager
-    ```
+---
 
-2. **Instalacja zależności**:
-    ```sh
-    pip install sqlalchemy
-    ```
+## 🎯 Funkcje
 
-3. **Uruchomienie skryptu**:
-    ```sh
-    python main.py
-    ```
+* Tworzenie, edycja i usuwanie:
+  * Kupujących
+  * Sklepów
+  * Firm
+  * Kategorii
+  * Artykułów
+  * Zamówień
+* Kategoryzacja artykułów
+* Powiązanie artykułów z firmami i kategoriami
+* Tworzenie zamówień z listą produktów, ilością i rabatami
+* Obsługa dźwięków (kliknięcia, błędy, start)
+* Obsługa JSON-ów z konfiguracją i językiem
+* Obsługa danych z kalendarza (tkcalendar)
 
-## Jak dodać artykuł do zamówienia?
-Aby dodać artykuł do zamówienia, wykonaj następujące kroki:
+---
 
-```python
-def Test(session):
-    kupujacy_1 = Kupujacy(nazwa="Patryk")
-    firma_1 = Firma(nazwa="Polgam")
-    sklep1 = Sklep(nazwa="Allegro")
-    kategoria_1 = Kategoria(nazwa='narzędzia')
-    typ_1 = Typ(nazwa='pendzel', kategoria=kategoria_1)
-    art_1 = Artykul_Lista(typ=typ_1, firma=firma_1, artykul="Klej")
-    zamow_1 = Zamowienie(kupujacy=kupujacy_1, sklep=sklep1)
-    
-    session.add_all([kupujacy_1, firma_1, sklep1, kategoria_1, typ_1, art_1, zamow_1])
-    session.commit()
+## 🗃️ Struktura bazy danych
 
-    session.execute(artykuly_relacja.insert().values(
-        zamowienie_id=zamow_1.id,
-        artykul_id=art_1.id,
-        cena_jednostkowa=1234,
-        ilosc_elem=2
-    ))
+Projekt wykorzystuje relacyjne modele ORM:
 
-    session.commit()
-    print(f"Dodano artykuł {art_1.artykul} do zamówienia {zamow_1.id}")
+* 🧍 Kupujacy – Reprezentuje osoby lub podmioty odpowiedzialne za składanie zamówień. Każdy kupujący może mieć wiele zamówień.
+* 🏢 Firma – Producent lub dostawca artykułów. Firma jest powiązana z artykułami, które oferuje.
+* 🏬 Sklep – Miejsce zakupu (fizyczne lub online). Każde zamówienie jest przypisane do jednego sklepu.
+* 🗂 Kategoria – Klasyfikacja artykułów według typu lub przeznaczenia (np. elektronika, narzędzia).
+* 📦 Artykul\_Lista – Lista dostępnych produktów. Każdy artykuł jest powiązany z firmą i kategorią.
+* 📄 Zamowienie – Reprezentuje pojedyncze zamówienie z datą, kupującym i sklepem.
+* 🔗 lista\_dodanie – Tabela pośrednia realizująca relację wiele-do-wielu między Zamowieniem a Artykul\_Lista. Przechowuje ilość, cenę i rabaty.
+
+---
+
+## 💻 Wykorzystane biblioteki
+
+Podstawowe:
+
+* Python 3.x
+* SQLAlchemy (ORM)
+* SQLite (baza danych)
+* tkinter (GUI)
+* tkinterdnd2 (drag-and-drop)
+* pygame (obsługa dźwięku)
+* tkcalendar (kalendarz wyboru daty)
+* Pillow / PhotoImage (ikony)
+* TkToolTip (dodatkowe opisy dla przycisków)
+
+---
+
+## ⚙️ Instalacja i uruchomienie
+
+1. Klonowanie repozytorium:
+
+```bash
+git clone https://github.com/MrEmsii/Torchik-Selling-Buying-Manager.git
+cd Torchik-Selling-Buying-Manager
 ```
 
-## Autor
-Projekt stworzony przez **MrEmsii**.
+2. Instalacja zależności:
+   Zalecane jest użycie virtualenv:
 
-## Licencja
-MIT License
+```bash
+python -m venv venv
+venv\Scripts\activate  # Windows
+pip install -r requirements.txt
+```
 
+Jeśli nie masz requirements.txt, zainstaluj ręcznie:
+
+```bash
+pip install sqlalchemy pygame tkcalendar tkinterdnd2
+```
+
+3. Uruchomienie programu:
+
+```bash
+python main.py
+```
+
+---
+
+## 👤 Autor
+
+Projekt stworzony przez:
+🧑‍💻 Patryk Szczepanik (MrEmsii)
+
+---
+
+## 📄 Licencja
+
+Projekt objęty licencją:
+📘 CC BY-NC-ND 4.0 — Creative Commons Uznanie autorstwa – Użycie niekomercyjne – Bez utworów zależnych
+Więcej informacji: [https://creativecommons.org/licenses/by-nc-nd/4.0/](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+
+Nie zezwala się na:
+
+* użytek komercyjny,
+* modyfikowanie kodu,
+* tworzenie dzieł pochodnych.

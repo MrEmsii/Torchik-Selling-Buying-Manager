@@ -1,7 +1,7 @@
-from controller.controller import Controller
+from controller.ControllerOrder import ControllerOrder
 
 def main():
-    ctrl = Controller()
+    ctrl = ControllerOrder()
     ctrl.run()
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 from tkinter import ttk, messagebox, simpledialog, PhotoImage
 import tkinter as tk
 
-from view.soundview import SoundView
+from view.ViewSound import SoundView
 
 import os
 

@@ -1,13 +1,13 @@
-from tkinter import ttk, messagebox, simpledialog, PhotoImage
+from tkinter import ttk, PhotoImage
 import tkinter as tk
 import datetime
-from view.soundview import SoundView
+from view.ViewSound import ViewSound
 
 from TkToolTip import ToolTip
 from tkcalendar import DateEntry
 import os
 
-class View:
+class ViewOrder:
     def __init__(self, master, dsc=None, leksykon = None, konfiguracja_programu = None):
         self.master = master
         self.master.geometry("1280x720+0+0")
@@ -19,7 +19,7 @@ class View:
         self.setup_styles(dsc)
         self.setup_frames()
 
-        self.sound = SoundView(dsc, konfiguracja_programu)
+        self.sound = ViewSound(dsc, konfiguracja_programu)
         self.sound.play_start_sound()
 
     def setup_frames(self):
@@ -58,20 +58,6 @@ class View:
         self.master.grid_columnconfigure(1, weight=2000)
         self.master.grid_columnconfigure(2, weight=2000)
         self.master.grid_columnconfigure(3, weight=2000)
-
-    def messagebox(self, type, language_code = None, heading = None, text = None, value = None):
-        if type == "error" or type == "language" and language_code:
-            self.sound.play_error_sound()
-            return messagebox.showerror(heading, text)
-        elif type == "info":
-            self.sound.play_info_sound()
-            return messagebox.showinfo(heading, text)
-        elif type == "close":
-            self.sound.play_info_sound()
-            return messagebox.askokcancel(heading, text)
-        elif type == "ask":
-            self.sound.play_info_sound()
-            return simpledialog.askstring(heading, text, initialvalue=value)
 
     def zamowienia_grid_setting(self):
         self.zamowienia_frame.grid(row=0, column=1, columnspan=3, rowspan=5, sticky="nsew", padx=5, pady=5)
@@ -301,7 +287,7 @@ class View:
         przycisk = ttk.Button(
             frame,
             text=leksykon_programu["text"],
-            command=command,
+            command=self.click_sound(command),
             width=10,
             image=icon or self.refresh_icon,
             compound="left"
@@ -309,6 +295,13 @@ class View:
         przycisk.pack(side=side, padx=padx, pady=pady)
         ToolTip(przycisk, msg=leksykon_programu["toolTip"], follow=True)
         return przycisk
+
+    def click_sound(self, func):
+        def wrapper(*args, **kwargs):
+            self.sound.play_info_sound()
+            return func(*args, **kwargs)
+        return wrapper
+
 
     def dodaj_modyfikuj_zamowienie_view(self, zamowienie_rabat_j=0, zamowienie_rabat_procentowy=0):
         self.rabat_j_var = tk.StringVar(value=zamowienie_rabat_j)
@@ -453,20 +446,3 @@ class View:
 
         self.cena_ilosc_view(cena_artykulu_var=cena, ilosc_artykulu_var=relacja)
 
-    def show_message_async(self):
-        def pokaz_okno():
-            self.msg_windows = tk.Toplevel(self.master)
-            self.msg_windows.geometry("300x50+340+160")
-            self.msg_windows.title(self.leksykon["info_initializing"]["heading"])
-
-            label = tk.Label(self.msg_windows, text=self.leksykon["info_initializing"]["text"], padx=20, pady=10)
-            label.pack()
-
-        self.master.after(0, pokaz_okno)
-
-    def ukryj_message_async(self):
-        def zamknij_okno():
-            if hasattr(self, 'msg_windows') and self.msg_windows.winfo_exists():
-                self.msg_windows.destroy()
-
-        self.master.after(0, zamknij_okno)

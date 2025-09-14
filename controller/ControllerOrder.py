@@ -1,6 +1,7 @@
 from model.models import SQLconnect, select, Kupujacy, Kategoria, Sklep, Firma, Zamowienie, Artykul_Lista, artykuly_relacja
-from view.orderview import ViewOrder
-from view.soundview import SoundView
+from view.ViewOrder import ViewOrder
+from view.ViewSound import ViewSound
+from view.ViewMessageBox import ViewMessageBox
 
 import os
 import string
@@ -12,7 +13,7 @@ import threading
 import json
 import datetime as datetime
 
-class Controller:
+class ControllerOrder:
     def __init__(self):
         self.dsc = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
         self.master = TkinterDnD.Tk()
@@ -27,8 +28,9 @@ class Controller:
         self.leksykon_programu = self.json_language(konfiguracja_programu["language"])
         
         self.view = ViewOrder(self.master, dsc=self.dsc, leksykon=self.leksykon_programu, konfiguracja_programu=konfiguracja_programu)
+        self.messagebox = ViewMessageBox()
 
-        self.sound = SoundView(self.dsc, konfiguracja_programu)
+        self.sound = ViewSound(self.dsc, konfiguracja_programu)
         self.inicjalizacja_frame()
 
     def run(self):
@@ -38,7 +40,7 @@ class Controller:
     def on_closing(self):
         leksykon = self.leksykon_programu["close_messagebox"]
                 
-        if ViewOrder.messagebox(self, type="close", heading=leksykon["heading"], text=leksykon["text"]):
+        if ViewMessageBox.messagebox(self, type="close", heading=leksykon["heading"], text=leksykon["text"]):
             self.db_session.close()
             self.view.master.destroy()
 
@@ -77,7 +79,7 @@ class Controller:
 
     def load_sklepy(self, widok, select_item):
         if widok == "pokaz":
-            self.view.show_message_async()
+            self.show_message_async()
 
         def task():
             sklepy = self.db_session.query(Sklep).all()
@@ -95,7 +97,7 @@ class Controller:
                 for sklep_id, sklep_nazwa in sklepy_data:
                     self.sklepy_tree.insert('', 'end', values=(sklep_id, sklep_nazwa))
                 self.zaznacz_wiersz_z_wartoscia(self.sklepy_tree, 'id', select_item)
-                self.view.ukryj_message_async()
+                self.hide_message_async()
             
             self.master.after(0, update_gui)
 
@@ -103,7 +105,7 @@ class Controller:
 
     def load_artykuly(self, widok = None, kategoria_id = None):
         if widok == "pokaz":
-            self.view.show_message_async()
+            self.show_message_async()
 
         def task():
             if not kategoria_id:
@@ -129,13 +131,13 @@ class Controller:
                 for id, kategoria, firma, nazwa, kolor, szczegoly in artykuly_data:
                     self.artykuly_tree.insert('', 'end', values=(id, kategoria, firma, nazwa, kolor, szczegoly))
                 
-                self.view.ukryj_message_async()
+                self.hide_message_async()
             self.master.after(0, update_gui)
         threading.Thread(target=task, daemon=True).start()
 
     def load_kupujacy(self, widok, select_item):
         if widok == "pokaz":
-            self.view.show_message_async()
+            self.show_message_async()
 
         def task():
             kupujacy = self.db_session.query(Kupujacy).all()
@@ -154,7 +156,7 @@ class Controller:
                     self.kupujacy_tree.insert('', 'end', values=(kup_id, kup_nazwa))
                 
                 self.zaznacz_wiersz_z_wartoscia(self.kupujacy_tree, 'id', select_item)
-                self.view.ukryj_message_async()
+                self.hide_message_async()
 
             self.master.after(0, update_gui)
 
@@ -162,7 +164,7 @@ class Controller:
 
     def load_kategorie(self, widok = None, select_item = None):
         if widok == "pokaz":
-            self.view.show_message_async()
+            self.show_message_async()
 
         def task():
             kategorie = self.db_session.query(Kategoria).all()
@@ -180,7 +182,7 @@ class Controller:
                 for kategoria_id, kategoria_name in kategorie_data:
                     self.kategorie_tree.insert('', 'end', values=(kategoria_id, kategoria_name))    
                 self.zaznacz_wiersz_z_wartoscia(self.kategorie_tree, 'id', select_item)
-                self.view.ukryj_message_async()
+                self.hide_message_async()
 
             self.master.after(0, update_gui)
 
@@ -188,7 +190,7 @@ class Controller:
 
     def load_firmy(self, widok, select_item):
         if widok == "pokaz":
-            self.view.show_message_async()
+            self.show_message_async()
 
         def task():
             firmy = self.db_session.query(Firma).all()
@@ -206,7 +208,7 @@ class Controller:
                 for firma_id, firma_name in firmy_data:
                     self.firma_tree.insert('', 'end', values=(firma_id, firma_name))  
                 self.zaznacz_wiersz_z_wartoscia(self.firma_tree, 'id', select_item)
-                self.view.ukryj_message_async()
+                self.hide_message_async()
 
             self.master.after(0, update_gui)
 
@@ -214,7 +216,7 @@ class Controller:
 
     def load_zamowienia(self, widok):
         if widok == "pokaz":
-            self.view.show_message_async()
+            self.show_message_async()
 
         def task():
             currency = self.leksykon_programu["currency"]
@@ -240,7 +242,7 @@ class Controller:
                 self.zamowienia_tree.delete(*self.zamowienia_tree.get_children())
                 for z_id, data, kupujacy, sklep, rabat_1, rabat_2, cena, cena_rabat in zamowienia_data:
                     self.zamowienia_tree.insert('', 'end', values=(z_id, data, kupujacy, sklep, rabat_1, rabat_2, cena, cena_rabat))
-                self.view.ukryj_message_async()
+                self.hide_message_async()
 
             self.master.after(0, update_gui)
 
@@ -344,7 +346,7 @@ class Controller:
                 return json.load(file)
         except FileNotFoundError:
             print(f"Language file '{language_code}.json' not found.")
-            ViewOrder.messagebox("language", language_code)
+            ViewMessageBox.messagebox("language", language_code)
             return {}
 
     def json_setting(self, status = "read", key = None, value = None):
@@ -599,10 +601,10 @@ class Controller:
 
     def stworz_sklep(self, value=None):
         leksykon = self.leksykon_programu["add_messagebox"]
-        name = ViewOrder.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["shop"]+"\t\t\t\t", value=value)
+        name = ViewMessageBox.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["shop"]+"\t\t\t\t", value=value)
         if name == "" or self.specjalne_znaki(name) :
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.stworz_sklep(value=name)
 
         elif name is not None:
@@ -611,43 +613,46 @@ class Controller:
             self.db_session.commit()
             self.load_sklepy_daemon(widok="pokaz")    
 
+            self.sound.play_confirm_sound()
+
     def stworz_kupujacy(self, value=None):
         leksykon = self.leksykon_programu["add_messagebox"]
-        name = ViewOrder.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["buyer"]+"\t\t\t\t", value=value)
+        name = ViewMessageBox.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["buyer"]+"\t\t\t\t", value=value)
         if name == "" or self.specjalne_znaki(name) :
-            
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.stworz_kupujacy(value=name)
 
         elif name is not None:
             obiekt = Kupujacy(nazwa=name)
             self.db_session.add(obiekt)
             self.db_session.commit()
-            self.load_kupujacy_daemon(widok="pokaz")    
+            self.load_kupujacy_daemon(widok="pokaz")  
+
+            self.sound.play_confirm_sound()
 
     def stworz_kategoria(self, value=None):
         leksykon = self.leksykon_programu["add_messagebox"]
-        name = ViewOrder.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["category"]+"\t\t\t\t", value=value)
+        name = ViewMessageBox.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["category"]+"\t\t\t\t", value=value)
         if name == "" or self.specjalne_znaki(name):
-            
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.stworz_kategoria(value=name)
 
         elif name is not None:
             obiekt = Kategoria(nazwa=name)
             self.db_session.add(obiekt)
             self.db_session.commit()
-            self.load_kategorie_daemon(widok="pokaz")     
+            self.load_kategorie_daemon(widok="pokaz")    
+
+            self.sound.play_confirm_sound()
 
     def stworz_firma(self, value=None):
         leksykon = self.leksykon_programu["add_messagebox"]
-        name = ViewOrder.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["company"]+"\t\t\t\t", value=value)
+        name = ViewMessageBox.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["company"]+"\t\t\t\t", value=value)
         if name == "" or self.specjalne_znaki(name) :
-            
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.stworz_firma(value=name)
 
         elif name is not None:
@@ -655,6 +660,8 @@ class Controller:
             self.db_session.add(obiekt)
             self.db_session.commit()
             self.load_firmy_deaemon(widok="pokaz") 
+
+            self.sound.play_confirm_sound()
 
     def zmien_nazwa_kupujacy(self):
         selected_item = self.kupujacy_tree.selection()
@@ -666,7 +673,7 @@ class Controller:
         stara_nazwa = element_value[1]
 
         leksykon = self.leksykon_programu["edit_messagebox"]
-        new_value = ViewOrder.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["buyer"]+"\t\t\t\t", value=stara_nazwa)
+        new_value = ViewMessageBox.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["buyer"]+"\t\t\t\t", value=stara_nazwa)
 
         if new_value and new_value.strip() and not self.specjalne_znaki(new_value):
             kupujacy = self.db_session.query(Kupujacy).filter_by(id=kupujacy_id).first()
@@ -675,11 +682,13 @@ class Controller:
                 kupujacy.nazwa = new_value 
                 self.db_session.commit()
                 self.load_zamowienia_daemon()
-                self.load_kupujacy_daemon(widok="ukryj") 
+                self.load_kupujacy_daemon(widok="ukryj")
+
+                self.sound.play_confirm_sound()
 
         elif self.specjalne_znaki(new_value):
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.zmien_nazwa_kupujacy()
 
     def zmien_nazwa_sklep(self):
@@ -692,7 +701,7 @@ class Controller:
         stara_nazwa = element_value[1]
 
         leksykon = self.leksykon_programu["edit_messagebox"]
-        new_value = ViewOrder.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["shop"]+"\t\t\t\t", value=stara_nazwa)
+        new_value = ViewMessageBox.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["shop"]+"\t\t\t\t", value=stara_nazwa)
 
         if new_value and new_value.strip() and not self.specjalne_znaki(new_value):
             sklep = self.db_session.query(Sklep).filter_by(id=sklep_id).first()
@@ -702,10 +711,12 @@ class Controller:
                 self.db_session.commit()
                 self.load_zamowienia_daemon(widok = "ukryj")
                 self.load_sklepy(widok = "ukryj")
+    
+                self.sound.play_confirm_sound()
 
         elif self.specjalne_znaki(new_value):
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.zmien_nazwa_sklep()
 
     def zmien_nazwa_firma(self):
@@ -718,7 +729,7 @@ class Controller:
         stara_nazwa = element_value[1]
 
         leksykon = self.leksykon_programu["edit_messagebox"]
-        new_value = ViewOrder.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["company"]+"\t\t\t\t", value=stara_nazwa)
+        new_value = ViewMessageBox.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["company"]+"\t\t\t\t", value=stara_nazwa)
 
         if new_value and new_value.strip():
             firma = self.db_session.query(Firma).filter_by(id=firma_id).first()
@@ -729,9 +740,11 @@ class Controller:
                 self.load_zamowienia_daemon()
                 self.load_firmy_deaemon(widok = "ukryj") 
 
+                self.sound.play_confirm_sound()
+
         elif self.specjalne_znaki(new_value):
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.zmien_nazwa_firma()
 
     def zmien_nazwa_kategoria(self):
@@ -744,7 +757,7 @@ class Controller:
         stara_nazwa = element_value[1]
 
         leksykon = self.leksykon_programu["edit_messagebox"]
-        new_value = ViewOrder.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["category"]+"\t\t\t\t", value=stara_nazwa)
+        new_value = ViewMessageBox.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["category"]+"\t\t\t\t", value=stara_nazwa)
 
         if new_value and new_value.strip():
             kategoria = self.db_session.query(Kategoria).filter_by(id=kategoria_id).first()
@@ -755,9 +768,11 @@ class Controller:
                 self.load_zamowienia_daemon()
                 self.load_kategorie_daemon(widok = "ukryj") 
 
+                self.sound.play_confirm_sound()
+
         elif self.specjalne_znaki(new_value):
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.zmien_nazwa_kategoria()
 
     def usun_zamowienie(self):
@@ -767,7 +782,7 @@ class Controller:
 
         leksykon = self.leksykon_programu["delete_messagebox"]
 
-        dialog = ViewOrder.messagebox(self, 
+        dialog = ViewMessageBox.messagebox(self, 
                                  type="ask", 
                                  heading=leksykon["heading"], 
                                  text=leksykon["text"]["order"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
@@ -779,6 +794,8 @@ class Controller:
             self.db_session.commit()
             self.load_zamowienia_daemon()  
 
+            self.sound.play_confirm_sound()
+
     def usun_artykul_zamowienie(self):
         selected_item = self.inside_tree.selection()
         if not selected_item:
@@ -788,7 +805,7 @@ class Controller:
 
         leksykon = self.leksykon_programu["delete_messagebox"]
 
-        dialog = ViewOrder.messagebox(self, 
+        dialog = ViewMessageBox.messagebox(self, 
                                  type="ask", 
                                  heading=leksykon["heading"], 
                                  text=leksykon["text"]["order"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
@@ -805,7 +822,10 @@ class Controller:
             self.db_session.commit()
             self.load_inside_zamowienie(self.zamowienie_id)
 
+            self.sound.play_confirm_sound()
+
         self.load_zamowienia_daemon()
+
 
     def usun_kupujacego(self):
         selected_item = self.kupujacy_tree.selection()
@@ -814,7 +834,7 @@ class Controller:
         
         leksykon = self.leksykon_programu["delete_messagebox"]
 
-        dialog = ViewOrder.messagebox(self, 
+        dialog = ViewMessageBox.messagebox(self, 
                                  type="ask", 
                                  heading=leksykon["heading"], 
                                  text=leksykon["text"]["buyer"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
@@ -825,7 +845,9 @@ class Controller:
             self.db_session.delete(obj)
             self.db_session.commit()
             self.load_zamowienia_daemon()
-            self.load_kupujacy_daemon(widok = "ukryj")   
+            self.load_kupujacy_daemon(widok = "ukryj")  
+
+            self.sound.play_confirm_sound()
 
     def usun_sklep(self):
         selected_item = self.sklepy_tree.selection()
@@ -834,7 +856,7 @@ class Controller:
         
         leksykon = self.leksykon_programu["delete_messagebox"]
 
-        dialog = ViewOrder.messagebox(self, 
+        dialog = ViewMessageBox.messagebox(self, 
                                  type="ask", 
                                  heading=leksykon["heading"], 
                                  text=leksykon["text"]["shop"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
@@ -844,7 +866,9 @@ class Controller:
             obj = self.db_session.query(Sklep).filter_by(id=sklep_id).first()
             self.db_session.delete(obj)
             self.db_session.commit()
-            self.load_sklepy_daemon(widok = "ukryj")   
+            self.load_sklepy_daemon(widok = "ukryj") 
+
+            self.sound.play_confirm_sound()
 
     def usun_firma(self):
         selected_item = self.firma_tree.selection()
@@ -853,7 +877,7 @@ class Controller:
         
         leksykon = self.leksykon_programu["delete_messagebox"]
 
-        dialog = ViewOrder.messagebox(self, 
+        dialog = ViewMessageBox.messagebox(self, 
                                  type="ask", 
                                  heading=leksykon["heading"], 
                                  text=leksykon["text"]["company"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
@@ -866,6 +890,8 @@ class Controller:
             self.db_session.commit()
             self.load_firmy_deaemon(widok = "ukryj")    
 
+            self.sound.play_confirm_sound()
+
     def usun_kategorie(self):
         selected_item = self.kategorie_tree.selection()
         if not selected_item:
@@ -873,7 +899,7 @@ class Controller:
         
         leksykon = self.leksykon_programu["delete_messagebox"]
 
-        dialog = ViewOrder.messagebox(self, 
+        dialog = ViewMessageBox.messagebox(self, 
                                  type="ask", 
                                  heading=leksykon["heading"], 
                                  text=leksykon["text"]["category"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
@@ -883,7 +909,9 @@ class Controller:
             obj = self.db_session.query(Kategoria).filter_by(id=kategoria_id).first()
             self.db_session.delete(obj)
             self.db_session.commit()
-            self.load_kategorie_daemon(widok = "ukryj")                
+            self.load_kategorie_daemon(widok = "ukryj") 
+
+            self.sound.play_confirm_sound()
 
     def zniszcz_artykul(self):
         selected_item = self.artykuly_tree.selection()
@@ -892,7 +920,7 @@ class Controller:
 
         leksykon = self.leksykon_programu["delete_messagebox"]
 
-        dialog = ViewOrder.messagebox(self, 
+        dialog = ViewMessageBox.messagebox(self, 
                                  type="ask", 
                                  heading=leksykon["heading"], 
                                  text=leksykon["text"]["article"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
@@ -902,6 +930,8 @@ class Controller:
             self.db_session.query(Artykul_Lista).filter_by(id=artykul_id).delete(synchronize_session=False)
             self.db_session.commit()
             self.powrot_do_lista_artykulow()
+
+            self.sound.play_confirm_sound()
 
     def dodaj_modyfikuj_artykul(self, commend = "stworz"):
         self.zamowienia_frame.grid_remove()
@@ -918,7 +948,7 @@ class Controller:
             selected_item = self.artykuly_tree.selection()
             if not selected_item:
                 leksykon = self.leksykon_programu["error_messagebox"]
-                ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["select_art"])
+                ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["select_art"])
                 return
                     
             self.artykul_modyfikacja_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
@@ -938,6 +968,8 @@ class Controller:
             firma_id_artykulu = info[4]
             kategoria_id_artykulu = info[3]
 
+        self.sound.play_confirm_sound()
+
         self.load_kategorie_daemon(widok = "ukryj", select_item = kategoria_id_artykulu)
         self.load_firmy_deaemon(select_item = firma_id_artykulu)
 
@@ -951,7 +983,6 @@ class Controller:
         firma_id_artykulu = artykul.firma_id #4
 
         return (nazwa_artykulu_string, kolor_artykulu_string, szczegoly_artykulu_string, kategoria_id_artykulu, firma_id_artykulu)
-
 
     def wczytaj_informacje_artykul_inside(self, arty):
         return
@@ -978,7 +1009,7 @@ class Controller:
             selected_item = self.zamowienia_tree.selection()
             if not selected_item:
                 leksykon = self.leksykon_programu["error_messagebox"]
-                ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["order"])
+                ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["order"])
                 return
 
             self.zamowienie_id = self.zamowienia_tree.item(selected_item[0], 'values')[0]
@@ -1003,44 +1034,44 @@ class Controller:
         selected_item = self.kupujacy_tree.selection()
         if not selected_item:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["buyer"])
+            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["buyer"])
             return
         
         selected_item = self.sklepy_tree.selection()
         if not selected_item:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["shop"])
+            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["shop"])
             return
 
         try:
             rabat_j = float(self.view.rabat_j_var.get().replace(',', '.'))
         except tk.TclError:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["unit_discount"])
+            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["unit_discount"])
             return
         
         except ValueError:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["unit_discount"])
+            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["unit_discount"])
             return
         
         try:
             rabat_procentowy = float(self.view.rabat_p_var.get().replace(',', '.'))
         except tk.TclError:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["proc_discount"])
+            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["proc_discount"])
             return
        
         except ValueError:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["proc_discount"])
+            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["proc_discount"])
             return
 
         try:
             data = self.konwersja_string_do_data(self.view.zamowienie_data.get())
         except ValueError:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["date"])
+            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["date"])
             return
         
         kupujacy_id = int(self.kupujacy_tree.item(self.kupujacy_tree.selection()[0], 'values')[0])
@@ -1069,19 +1100,19 @@ class Controller:
         selected_item = self.firma_tree.selection()
         if not selected_item:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["company"])
+            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["company"])
             return
         
         selected_item = self.kategorie_tree.selection()
         if not selected_item:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["category"])
+            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["category"])
             return
 
         nazwa = self.view.nazwa_artykulu_string.get()
         if not nazwa:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             return
        
         firma_id = int(self.firma_tree.item(self.firma_tree.selection()[0], 'values')[0])
@@ -1181,14 +1212,14 @@ class Controller:
             cena_artykulu_var = float(self.view.cena_artykulu_var.get().replace(",", "."))
         except ValueError:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["price"])
+            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["price"])
             return
 
         try:
             ilosc_artykulu_var =  float(self.view.ilosc_artykulu_var.get().replace(",", "."))
         except ValueError:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["amount"])
+            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["amount"])
             return
 
         text = ["start", (self.zamowienie_id, self.view.id_artykulu, cena_artykulu_var, ilosc_artykulu_var), "end", (self.view.cena_artykulu_var_old, self.view.ilosc_artykulu_var_old)]
@@ -1228,14 +1259,14 @@ class Controller:
             cena_artykulu_var = float(self.view.cena_artykulu_var.get().replace(",", "."))
         except ValueError:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["price"])
+            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["price"])
             return
 
         try:
             ilosc_artykulu_var =  float(self.view.ilosc_artykulu_var.get().replace(",", "."))
         except ValueError:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewOrder.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["amount"])
+            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["amount"])
             return
 
         zamowienie_id = self.zamowienie_dodawanie_artykulu_id
@@ -1296,13 +1327,11 @@ class Controller:
         for widget in self.view.button_frame.winfo_children():
             widget.destroy()
 
-    def show_message_async_demon(self):
-        print("show_message_async_demon")
-        threading.Thread(target=self.view.show_message_async, daemon=True).start()
+    def show_message_async(self):
+        self.messagebox.show_message_async(self.master, leksykon=self.leksykon_programu)
 
-    def hide_message_async_demon(self):
-        print("hide_message_async_demon")
-        threading.Thread(target=self.view.ukryj_message_async, daemon=True).start()
+    def hide_message_async(self):
+        self.messagebox.ukryj_message_async(self.master)
 
     def on_double_click_dodawanie_artykulu_do_zamowienia(self, event):
         try:
@@ -1323,6 +1352,8 @@ class Controller:
             
             zamowienie_id = self.zamowienie_dodawanie_artykulu_id
             self.load_inside_zamowienie(zamowienie_id)
+            
+            self.sound.play_confirm_sound()
 
     def on_double_click_otwieranie_zamowienia(self, event):
         selected_item = self.zamowienia_tree.selection()
@@ -1332,6 +1363,8 @@ class Controller:
             self.zamowienie_id = self.zamowienia_tree.item(selected_item[0], 'values')[0]
             self.load_inside_zamowienie(self.zamowienie_id)
 
+            self.sound.play_confirm_sound()
+
     def on_double_click_filtrowanie_kategoria(self, event):
         selected_item = self.kategorie_tree.selection()
         if selected_item:
@@ -1339,6 +1372,11 @@ class Controller:
             self.load_artykuly(kategoria_id=kategoria_id)
             self.load_kategorie()
 
+            self.sound.play_confirm_sound()
+
     def on_double_click_filtrowanie_kategoria_resetowanie(self, event):
         self.load_kategorie()
         self.load_artykuly()
+
+        self.sound.play_confirm_sound()
+

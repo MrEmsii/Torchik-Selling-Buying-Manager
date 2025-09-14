@@ -13,7 +13,7 @@ import json
 class ControllerMain:
     def __init__(self):
         #wczytanie słowników, podzielenie słowników na elementy, 
-        #uruchomienie okna głównego z możliwością wybory dalszego działania
+        #uruchomienie okna głównego z możliwością wybory dalszego działania - check
         #wybór między zamówienia, statystyki
 
         self.dsc = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -39,6 +39,9 @@ class ControllerMain:
         self.main_view_frame = self.main_view.main_view_frame
         
         self.button_order_click(self.main_view_frame)
+        self.button_statistics_click(self.main_view_frame)
+        self.button_settings_click(self.main_view_frame)
+        self.button_exit_click(self.main_view_frame)
 
     def run(self):
         self.main_view.master.protocol("WM_DELETE_WINDOW", self.on_closing_order_window)
@@ -105,8 +108,24 @@ class ControllerMain:
         )
         self.order_controller.run()
 
+    def open_statistics_window(self):
+        pass
+
+    def open_settings_window(self):
+        pass
+
     def button_order_click(self, frame):
-        leksykon = self.leksykon_programu["order_window"]["button_stworz_artykul"]
-        self.main_view.utworz_przycisk(frame, self.open_order_window, pady=(30,30), icon=self.main_view.order_button_icon, leksykon_programu=leksykon)
+        leksykon = self.leksykon_programu["main_window"]["button_zamowienia"]
+        self.main_view.utworz_przycisk(frame, self.open_order_window, icon=self.main_view.order_button_icon, leksykon_programu=leksykon)
 
+    def button_statistics_click(self, frame):
+        leksykon = self.leksykon_programu["main_window"]["button_statystyki"]
+        self.main_view.utworz_przycisk(frame, self.open_statistics_window, icon=self.main_view.statistics_button_icon, leksykon_programu=leksykon)
 
+    def button_settings_click(self, frame):
+        leksykon = self.leksykon_programu["main_window"]["button_ustawienia"]
+        self.main_view.utworz_przycisk(frame, self.open_settings_window, icon=self.main_view.settings_button_icon, leksykon_programu=leksykon)
+
+    def button_exit_click(self, frame):
+        leksykon = self.leksykon_programu["main_window"]["button_wyjscie"]
+        self.main_view.utworz_przycisk(frame, self.on_closing_order_window, icon=self.main_view.exit_button_icon, leksykon_programu=leksykon)

@@ -25,7 +25,6 @@ class ViewOrder(BaseView):
 
     def setup_styles(self, dsc):
         self.style = ttk.Style()
-        # self.order_master.tk.call('source', dsc + '/resources/themes/awdark.tcl')
 
         self.style.theme_use("awdark")
         self.style.configure("Treeview", background="#D8E8E8", foreground="#2F3131", rowheight=20, fieldbackground="#E7E7E7", font=('Arial', 8))

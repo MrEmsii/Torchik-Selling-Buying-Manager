@@ -11,8 +11,8 @@ class BaseView:
             frame,
             text=leksykon_programu["text"],
             command=self._click_sound(command),
-            width=10,
-            image=icon or None,
+            width=12,
+            image=icon,
             compound="left"
         )
         przycisk.pack(side=side, padx=padx, pady=pady)

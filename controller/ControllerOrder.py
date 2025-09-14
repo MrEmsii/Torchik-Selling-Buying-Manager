@@ -33,7 +33,7 @@ class ControllerOrder(BaseView):
             )
 
         self.sound = sound
-        self.messagebox_controller = messagebox_controller  # Tymczasowe przypisanie None, zostanie zaktualizowane później
+        self.messagebox_controller = messagebox_controller 
         self.inicjalizacja_frame()
 
     def run(self):

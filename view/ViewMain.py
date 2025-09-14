@@ -10,7 +10,7 @@ import os
 class ViewMain(BaseView):
     def __init__(self, master, dsc=None, leksykon = None, konfiguracja_programu = None, sound = None, refresh_icon=None):
         self.master = master
-        self.master.geometry("500x200+0+0")
+        self.master.geometry("500x500+100+100")
         self.master.resizable(True, True)
 
         self.leksykon = leksykon
@@ -23,12 +23,12 @@ class ViewMain(BaseView):
         self.button_icon_pack_main(dsc)
 
     def setup_frames(self):
-        self.button_main_frame = ttk.Frame(self.master, padding=5)
+        # self.button_main_frame = ttk.Frame(self.master, padding=5)
 
         self.main_view_frame = ttk.Frame(self.master, padding=5)
 
-        self.button_main_frame.grid(row=0, column=0, rowspan=5, sticky="nsew", padx=5, pady=5)
-        self.main_view_frame.grid(row=0, column=1, columnspan=5, rowspan=5, sticky="nsew", padx=5, pady=5)
+        # self.button_main_frame.grid(row=0, column=0, padx=5, pady=5)
+        self.main_view_frame.grid(row=0, column=0, padx=5, pady=5)
 
     def setup_styles(self, dsc):
         self.style = ttk.Style()
@@ -47,18 +47,14 @@ class ViewMain(BaseView):
         self.background_label.place(x=0, y=0, relwidth=1, relheight=1) 
 
         self.master.grid_rowconfigure(0, weight=4)
-        self.master.grid_rowconfigure(1, weight=4)
-        self.master.grid_rowconfigure(2, weight=4)
-        self.master.grid_rowconfigure(3, weight=4)
 
-        self.master.grid_columnconfigure(0, weight=1)
-        self.master.grid_columnconfigure(1, weight=2000)
-        self.master.grid_columnconfigure(2, weight=2000)
-        self.master.grid_columnconfigure(3, weight=2000)
+        self.master.grid_columnconfigure(0, weight=10)
 
     def button_icon_pack_main(self, dsc):
         self.order_button_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_firma_icon.png")).subsample(8, 8)
-        self.refresh_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "refresh_icon.png")).subsample(8, 8)
-        self.setting_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "setting_icon.png")).subsample(8, 8)
+        self.refresh_button_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "refresh_icon.png")).subsample(8, 8)
+        self.settings_button_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "setting_icon.png")).subsample(8, 8)
+        self.exit_button_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "setting_icon.png")).subsample(8, 8)
+        self.statistics_button_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "setting_icon.png")).subsample(8, 8)
         
 

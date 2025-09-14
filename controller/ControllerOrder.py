@@ -1,7 +1,7 @@
 from model.models import SQLconnect, select, Kupujacy, Kategoria, Sklep, Firma, Zamowienie, Artykul_Lista, artykuly_relacja
 from view.ViewOrder import ViewOrder
-from view.ViewSound import ViewSound
-from view.ViewMessageBox import ViewMessageBox
+from controller.ControllerMessageBox import ControllerMessageBox
+# from view.self.messagebox_controller import self.messagebox_controller
 
 import os
 import string
@@ -10,39 +10,39 @@ from tkinterdnd2 import DND_FILES, TkinterDnD
 import tkinter as tk
 
 import threading
-import json
 import datetime as datetime
 
-class ControllerOrder:
-    def __init__(self):
-        self.dsc = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-        self.master = TkinterDnD.Tk()
-        self.db_session = SQLconnect()
-        
-        if os.path.exists(self.dsc + "/resources/setting.json") == False:
-            self.json_setting(status = "create")
-            print("Setting file created.")
-        
-        konfiguracja_programu = self.json_setting(status="read")
-        
-        self.leksykon_programu = self.json_language(konfiguracja_programu["language"])
-        
-        self.view = ViewOrder(self.master, dsc=self.dsc, leksykon=self.leksykon_programu, konfiguracja_programu=konfiguracja_programu)
-        self.messagebox = ViewMessageBox()
+from view.base_view import BaseView
 
-        self.sound = ViewSound(self.dsc, konfiguracja_programu)
+class ControllerOrder(BaseView):
+    def __init__(self, master, dsc, leksykon_programu, konfiguracja_programu, sound = None, messagebox_controller = None, currency = None, language_code = None):
+        self.dsc = dsc
+        self.leksykon_programu = leksykon_programu
+        self.konfiguracja_programu = konfiguracja_programu
+        self.currency = currency
+
+        self.order_master = tk.Toplevel(master)
+        self.db_session = SQLconnect()
+
+        self.view = ViewOrder(
+            self.order_master, 
+            dsc=self.dsc, 
+            leksykon=self.leksykon_programu, 
+            konfiguracja_programu=konfiguracja_programu, 
+            language_code=language_code
+            )
+
+        self.sound = sound
+        self.messagebox_controller = messagebox_controller  # Tymczasowe przypisanie None, zostanie zaktualizowane później
         self.inicjalizacja_frame()
 
     def run(self):
-        self.view.master.protocol("WM_DELETE_WINDOW", self.on_closing)
-        self.view.master.mainloop()
+        self.view.order_master.protocol("WM_DELETE_WINDOW", self.on_closing_order_window)
+        self.view.order_master.mainloop()
 
-    def on_closing(self):
-        leksykon = self.leksykon_programu["close_messagebox"]
-                
-        if ViewMessageBox.messagebox(self, type="close", heading=leksykon["heading"], text=leksykon["text"]):
-            self.db_session.close()
-            self.view.master.destroy()
+    def on_closing_order_window(self):
+        if self.messagebox_controller.close_info():
+            self.view.order_master.destroy() 
 
     def ustawienia_programu(self):
         print("dodać ustawienia")
@@ -99,7 +99,7 @@ class ControllerOrder:
                 self.zaznacz_wiersz_z_wartoscia(self.sklepy_tree, 'id', select_item)
                 self.hide_message_async()
             
-            self.master.after(0, update_gui)
+            self.order_master.after(0, update_gui)
 
         threading.Thread(target=task, daemon=True).start()
 
@@ -132,7 +132,7 @@ class ControllerOrder:
                     self.artykuly_tree.insert('', 'end', values=(id, kategoria, firma, nazwa, kolor, szczegoly))
                 
                 self.hide_message_async()
-            self.master.after(0, update_gui)
+            self.order_master.after(0, update_gui)
         threading.Thread(target=task, daemon=True).start()
 
     def load_kupujacy(self, widok, select_item):
@@ -158,7 +158,7 @@ class ControllerOrder:
                 self.zaznacz_wiersz_z_wartoscia(self.kupujacy_tree, 'id', select_item)
                 self.hide_message_async()
 
-            self.master.after(0, update_gui)
+            self.order_master.after(0, update_gui)
 
         threading.Thread(target=task, daemon=True).start()
 
@@ -184,7 +184,7 @@ class ControllerOrder:
                 self.zaznacz_wiersz_z_wartoscia(self.kategorie_tree, 'id', select_item)
                 self.hide_message_async()
 
-            self.master.after(0, update_gui)
+            self.order_master.after(0, update_gui)
 
         threading.Thread(target=task, daemon=True).start()
 
@@ -210,7 +210,7 @@ class ControllerOrder:
                 self.zaznacz_wiersz_z_wartoscia(self.firma_tree, 'id', select_item)
                 self.hide_message_async()
 
-            self.master.after(0, update_gui)
+            self.order_master.after(0, update_gui)
 
         threading.Thread(target=task, daemon=True).start()
 
@@ -219,8 +219,6 @@ class ControllerOrder:
             self.show_message_async()
 
         def task():
-            currency = self.leksykon_programu["currency"]
-
             zamowienia = self.db_session.query(Zamowienie).all()
             zamowienia_data = []
 
@@ -229,10 +227,10 @@ class ControllerOrder:
                 zamow_data = zamow.data
                 zamow_kupujacy = zamow.kupujacy.nazwa if zamow.kupujacy else " "
                 zamow_sklep = zamow.sklep.nazwa if zamow.sklep else " "
-                rabat_j = f"{zamow.rabat_j:.2f} {currency}"
+                rabat_j = f"{zamow.rabat_j:.2f} {self.currency}"
                 rabat_proc = f"{zamow.rabat_procent :.0f} %"
-                zamow_cena = f"{zamow.oblicz_cene(self.db_session):,.2f} {currency}".replace(",", " ")
-                zamow_cena_rabat = f"{zamow.oblicz_cene_rabat(self.db_session):,.2f} {currency}".replace(",", " ")
+                zamow_cena = f"{zamow.oblicz_cene(self.db_session):,.2f} {self.currency}".replace(",", " ")
+                zamow_cena_rabat = f"{zamow.oblicz_cene_rabat(self.db_session):,.2f} {self.currency}".replace(",", " ")
                 zamowienia_data.append((zamow_id, zamow_data, zamow_kupujacy, zamow_sklep, rabat_j, rabat_proc, zamow_cena, zamow_cena_rabat))
 
             zamowienia_data.sort(key=lambda x: x[0], reverse=True)
@@ -244,79 +242,79 @@ class ControllerOrder:
                     self.zamowienia_tree.insert('', 'end', values=(z_id, data, kupujacy, sklep, rabat_1, rabat_2, cena, cena_rabat))
                 self.hide_message_async()
 
-            self.master.after(0, update_gui)
+            self.order_master.after(0, update_gui)
 
         threading.Thread(target=task, daemon=True).start()
 
     def button_manager(self, frame, back_target = 'main', startup = False):
         if startup == False:
-            for widget in self.main_frame.winfo_children():
+            for widget in self.order_frame.winfo_children():
                 widget.destroy()
 
-            for widget in self.button_frame.winfo_children():
+            for widget in self.button_orders_frame.winfo_children():
                 widget.destroy()
         
         if frame == "main":
-            self.button_dodaj_zamowienie(self.button_frame)
-            self.button_modyfikuj_zamowienie(self.button_frame)
-            self.button_lista_artykulow(self.button_frame)
-            self.button_lista_sklepow(self.button_frame)
-            self.button_lista_kupujacych(self.button_frame)
-            self.button_lista_kategorii(self.button_frame)
-            self.button_lista_firm(self.button_frame)
-            self.button_refresh_zamowienia(self.button_frame)  
-            self.button_ustawienia(self.button_frame) 
-            self.button_usun_zamowienie(self.button_frame)
+            self.button_dodaj_zamowienie(self.button_orders_frame)
+            self.button_modyfikuj_zamowienie(self.button_orders_frame)
+            self.button_lista_artykulow(self.button_orders_frame)
+            self.button_lista_sklepow(self.button_orders_frame)
+            self.button_lista_kupujacych(self.button_orders_frame)
+            self.button_lista_kategorii(self.button_orders_frame)
+            self.button_lista_firm(self.button_orders_frame)
+            self.button_refresh_zamowienia(self.button_orders_frame)  
+            self.button_ustawienia(self.button_orders_frame) 
+            self.button_usun_zamowienie(self.button_orders_frame)
 
         elif frame == "lista dodanych do zamowienia":
-            self.button_dodaj_artykul_zamowienie(self.button_frame)
-            self.button_edytuj_artykul_zamowienie(self.button_frame)
-            self.button_usun_artykul_zamowienie(self.button_frame)
+            self.button_dodaj_artykul_zamowienie(self.button_orders_frame)
+            self.button_edytuj_artykul_zamowienie(self.button_orders_frame)
+            self.button_usun_artykul_zamowienie(self.button_orders_frame)
 
         elif frame == "kupujacy":
-            self.button_dodaj_kupujacy(self.button_frame)
-            self.button_zmiana_nazwa_kupujacy(self.button_frame)
-            self.button_usun_kupujacy(self.button_frame)
+            self.button_dodaj_kupujacy(self.button_orders_frame)
+            self.button_zmiana_nazwa_kupujacy(self.button_orders_frame)
+            self.button_usun_kupujacy(self.button_orders_frame)
 
         elif frame == "sklepy":
-            self.button_dodaj_sklep(self.button_frame) 
-            self.button_zmiana_nazwa_sklep(self.button_frame)
-            self.button_usun_sklep(self.button_frame)
+            self.button_dodaj_sklep(self.button_orders_frame) 
+            self.button_zmiana_nazwa_sklep(self.button_orders_frame)
+            self.button_usun_sklep(self.button_orders_frame)
 
         elif frame == "firmy":
-            self.button_dodaj_firma(self.button_frame) 
-            self.button_zmiana_nazwa_firma(self.button_frame)
-            self.button_usun_firma(self.button_frame)
+            self.button_dodaj_firma(self.button_orders_frame) 
+            self.button_zmiana_nazwa_firma(self.button_orders_frame)
+            self.button_usun_firma(self.button_orders_frame)
 
         elif frame == "lista_artykuly":
-            self.button_stworz_artykul(self.button_frame) 
-            self.button_modyfikuj_artykul(self.button_frame) 
-            self.button_zniszcz_artykul(self.button_frame)
+            self.button_stworz_artykul(self.button_orders_frame) 
+            self.button_modyfikuj_artykul(self.button_orders_frame) 
+            self.button_zniszcz_artykul(self.button_orders_frame)
 
         elif frame == "dodaj_zamowienie":
-            self.buttons_zatwierdz_zamowienia(self.button_frame) 
-            self.button_dodaj_kupujacy(self.button_frame)
-            self.button_dodaj_sklep(self.button_frame) 
+            self.buttons_zatwierdz_zamowienia(self.button_orders_frame) 
+            self.button_dodaj_kupujacy(self.button_orders_frame)
+            self.button_dodaj_sklep(self.button_orders_frame) 
 
         elif frame == "modyfikuj_zamowienie":
-            self.button_zatwierdz_edycje_zamowienie(self.button_frame) 
-            self.button_dodaj_kupujacy(self.button_frame)
-            self.button_dodaj_sklep(self.button_frame) 
+            self.button_zatwierdz_edycje_zamowienie(self.button_orders_frame) 
+            self.button_dodaj_kupujacy(self.button_orders_frame)
+            self.button_dodaj_sklep(self.button_orders_frame) 
 
         elif frame == "kategorie":
-            self.button_dodaj_kategoria(self.button_frame) 
-            self.button_zmiana_nazwa_kategoria(self.button_frame)
-            self.button_usun_kategorie(self.button_frame)
+            self.button_dodaj_kategoria(self.button_orders_frame) 
+            self.button_zmiana_nazwa_kategoria(self.button_orders_frame)
+            self.button_usun_kategorie(self.button_orders_frame)
 
         elif frame == 'tworzenie_artykuly':
-            self.button_zatwierdz_artykul(self.button_frame)
-            self.button_dodaj_firma(self.button_frame)
-            self.button_dodaj_kategoria(self.button_frame) 
+            self.button_zatwierdz_artykul(self.button_orders_frame)
+            self.button_dodaj_firma(self.button_orders_frame)
+            self.button_dodaj_kategoria(self.button_orders_frame) 
 
         elif frame == 'modyfikacja_artykuly':
-            self.button_zatwierdz_edycje_artykul(self.button_frame)
-            self.button_dodaj_firma(self.button_frame)
-            self.button_dodaj_kategoria(self.button_frame) 
+            self.button_zatwierdz_edycje_artykul(self.button_orders_frame)
+            self.button_dodaj_firma(self.button_orders_frame)
+            self.button_dodaj_kategoria(self.button_orders_frame) 
 
         elif frame == "wyjdź_z_cena_ilosc_dodawanie":
             self.button_zatwierdz_dodanie_artykulu(self.view.button_cena_ilosc_frame)
@@ -328,49 +326,17 @@ class ControllerOrder:
 
 
         if frame != 'main':
-            self.button_back_pack(self.button_frame, back_target)
+            self.button_back_pack(self.button_orders_frame, back_target)
         
         ViewOrder.start_grid_setting(self)
 
     def inicjalizacja_frame(self):
-        self.main_frame = self.view.main_frame
-        self.button_frame = self.view.button_frame
+        self.order_frame = self.view.order_frame
+        self.button_orders_frame = self.view.button_orders_frame
         self.zamowienia_frame = self.view.zamowienia_frame
         self.zamowienie_id = None
 
         self.list_zamowienia()
-
-    def json_language(self, language_code):
-        try:
-            with open(os.path.join(self.dsc, "resources", "language", f"{language_code}.json"), 'r', encoding='utf-8') as file:
-                return json.load(file)
-        except FileNotFoundError:
-            print(f"Language file '{language_code}.json' not found.")
-            ViewMessageBox.messagebox("language", language_code)
-            return {}
-
-    def json_setting(self, status = "read", key = None, value = None):
-        if status == "create":
-            config = {
-                "volume": 0.1, 
-                "language": "pl_PL",
-                "start_sound": "start_sound.wav",
-                "info_sound": "info_sound.wav",
-                "error_sound": "error_sound.wav",
-                "confirm_sound": "confirm_sound.wav"
-            }
-
-            with open(os.path.join(self.dsc, "resources", "setting.json"), 'w', encoding='utf-8') as settings:
-                json.dump(config, settings, ensure_ascii=False, indent=4)  
-
-        elif status == "read":
-            with open(os.path.join(self.dsc, "resources", "setting.json"), 'r', encoding='utf-8') as settings:
-                config = json.load(settings)
-                return config
-
-        elif status == "edit":
-            config = self.json_setting(status="read")
-            config[key] = value
 
     # --- ARTYKUŁY ---
     def button_stworz_artykul(self, frame):
@@ -527,7 +493,7 @@ class ControllerOrder:
 
     def button_back_pack(self, frame, commend = "main"):
         if commend == "main":
-            commend = self.pokaz_main_frame
+            commend = self.pokaz_order_frame
         elif commend == "lista_artykułów":
             commend = self.powrot_do_lista_artykulow
         elif commend == "zamówienie":
@@ -555,7 +521,7 @@ class ControllerOrder:
 
 
         self.artykuly_tree = self.view.artykuly_tree(parent_frame = self.view.secend_frame, label_text = name["select_art"])
-        self.kategorie_tree = self.view.name_tree(self.view.main_frame, name["category"], True)
+        self.kategorie_tree = self.view.name_tree(self.view.order_frame, name["category"], True)
         
         self.load_artykuly_deaemon("ukryj")
         self.load_kategorie_daemon()
@@ -575,36 +541,36 @@ class ControllerOrder:
         self.zamowienia_frame.grid_remove()
         self.button_manager("kupujacy")
         name = self.leksykon_programu["names_list"]["buyer"]
-        self.kupujacy_tree = self.view.name_tree(self.main_frame, name, True)
+        self.kupujacy_tree = self.view.name_tree(self.order_frame, name, True)
         self.load_kupujacy_daemon()
 
     def list_firmy(self):
         self.zamowienia_frame.grid_remove()
         self.button_manager(frame="firmy")
         name = self.leksykon_programu["names_list"]["company"]
-        self.firma_tree = self.view.name_tree(self.main_frame, name, True)
+        self.firma_tree = self.view.name_tree(self.order_frame, name, True)
         self.load_firmy_deaemon()
 
     def list_sklepy(self):
         self.zamowienia_frame.grid_remove()
         self.button_manager("sklepy")
         name = self.leksykon_programu["names_list"]["shop"]
-        self.sklepy_tree = self.view.name_tree(self.main_frame, name, True)
+        self.sklepy_tree = self.view.name_tree(self.order_frame, name, True)
         self.load_sklepy_daemon()
 
     def list_kategorie(self):
         self.zamowienia_frame.grid_remove()
         self.button_manager(frame="kategorie")
         name = self.leksykon_programu["names_list"]["category"]
-        self.kategorie_tree = self.view.name_tree(self.main_frame, name, True)
+        self.kategorie_tree = self.view.name_tree(self.order_frame, name, True)
         self.load_kategorie_daemon()
 
     def stworz_sklep(self, value=None):
         leksykon = self.leksykon_programu["add_messagebox"]
-        name = ViewMessageBox.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["shop"]+"\t\t\t\t", value=value)
+        name = self.messagebox_controller.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["shop"]+"\t\t\t\t", value=value)
         if name == "" or self.specjalne_znaki(name) :
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.stworz_sklep(value=name)
 
         elif name is not None:
@@ -617,10 +583,10 @@ class ControllerOrder:
 
     def stworz_kupujacy(self, value=None):
         leksykon = self.leksykon_programu["add_messagebox"]
-        name = ViewMessageBox.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["buyer"]+"\t\t\t\t", value=value)
+        name = self.messagebox_controller.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["buyer"]+"\t\t\t\t", value=value)
         if name == "" or self.specjalne_znaki(name) :
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.stworz_kupujacy(value=name)
 
         elif name is not None:
@@ -633,10 +599,10 @@ class ControllerOrder:
 
     def stworz_kategoria(self, value=None):
         leksykon = self.leksykon_programu["add_messagebox"]
-        name = ViewMessageBox.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["category"]+"\t\t\t\t", value=value)
+        name = self.messagebox_controller.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["category"]+"\t\t\t\t", value=value)
         if name == "" or self.specjalne_znaki(name):
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.stworz_kategoria(value=name)
 
         elif name is not None:
@@ -649,10 +615,10 @@ class ControllerOrder:
 
     def stworz_firma(self, value=None):
         leksykon = self.leksykon_programu["add_messagebox"]
-        name = ViewMessageBox.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["company"]+"\t\t\t\t", value=value)
+        name = self.messagebox_controller.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["company"]+"\t\t\t\t", value=value)
         if name == "" or self.specjalne_znaki(name) :
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.stworz_firma(value=name)
 
         elif name is not None:
@@ -673,7 +639,7 @@ class ControllerOrder:
         stara_nazwa = element_value[1]
 
         leksykon = self.leksykon_programu["edit_messagebox"]
-        new_value = ViewMessageBox.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["buyer"]+"\t\t\t\t", value=stara_nazwa)
+        new_value = self.messagebox_controller.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["buyer"]+"\t\t\t\t", value=stara_nazwa)
 
         if new_value and new_value.strip() and not self.specjalne_znaki(new_value):
             kupujacy = self.db_session.query(Kupujacy).filter_by(id=kupujacy_id).first()
@@ -688,7 +654,7 @@ class ControllerOrder:
 
         elif self.specjalne_znaki(new_value):
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.zmien_nazwa_kupujacy()
 
     def zmien_nazwa_sklep(self):
@@ -701,7 +667,7 @@ class ControllerOrder:
         stara_nazwa = element_value[1]
 
         leksykon = self.leksykon_programu["edit_messagebox"]
-        new_value = ViewMessageBox.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["shop"]+"\t\t\t\t", value=stara_nazwa)
+        new_value = self.messagebox_controller.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["shop"]+"\t\t\t\t", value=stara_nazwa)
 
         if new_value and new_value.strip() and not self.specjalne_znaki(new_value):
             sklep = self.db_session.query(Sklep).filter_by(id=sklep_id).first()
@@ -716,7 +682,7 @@ class ControllerOrder:
 
         elif self.specjalne_znaki(new_value):
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.zmien_nazwa_sklep()
 
     def zmien_nazwa_firma(self):
@@ -729,7 +695,7 @@ class ControllerOrder:
         stara_nazwa = element_value[1]
 
         leksykon = self.leksykon_programu["edit_messagebox"]
-        new_value = ViewMessageBox.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["company"]+"\t\t\t\t", value=stara_nazwa)
+        new_value = self.messagebox_controller.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["company"]+"\t\t\t\t", value=stara_nazwa)
 
         if new_value and new_value.strip():
             firma = self.db_session.query(Firma).filter_by(id=firma_id).first()
@@ -744,7 +710,7 @@ class ControllerOrder:
 
         elif self.specjalne_znaki(new_value):
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.zmien_nazwa_firma()
 
     def zmien_nazwa_kategoria(self):
@@ -757,7 +723,7 @@ class ControllerOrder:
         stara_nazwa = element_value[1]
 
         leksykon = self.leksykon_programu["edit_messagebox"]
-        new_value = ViewMessageBox.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["category"]+"\t\t\t\t", value=stara_nazwa)
+        new_value = self.messagebox_controller.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["category"]+"\t\t\t\t", value=stara_nazwa)
 
         if new_value and new_value.strip():
             kategoria = self.db_session.query(Kategoria).filter_by(id=kategoria_id).first()
@@ -772,7 +738,7 @@ class ControllerOrder:
 
         elif self.specjalne_znaki(new_value):
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.zmien_nazwa_kategoria()
 
     def usun_zamowienie(self):
@@ -782,7 +748,7 @@ class ControllerOrder:
 
         leksykon = self.leksykon_programu["delete_messagebox"]
 
-        dialog = ViewMessageBox.messagebox(self, 
+        dialog = self.messagebox_controller.messagebox(self, 
                                  type="ask", 
                                  heading=leksykon["heading"], 
                                  text=leksykon["text"]["order"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
@@ -805,7 +771,7 @@ class ControllerOrder:
 
         leksykon = self.leksykon_programu["delete_messagebox"]
 
-        dialog = ViewMessageBox.messagebox(self, 
+        dialog = self.messagebox_controller.messagebox(self, 
                                  type="ask", 
                                  heading=leksykon["heading"], 
                                  text=leksykon["text"]["order"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
@@ -834,7 +800,7 @@ class ControllerOrder:
         
         leksykon = self.leksykon_programu["delete_messagebox"]
 
-        dialog = ViewMessageBox.messagebox(self, 
+        dialog = self.messagebox_controller.messagebox(self, 
                                  type="ask", 
                                  heading=leksykon["heading"], 
                                  text=leksykon["text"]["buyer"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
@@ -856,7 +822,7 @@ class ControllerOrder:
         
         leksykon = self.leksykon_programu["delete_messagebox"]
 
-        dialog = ViewMessageBox.messagebox(self, 
+        dialog = self.messagebox_controller.messagebox(self, 
                                  type="ask", 
                                  heading=leksykon["heading"], 
                                  text=leksykon["text"]["shop"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
@@ -877,7 +843,7 @@ class ControllerOrder:
         
         leksykon = self.leksykon_programu["delete_messagebox"]
 
-        dialog = ViewMessageBox.messagebox(self, 
+        dialog = self.messagebox_controller.messagebox(self, 
                                  type="ask", 
                                  heading=leksykon["heading"], 
                                  text=leksykon["text"]["company"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
@@ -899,7 +865,7 @@ class ControllerOrder:
         
         leksykon = self.leksykon_programu["delete_messagebox"]
 
-        dialog = ViewMessageBox.messagebox(self, 
+        dialog = self.messagebox_controller.messagebox(self, 
                                  type="ask", 
                                  heading=leksykon["heading"], 
                                  text=leksykon["text"]["category"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
@@ -920,7 +886,7 @@ class ControllerOrder:
 
         leksykon = self.leksykon_programu["delete_messagebox"]
 
-        dialog = ViewMessageBox.messagebox(self, 
+        dialog = self.messagebox_controller.messagebox(self, 
                                  type="ask", 
                                  heading=leksykon["heading"], 
                                  text=leksykon["text"]["article"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
@@ -948,7 +914,7 @@ class ControllerOrder:
             selected_item = self.artykuly_tree.selection()
             if not selected_item:
                 leksykon = self.leksykon_programu["error_messagebox"]
-                ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["select_art"])
+                self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["select_art"])
                 return
                     
             self.artykul_modyfikacja_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
@@ -960,7 +926,7 @@ class ControllerOrder:
             self.view.dodaj_modyfikuj_artykul_view(nazwa_artykulu_string = info[0], kolor_artykulu_string = info[1], szczegoly_artykulu_string = info[2])
 
 
-        self.firma_tree = self.view.name_tree(self.view.main_frame, "Lista Firm", True)
+        self.firma_tree = self.view.name_tree(self.view.order_frame, "Lista Firm", True)
         self.kategorie_tree = self.view.name_tree(self.view.secend_frame, "Kategorie Lista", True)
 
 
@@ -1009,7 +975,7 @@ class ControllerOrder:
             selected_item = self.zamowienia_tree.selection()
             if not selected_item:
                 leksykon = self.leksykon_programu["error_messagebox"]
-                ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["order"])
+                self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["order"])
                 return
 
             self.zamowienie_id = self.zamowienia_tree.item(selected_item[0], 'values')[0]
@@ -1024,7 +990,7 @@ class ControllerOrder:
 
         self.zamowienia_frame.grid_remove()
 
-        self.kupujacy_tree = self.view.name_tree(self.view.main_frame, "Kupujacy", True)
+        self.kupujacy_tree = self.view.name_tree(self.view.order_frame, "Kupujacy", True)
         self.sklepy_tree = self.view.name_tree(self.view.secend_frame, "Sklepy", True)
 
         self.load_kupujacy_daemon(widok="ukryj", select_item = select_kupujacy)
@@ -1034,44 +1000,44 @@ class ControllerOrder:
         selected_item = self.kupujacy_tree.selection()
         if not selected_item:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["buyer"])
+            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["buyer"])
             return
         
         selected_item = self.sklepy_tree.selection()
         if not selected_item:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["shop"])
+            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["shop"])
             return
 
         try:
             rabat_j = float(self.view.rabat_j_var.get().replace(',', '.'))
         except tk.TclError:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["unit_discount"])
+            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["unit_discount"])
             return
         
         except ValueError:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["unit_discount"])
+            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["unit_discount"])
             return
         
         try:
             rabat_procentowy = float(self.view.rabat_p_var.get().replace(',', '.'))
         except tk.TclError:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["proc_discount"])
+            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["proc_discount"])
             return
        
         except ValueError:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["proc_discount"])
+            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["proc_discount"])
             return
 
         try:
             data = self.konwersja_string_do_data(self.view.zamowienie_data.get())
         except ValueError:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["date"])
+            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["date"])
             return
         
         kupujacy_id = int(self.kupujacy_tree.item(self.kupujacy_tree.selection()[0], 'values')[0])
@@ -1100,19 +1066,19 @@ class ControllerOrder:
         selected_item = self.firma_tree.selection()
         if not selected_item:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["company"])
+            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["company"])
             return
         
         selected_item = self.kategorie_tree.selection()
         if not selected_item:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["category"])
+            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["category"])
             return
 
         nazwa = self.view.nazwa_artykulu_string.get()
         if not nazwa:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             return
        
         firma_id = int(self.firma_tree.item(self.firma_tree.selection()[0], 'values')[0])
@@ -1140,7 +1106,7 @@ class ControllerOrder:
         self.zamowienia_frame.grid_remove()
         self.usun_all_widgets()
         self.button_manager("lista dodanych do zamowienia")
-        self.inside_tree = self.view.inside_tree(self.main_frame, 'Lista artykułów dodatych do zamówienia') 
+        self.inside_tree = self.view.inside_tree(self.order_frame, 'Lista artykułów dodatych do zamówienia') 
         self.inside_tree.delete(*self.inside_tree.get_children())
 
         wynik_all = self.db_session.execute(
@@ -1158,11 +1124,9 @@ class ControllerOrder:
 
         artykul_data = []
 
-        currency = self.leksykon_programu["currency"]
-
         for wynik in wynik_all:
             id_art = wynik.artykul_id
-            cena = f"{wynik.cena_jednostkowa if wynik.cena_jednostkowa else 0:.2f} {currency}"
+            cena = f"{wynik.cena_jednostkowa if wynik.cena_jednostkowa else 0:.2f} {self.currency}"
             ilosc = wynik.ilosc_artykulu if wynik.ilosc_artykulu else 1
 
             artykul = self.db_session.query(Artykul_Lista).filter_by(id=id_art).first()
@@ -1192,7 +1156,7 @@ class ControllerOrder:
             return 
         
         relacja_name = self.inside_tree.item(self.inside_tree.selection()[0], 'values')
-        cena = float(relacja_name[1].replace(" {currency}", ""))
+        cena = float(relacja_name[1].replace(" {self.currency}", ""))
         print(relacja_name, cena)
 
         leksykon = self.leksykon_programu["edit_messagebox"]
@@ -1212,14 +1176,14 @@ class ControllerOrder:
             cena_artykulu_var = float(self.view.cena_artykulu_var.get().replace(",", "."))
         except ValueError:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["price"])
+            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["price"])
             return
 
         try:
             ilosc_artykulu_var =  float(self.view.ilosc_artykulu_var.get().replace(",", "."))
         except ValueError:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["amount"])
+            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["amount"])
             return
 
         text = ["start", (self.zamowienie_id, self.view.id_artykulu, cena_artykulu_var, ilosc_artykulu_var), "end", (self.view.cena_artykulu_var_old, self.view.ilosc_artykulu_var_old)]
@@ -1259,14 +1223,14 @@ class ControllerOrder:
             cena_artykulu_var = float(self.view.cena_artykulu_var.get().replace(",", "."))
         except ValueError:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["price"])
+            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["price"])
             return
 
         try:
             ilosc_artykulu_var =  float(self.view.ilosc_artykulu_var.get().replace(",", "."))
         except ValueError:
             leksykon = self.leksykon_programu["error_messagebox"]
-            ViewMessageBox.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["amount"])
+            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["amount"])
             return
 
         zamowienie_id = self.zamowienie_dodawanie_artykulu_id
@@ -1298,14 +1262,14 @@ class ControllerOrder:
         date = datetime.datetime.strptime(date, format).date()
         return date
     
-    def pokaz_main_frame(self):
+    def pokaz_order_frame(self):
         if not self.zamowienia_frame.winfo_ismapped():
             self.usun_all_widgets()
             self.zamowienia_frame.grid()
             self.button_manager(frame="main", startup=True)
 
     def powrot_do_glownego_okna(self):
-        self.pokaz_main_frame()
+        self.pokaz_order_frame()
         self.load_zamowienia_daemon()
 
     def powrot_do_lista_artykulow(self):
@@ -1321,17 +1285,17 @@ class ControllerOrder:
         except AttributeError:
             pass
 
-        for widget in self.view.main_frame.winfo_children():
+        for widget in self.view.order_frame.winfo_children():
             widget.destroy()
 
-        for widget in self.view.button_frame.winfo_children():
+        for widget in self.view.button_orders_frame.winfo_children():
             widget.destroy()
 
     def show_message_async(self):
-        self.messagebox.show_message_async(self.master, leksykon=self.leksykon_programu)
+        self.messagebox_controller.show_message_async(master=self.order_master)
 
     def hide_message_async(self):
-        self.messagebox.ukryj_message_async(self.master)
+        self.messagebox_controller.ukryj_message_async(master=self.order_master)
 
     def on_double_click_dodawanie_artykulu_do_zamowienia(self, event):
         try:

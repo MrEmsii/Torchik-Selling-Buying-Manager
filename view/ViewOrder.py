@@ -3,71 +3,113 @@ import tkinter as tk
 import datetime
 from view.ViewSound import ViewSound
 
-from TkToolTip import ToolTip
 from tkcalendar import DateEntry
 import os
 
-class ViewOrder:
-    def __init__(self, master, dsc=None, leksykon = None, konfiguracja_programu = None):
-        self.master = master
-        self.master.geometry("1280x720+0+0")
-        self.master.resizable(True, True)
+from view.base_view import BaseView
+
+class ViewOrder(BaseView):
+    def __init__(self, order_master, dsc=None, leksykon = None, language_code = None, konfiguracja_programu = None):
+        self.order_master = order_master
+        self.order_master.geometry("1280x720+0+0")
+        self.order_master.resizable(True, True)
 
         self.leksykon = leksykon
 
         self.button_icon_pack(dsc)
-        self.setup_styles(dsc)
         self.setup_frames()
+        self.setup_styles(dsc)
 
         self.sound = ViewSound(dsc, konfiguracja_programu)
-        self.sound.play_start_sound()
-
-    def setup_frames(self):
-        self.button_frame = ttk.Frame(self.master, padding=5)
-
-        self.main_frame = ttk.Frame(self.master, padding=5)
-        self.zamowienia_frame = ttk.Frame(self.master, padding=5)
-        self.secend_frame = ttk.Frame(self.master, padding=5)
-        self.third_frame = ttk.Frame(self.master, padding=5)
-
-        self.button_frame.grid(row=0, column=0, rowspan=5, sticky="nsew", padx=5, pady=5)
-        self.main_frame.grid(row=0, column=1, columnspan=5, rowspan=5, sticky="nsew", padx=5, pady=5)
+        self.language_code = language_code
 
     def setup_styles(self, dsc):
         self.style = ttk.Style()
-        self.master.tk.call('source', dsc + '/resources/themes/awdark.tcl')
+        # self.order_master.tk.call('source', dsc + '/resources/themes/awdark.tcl')
 
         self.style.theme_use("awdark")
         self.style.configure("Treeview", background="#D8E8E8", foreground="#2F3131", rowheight=20, fieldbackground="#E7E7E7", font=('Arial', 8))
         self.style.map("Treeview", background=[('selected', "#2F3131")], foreground=[('selected', '#D8E8E8')])
 
-        self.master.title("Torchik")
-        self.master.iconbitmap(os.path.join(dsc, "resources", "image", "icon.ico"))
+        self.order_master.title("Torchik - Order Window")
+        self.order_master.iconbitmap(os.path.join(dsc, "resources", "image", "icon.ico"))
 
         self.style.configure('TButton', justify="left", anchor='w')
         self.background_image = PhotoImage(file=os.path.join(dsc, "resources", "image", "background.png"))
-        self.background_label = ttk.Label(self.master, image=self.background_image)
+        self.background_label = ttk.Label(self.order_master, image=self.background_image)
         self.background_label.place(x=0, y=0, relwidth=1, relheight=1) 
+        self.background_label.lower()
 
-        self.master.grid_rowconfigure(0, weight=4)
-        self.master.grid_rowconfigure(1, weight=4)
-        self.master.grid_rowconfigure(2, weight=4)
-        self.master.grid_rowconfigure(3, weight=4)
+        self.order_master.grid_rowconfigure(0, weight=4)
+        self.order_master.grid_rowconfigure(1, weight=4)
+        self.order_master.grid_rowconfigure(2, weight=4)
+        self.order_master.grid_rowconfigure(3, weight=4)
 
-        self.master.grid_columnconfigure(0, weight=1)
-        self.master.grid_columnconfigure(1, weight=2000)
-        self.master.grid_columnconfigure(2, weight=2000)
-        self.master.grid_columnconfigure(3, weight=2000)
+        self.order_master.grid_columnconfigure(0, weight=1)
+        self.order_master.grid_columnconfigure(1, weight=2000)
+        self.order_master.grid_columnconfigure(2, weight=2000)
+        self.order_master.grid_columnconfigure(3, weight=2000)
 
+    def setup_frames(self):
+        self.button_orders_frame = ttk.Frame(self.order_master, padding=5)
+
+        self.order_frame = ttk.Frame(self.order_master, padding=5)
+        self.zamowienia_frame = ttk.Frame(self.order_master, padding=5)
+        self.secend_frame = ttk.Frame(self.order_master, padding=5)
+        self.third_frame = ttk.Frame(self.order_master, padding=5)
+
+        self.button_orders_frame.grid(row=0, column=0, rowspan=5, sticky="nsew", padx=5, pady=5)
+        self.order_frame.grid(row=0, column=1, columnspan=5, rowspan=5, sticky="nsew", padx=5, pady=5)
+
+    def button_icon_pack(self, dsc):
+            self.add_firma_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_firma_icon.png")).subsample(8, 8)
+            self.edit_firma_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_firma_icon.png")).subsample(8, 8)
+            self.delete_firma_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_firma_icon.png")).subsample(8, 8)
+            
+            self.add_sklep_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_sklep_icon.png")).subsample(8, 8)
+            self.edit_sklep_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_sklep_icon.png")).subsample(8, 8)
+            self.delete_sklep_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_sklep_icon.png")).subsample(8, 8)
+
+            self.add_kategoria_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_kategoria_icon.png")).subsample(8, 8)
+            self.edit_kategoria_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_kategoria_icon.png")).subsample(8, 8)
+            self.delete_kategoria_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_kategoria_icon.png")).subsample(8, 8)
+            
+            self.add_kupujacy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_kupujacy_icon.png")).subsample(8, 8)
+            self.edit_kupujacy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_kupujacy_icon.png")).subsample(8, 8)
+            self.delete_kupujacy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_kupujacy_icon.png")).subsample(8, 8)
+            
+            self.add_artykul_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_artykul_icon.png")).subsample(8, 8)
+            self.edit_artykul_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_artykul_icon.png")).subsample(8, 8)
+            self.delete_artykul_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_artykul_icon.png")).subsample(8, 8)
+            
+            self.add_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_zamowienie_icon.png")).subsample(8, 8)
+            self.edit_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_zamowienie_icon.png")).subsample(8, 8)
+            self.delete_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_zamowienie_icon.png")).subsample(8, 8)
+            
+            self.add_artykul_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_artykul_zamowienie_icon.png")).subsample(8, 8)
+            self.edit_artykul_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_artykul_zamowienie_icon.png")).subsample(8, 8)
+            self.delete_artykul_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_artykul_zamowienie_icon.png")).subsample(8, 8)
+            
+            self.lista_firmy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_firmy_icon.png")).subsample(8, 8)
+            self.lista_sklepy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_sklepy_icon.png")).subsample(8, 8)
+            self.lista_zamowien_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_zamowien_icon.png")).subsample(8, 8)
+            self.lista_kupujacy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_kupujacy_icon.png")).subsample(8, 8)
+            self.lista_kategorie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_kategorie_icon.png")).subsample(8, 8)
+            self.lista_artykulow_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_artykulow_icon.png")).subsample(8, 8)
+
+            self.backButton_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "backButton_icon.png")).subsample(8, 8)
+            self.refresh_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "refresh_icon.png")).subsample(8, 8)
+            self.setting_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "setting_icon.png")).subsample(8, 8)
+            
     def zamowienia_grid_setting(self):
         self.zamowienia_frame.grid(row=0, column=1, columnspan=3, rowspan=5, sticky="nsew", padx=5, pady=5)
 
     def artukuly_list_grid_setting(self):
-        self.main_frame.grid(row=0, column=1, columnspan=1, rowspan=5, sticky="nsew", padx=5, pady=5)
+        self.order_frame.grid(row=0, column=1, columnspan=1, rowspan=5, sticky="nsew", padx=5, pady=5)
         self.secend_frame.grid(row=0, column=2, columnspan=2, rowspan=5, sticky="nsew", padx=5, pady=5)
     
     def start_grid_setting(self):
-        self.main_frame.grid(row=0, column=1, columnspan=5, rowspan=5, sticky="nsew", padx=5, pady=5)
+        self.order_frame.grid(row=0, column=1, columnspan=5, rowspan=5, sticky="nsew", padx=5, pady=5)
 
     def inside_tree(self, parent_frame, label_text):
         columns_name = self.leksykon["columns"]["inside_tree_columns"]
@@ -243,66 +285,6 @@ class ViewOrder:
 
         return tree    
 
-    def button_icon_pack(self, dsc):
-            self.add_firma_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_firma_icon.png")).subsample(8, 8)
-            self.edit_firma_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_firma_icon.png")).subsample(8, 8)
-            self.delete_firma_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_firma_icon.png")).subsample(8, 8)
-            
-            self.add_sklep_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_sklep_icon.png")).subsample(8, 8)
-            self.edit_sklep_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_sklep_icon.png")).subsample(8, 8)
-            self.delete_sklep_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_sklep_icon.png")).subsample(8, 8)
-
-            self.add_kategoria_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_kategoria_icon.png")).subsample(8, 8)
-            self.edit_kategoria_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_kategoria_icon.png")).subsample(8, 8)
-            self.delete_kategoria_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_kategoria_icon.png")).subsample(8, 8)
-            
-            self.add_kupujacy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_kupujacy_icon.png")).subsample(8, 8)
-            self.edit_kupujacy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_kupujacy_icon.png")).subsample(8, 8)
-            self.delete_kupujacy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_kupujacy_icon.png")).subsample(8, 8)
-            
-            self.add_artykul_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_artykul_icon.png")).subsample(8, 8)
-            self.edit_artykul_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_artykul_icon.png")).subsample(8, 8)
-            self.delete_artykul_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_artykul_icon.png")).subsample(8, 8)
-            
-            self.add_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_zamowienie_icon.png")).subsample(8, 8)
-            self.edit_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_zamowienie_icon.png")).subsample(8, 8)
-            self.delete_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_zamowienie_icon.png")).subsample(8, 8)
-            
-            self.add_artykul_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_artykul_zamowienie_icon.png")).subsample(8, 8)
-            self.edit_artykul_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_artykul_zamowienie_icon.png")).subsample(8, 8)
-            self.delete_artykul_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_artykul_zamowienie_icon.png")).subsample(8, 8)
-            
-            self.lista_firmy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_firmy_icon.png")).subsample(8, 8)
-            self.lista_sklepy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_sklepy_icon.png")).subsample(8, 8)
-            self.lista_zamowien_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_zamowien_icon.png")).subsample(8, 8)
-            self.lista_kupujacy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_kupujacy_icon.png")).subsample(8, 8)
-            self.lista_kategorie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_kategorie_icon.png")).subsample(8, 8)
-            self.lista_artykulow_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_artykulow_icon.png")).subsample(8, 8)
-
-            self.refresh_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "refresh_icon.png")).subsample(8, 8)
-            self.setting_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "setting_icon.png")).subsample(8, 8)
-            self.backButton_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "backButton_icon.png")).subsample(8, 8)
-
-    def utworz_przycisk(self, frame, command, side='top', padx=1, pady=3, icon=None, leksykon_programu=None):
-        przycisk = ttk.Button(
-            frame,
-            text=leksykon_programu["text"],
-            command=self.click_sound(command),
-            width=10,
-            image=icon or self.refresh_icon,
-            compound="left"
-        )
-        przycisk.pack(side=side, padx=padx, pady=pady)
-        ToolTip(przycisk, msg=leksykon_programu["toolTip"], follow=True)
-        return przycisk
-
-    def click_sound(self, func):
-        def wrapper(*args, **kwargs):
-            self.sound.play_info_sound()
-            return func(*args, **kwargs)
-        return wrapper
-
-
     def dodaj_modyfikuj_zamowienie_view(self, zamowienie_rabat_j=0, zamowienie_rabat_procentowy=0):
         self.rabat_j_var = tk.StringVar(value=zamowienie_rabat_j)
         self.rabat_p_var = tk.StringVar(value=zamowienie_rabat_procentowy)
@@ -316,13 +298,13 @@ class ViewOrder:
         self.artykul_view()
 
     def artykuly_lista_view(self):
-        self.secend_frame = ttk.Frame(self.master, padding=5)
+        self.secend_frame = ttk.Frame(self.order_master, padding=5)
         
     def artykul_view(self):
         label_name = self.leksykon["labels"]
 
-        self.secend_frame = ttk.Frame(self.master, padding=5)
-        self.third_frame = ttk.Frame(self.master, padding=5)
+        self.secend_frame = ttk.Frame(self.order_master, padding=5)
+        self.third_frame = ttk.Frame(self.order_master, padding=5)
 
         nazwa_label = ttk.Label(self.third_frame, text = label_name["name"], font=('calibre', 10, 'bold'), anchor='center')
         kolor_label = ttk.Label(self.third_frame, text = label_name["color"], font=('calibre', 10, 'bold'), anchor='center')
@@ -349,16 +331,15 @@ class ViewOrder:
         kolor_entry.grid(row=2,column=1)
         szczegoly_entry.grid(row=3,column=1)
 
-        self.main_frame.grid(row=0, column=1, columnspan=5, rowspan=2, sticky="nsew", padx=5, pady=5)
+        self.order_frame.grid(row=0, column=1, columnspan=5, rowspan=2, sticky="nsew", padx=5, pady=5)
         self.secend_frame.grid(row=2, column=1, columnspan=5, rowspan=2, sticky="nsew", padx=5, pady=5)
         self.third_frame.grid(row=0, column=6, columnspan=1, rowspan=4, sticky="nsew", padx=5, pady=5)
         
     def zamowienie_view(self):
         label_name = self.leksykon["labels"]
-        language_code = self.leksykon["language_code"]
         
-        self.secend_frame = ttk.Frame(self.master, padding=5)
-        self.third_frame = ttk.Frame(self.master, padding=5)
+        self.secend_frame = ttk.Frame(self.order_master, padding=5)
+        self.third_frame = ttk.Frame(self.order_master, padding=5)
 
         date_label = ttk.Label(self.third_frame, text = label_name["date"], font=('calibre', 10, 'bold'), anchor='center')
        
@@ -368,7 +349,7 @@ class ViewOrder:
         rabat_j_entry = ttk.Entry(self.third_frame, textvariable = self.rabat_j_var, font=('calibre',10,'normal'), width=10)
         rabat_p_entry = ttk.Entry(self.third_frame, textvariable = self.rabat_p_var, font=('calibre',10,'normal'), width=10)
 
-        self.date_entry = DateEntry(self.third_frame, localestr=language_code, date_pattern="yyyy-mm-dd", textvariable=self.zamowienie_data, width=10, set_date=datetime.date(2023,4,2))
+        self.date_entry = DateEntry(self.third_frame, localestr=self.language_code, date_pattern="yyyy-mm-dd", textvariable=self.zamowienie_data, width=10, set_date=datetime.date(2023,4,2))
 
         self.third_frame.grid_rowconfigure(0, weight=80)
         self.third_frame.grid_rowconfigure(1, weight=1)
@@ -387,7 +368,7 @@ class ViewOrder:
         rabat_j_entry.grid(row=2,column=1)
         rabat_p_entry.grid(row=3,column=1)
 
-        self.main_frame.grid(row=0, column=1, columnspan=5, rowspan=1, sticky="nsew", padx=5, pady=5)
+        self.order_frame.grid(row=0, column=1, columnspan=5, rowspan=1, sticky="nsew", padx=5, pady=5)
         self.secend_frame.grid(row=1, column=1, columnspan=5, rowspan=3, sticky="nsew", padx=5, pady=5)
         self.third_frame.grid(row=0, column=6, columnspan=1, rowspan=4, sticky="nsew", padx=5, pady=5)
         
@@ -434,7 +415,7 @@ class ViewOrder:
         self.filament_frame.grid_rowconfigure(3, weight=80)
 
     def cena_ilosc_window(self, dsc, title, relacja = 1, cena = 0, id = None):
-        self.window = tk.Toplevel(self.master)
+        self.window = tk.Toplevel(self.order_master)
         self.window.geometry("400x180+500+300")
         self.window.title(title)
 

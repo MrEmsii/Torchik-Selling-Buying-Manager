@@ -1,7 +1,6 @@
 from tkinter import ttk, messagebox, simpledialog
 import tkinter as tk
 
-    
 class ViewMessageBox():
     def show_message_async(self, master, leksykon):
         def pokaz_okno(master):
@@ -21,17 +20,12 @@ class ViewMessageBox():
 
         master.after(0, zamknij_okno)
 
-
     def messagebox(self, type, language_code = None, heading = None, text = None, value = None):
         if type == "error" or type == "language" and language_code:
-            self.sound.play_error_sound()
             return messagebox.showerror(heading, text)
         elif type == "info":
-            self.sound.play_info_sound()
             return messagebox.showinfo(heading, text)
         elif type == "close":
-            self.sound.play_info_sound()
             return messagebox.askokcancel(heading, text)
         elif type == "ask":
-            self.sound.play_info_sound()
             return simpledialog.askstring(heading, text, initialvalue=value)

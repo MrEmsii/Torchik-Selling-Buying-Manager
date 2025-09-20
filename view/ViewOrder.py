@@ -9,12 +9,13 @@ from view.ViewSound import ViewSound
 from view.base_view import BaseView
 
 class ViewOrder(BaseView):
-    def __init__(self, order_master, dsc=None, leksykon = None, language_code = None, konfiguracja_programu = None):
+    def __init__(self, order_master, dsc=None, leksykon = None, currency=None, language_code = None, konfiguracja_programu = None):
         self.order_master = order_master
         self.order_master.geometry("1280x720+0+0")
         self.order_master.resizable(True, True)
 
         self.leksykon = leksykon
+        self.currency = currency
 
         self.button_icon_pack(dsc)
         self.setup_frames()
@@ -139,23 +140,23 @@ class ViewOrder(BaseView):
         tree.column(columns_name[1], width=100, anchor='e')
         tree.heading(columns_name[1], text=columns_name[1], anchor='e')
 
-        tree.column(columns_name[2], width=100, anchor='e')
-        tree.heading(columns_name[2], text=columns_name[2], anchor='e')
+        tree.column(columns_name[2], width=100, anchor='w')
+        tree.heading(columns_name[2], text=columns_name[2], anchor='w')
 
-        tree.column(columns_name[3], width=100, anchor='e')
-        tree.heading(columns_name[3], text=columns_name[3], anchor='e')
+        tree.column(columns_name[3], width=100, anchor='w')
+        tree.heading(columns_name[3], text=columns_name[3], anchor='w')
 
-        tree.column(columns_name[4], width=100, anchor='e')
-        tree.heading(columns_name[4], text=columns_name[4], anchor='e')
+        tree.column(columns_name[4], width=100, anchor='w')
+        tree.heading(columns_name[4], text=columns_name[4], anchor='w')
 
-        tree.column(columns_name[5], width=100, anchor='e')
-        tree.heading(columns_name[5], text=columns_name[5], anchor='e')     
+        tree.column(columns_name[5], width=100, anchor='w')
+        tree.heading(columns_name[5], text=columns_name[5], anchor='w')     
 
-        tree.column(columns_name[6], width=100, anchor='e')
-        tree.heading(columns_name[6], text=columns_name[6], anchor='e')   
+        tree.column(columns_name[6], width=100, anchor='w')
+        tree.heading(columns_name[6], text=columns_name[6], anchor='w')   
 
-        tree.column(columns_name[7], width=300, anchor='e')
-        tree.heading(columns_name[7], text=columns_name[7], anchor='e')
+        tree.column(columns_name[7], width=300, anchor='w')
+        tree.heading(columns_name[7], text=columns_name[7], anchor='w')
 
         tree.pack(expand=True, fill='both')
 
@@ -373,7 +374,6 @@ class ViewOrder(BaseView):
         
     def cena_ilosc_view(self, cena_artykulu_var = 0, ilosc_artykulu_var = 1):
         label_name = self.leksykon["labels"]
-        currency = self.leksykon["currency"]
 
         self.cena_artykulu_var_old = cena_artykulu_var
         self.ilosc_artykulu_var_old = ilosc_artykulu_var
@@ -385,7 +385,7 @@ class ViewOrder(BaseView):
         self.filament_frame.grid(row=0, column=1, columnspan=2, sticky="nsew", padx=5, pady=5)
 
         cena_label = ttk.Label(self.filament_frame, text = label_name["price"], font=('calibre', 10, 'bold'), anchor='center')
-        waluta_label = ttk.Label(self.filament_frame, text = currency, font=('calibre', 10, 'bold'), anchor='e')
+        waluta_label = ttk.Label(self.filament_frame, text = self.currency, font=('calibre', 10, 'bold'), anchor='e')
         ilosc_label = ttk.Label(self.filament_frame, text = label_name["amount"], font=('calibre', 10, 'bold'), anchor='w')
         
         self.cena_artykulu_var = tk.StringVar(value=cena_artykulu_var)

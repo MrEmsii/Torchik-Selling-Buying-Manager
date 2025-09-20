@@ -56,41 +56,62 @@ class StatisticsModel:
 
     def koszt_w_firma(self):
         """
-        Firma, która wygenerowała największy koszt ogółem.
+        Firma, która wygenerowała największy koszt ogółem (uwzględnia rabaty).
         """
         stmt = (
             select(
                 Firma.nazwa,
-                func.sum(artykuly_relacja.c.cena_jednostkowa * artykuly_relacja.c.ilosc_artykulu).label("total_cost")
+                func.sum(
+                    (artykuly_relacja.c.cena_jednostkowa * artykuly_relacja.c.ilosc_artykulu)
+                    * (1 - (func.coalesce(Zamowienie.rabat_procent, 0) / 100.0))
+                    - func.coalesce(Zamowienie.rabat_j, 0)
+                ).label("total_cost")
             )
             .join(Artykul_Lista, Artykul_Lista.firma_id == Firma.id)
             .join(artykuly_relacja, Artykul_Lista.id == artykuly_relacja.c.artykul_id)
+            .join(Zamowienie, Zamowienie.id == artykuly_relacja.c.zamowienie_id)
             .group_by(Firma.id)
-            .order_by(func.sum(artykuly_relacja.c.cena_jednostkowa * artykuly_relacja.c.ilosc_artykulu).desc())
-            .order_by(func.count(Artykul_Lista.id).desc())
-            
+            .order_by(func.sum(
+                (artykuly_relacja.c.cena_jednostkowa * artykuly_relacja.c.ilosc_artykulu)
+                * (1 - (func.coalesce(Zamowienie.rabat_procent, 0) / 100.0))
+                - func.coalesce(Zamowienie.rabat_j, 0)
+            ).desc())
         )
         return self.session.execute(stmt).all()
-
+    
     def koszt_w_sklepach(self):
         """
-        Firma, która wygenerowała największy koszt ogółem.
+        Koszt w sklepach (uwzględnia rabaty).
         """
+        # podzapytanie: koszt pojedynczego zamówienia
+        subquery = (
+            select(
+                Zamowienie.id.label("zamowienie_id"),
+                Zamowienie.sklep_id.label("sklep_id"),
+                (
+                    func.sum(artykuly_relacja.c.cena_jednostkowa * artykuly_relacja.c.ilosc_artykulu)
+                    * (1 - (func.coalesce(Zamowienie.rabat_procent, 0) / 100.0))
+                    - func.coalesce(Zamowienie.rabat_j, 0)
+                ).label("order_cost")
+            )
+            .join(artykuly_relacja, Zamowienie.id == artykuly_relacja.c.zamowienie_id)
+            .group_by(Zamowienie.id)
+            .subquery()
+        )
+
+        # agregacja po sklepach
         stmt = (
             select(
                 Sklep.nazwa,
-                func.sum(artykuly_relacja.c.cena_jednostkowa * artykuly_relacja.c.ilosc_artykulu).label("total_cost")
+                func.sum(subquery.c.order_cost).label("total_cost")
             )
-            .join(Zamowienie, Zamowienie.sklep_id == Sklep.id)
-            .join(Artykul_Lista, Artykul_Lista.id == artykuly_relacja.c.artykul_id)
-            .join(artykuly_relacja, Zamowienie.id == artykuly_relacja.c.zamowienie_id)
+            .join(subquery, Sklep.id == subquery.c.sklep_id)
             .group_by(Sklep.id)
-            .order_by(func.sum(artykuly_relacja.c.cena_jednostkowa * artykuly_relacja.c.ilosc_artykulu).desc())
-            .order_by(func.count(Artykul_Lista.id).desc())
-            
+            .order_by(func.sum(subquery.c.order_cost).desc())
         )
-        return self.session.execute(stmt).all()
 
+        return self.session.execute(stmt).all()
+    
     def koszt_w_kupujacych(self):
         """
         Firma, która wygenerowała największy koszt ogółem.
@@ -107,6 +128,30 @@ class StatisticsModel:
             .order_by(func.sum(artykuly_relacja.c.cena_jednostkowa * artykuly_relacja.c.ilosc_artykulu).desc())
             .order_by(func.count(Artykul_Lista.id).desc())
             
+        )
+        return self.session.execute(stmt).all()
+
+    def koszt_artykulow(self):
+        """
+        Całkowity koszt dla każdego artykułu (uwzględnia rabaty).
+        """
+        stmt = (
+            select(
+                Artykul_Lista.nazwa,
+                func.sum(
+                    (artykuly_relacja.c.cena_jednostkowa * artykuly_relacja.c.ilosc_artykulu)
+                    * (1 - (func.coalesce(Zamowienie.rabat_procent, 0) / 100.0))
+                    - func.coalesce(Zamowienie.rabat_j, 0)
+                ).label("total_cost")
+            )
+            .join(artykuly_relacja, Artykul_Lista.id == artykuly_relacja.c.artykul_id)
+            .join(Zamowienie, Zamowienie.id == artykuly_relacja.c.zamowienie_id)
+            .group_by(Artykul_Lista.id)
+            .order_by(func.sum(
+                (artykuly_relacja.c.cena_jednostkowa * artykuly_relacja.c.ilosc_artykulu)
+                * (1 - (func.coalesce(Zamowienie.rabat_procent, 0) / 100.0))
+                - func.coalesce(Zamowienie.rabat_j, 0)
+            ).desc())
         )
         return self.session.execute(stmt).all()
 

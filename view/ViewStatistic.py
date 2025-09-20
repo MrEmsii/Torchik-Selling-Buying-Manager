@@ -8,6 +8,7 @@ import os
 from view.base_view import BaseView
 from view.ViewSound import ViewSound
 
+
 class ViewStatistic(BaseView):
     def __init__(self, statistic_master, dsc=None, leksykon = None, language_code = None, konfiguracja_programu = None):
         self.statistic_master = statistic_master
@@ -22,6 +23,11 @@ class ViewStatistic(BaseView):
 
         self.sound = ViewSound(dsc, konfiguracja_programu)
         self.language_code = language_code
+
+        self.tree = ttk.Treeview(self.table_frame, columns=("name", "value"), show="headings")
+        self.tree.heading("name", text="Nazwa")
+        self.tree.heading("value", text="Wartość")
+        self.tree.pack(fill="both", expand=True)
 
         # self.master = master
         # self.frame = tk.Frame(master)
@@ -50,7 +56,7 @@ class ViewStatistic(BaseView):
         self.style.configure("Treeview", background="#D8E8E8", foreground="#2F3131", rowheight=20, fieldbackground="#E7E7E7", font=('Arial', 8))
         self.style.map("Treeview", background=[('selected', "#2F3131")], foreground=[('selected', '#D8E8E8')])
 
-        self.statistic_master.title("Torchik - Order Window")
+        self.statistic_master.title("Torchik - Statistic Window")
         self.statistic_master.iconbitmap(os.path.join(dsc, "resources", "image", "icon.ico"))
 
         self.style.configure('TButton', justify="left", anchor='w')
@@ -68,19 +74,25 @@ class ViewStatistic(BaseView):
         self.statistic_master.grid_columnconfigure(1, weight=2000)
         self.statistic_master.grid_columnconfigure(2, weight=2000)
         self.statistic_master.grid_columnconfigure(3, weight=2000)
+        self.statistic_master.grid_columnconfigure(4, weight=2000)
 
     def setup_frames(self):
         self.button_statistic_frame = ttk.Frame(self.statistic_master, padding=5)
 
         self.statistic_frame = ttk.Frame(self.statistic_master, padding=5)
+        self.table_frame = ttk.Frame(self.statistic_master, padding=5)
 
         self.button_statistic_frame.grid(row=0, column=0, rowspan=5, sticky="nsew", padx=5, pady=5)
-        self.statistic_frame.grid(row=0, column=1, columnspan=5, rowspan=5, sticky="nsew", padx=5, pady=5)
+        self.statistic_frame.grid(row=0, column=1, columnspan=2, rowspan=5, sticky="nsew", padx=5, pady=5)
+        self.table_frame.grid(row=0, column=3, columnspan=2, rowspan=5, sticky="nsew", padx=5, pady=5)
 
     def button_icon_pack(self, dsc):
-        pass
-    
-
+        self.category_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_kategorie_icon.png")).subsample(8, 8)
+        self.buyers_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_kupujacy_icon.png")).subsample(8, 8)
+        self.arts_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_artykulow_icon.png")).subsample(8, 8)
+        self.company_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_firmy_icon.png")).subsample(8, 8)
+        self.shops_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_sklepy_icon.png")).subsample(8, 8)
+            
     def update_table(self, headers, data):
         """
         headers = ["Kolumna1", "Kolumna2", ...]
@@ -100,8 +112,8 @@ class ViewStatistic(BaseView):
         # for row in data:
         #     self.tree.insert("", "end", values=row)
 
-        for sklep_id, sklep_nazwa in data:
-            self.tree.insert('', 'end', values=(sklep_id, str(round(sklep_nazwa, 2)) + " zł"))
+        for id, wartosc in data:
+            self.tree.insert('', 'end', values=(id, f"{wartosc:,.2f} zł".replace(",", " ")))
 
     def show_chart(self, labels, values, title="Wykres", master = None):
         """
@@ -114,7 +126,7 @@ class ViewStatistic(BaseView):
         fig = Figure(figsize=(5, 4))
         ax = fig.add_subplot(111)
         # ax.bar(labels, values)
-        ax.pie(values, labels=labels, startangle=140, autopct=self.autopct_format(values), textprops={'fontsize': 8}, pctdistance=0.85, labeldistance=1.1)
+        ax.pie(values, labels=labels, startangle=140, autopct=self.autopct_format(values), textprops={'fontsize': 8}, pctdistance=0.75, labeldistance=1.1)
         ax.set_title(title)
         # ax.set_ylabel("Wartość")
 
@@ -122,10 +134,9 @@ class ViewStatistic(BaseView):
         canvas.draw()
         canvas.get_tk_widget().pack(fill="both", expand=True)
 
-
     def autopct_format(self, values):
         def my_format(pct):
             total = sum(values)
             val = int(round(pct*total/100.0))
-            return '{:.1f}%\n({v:d} zł)'.format(pct, v=val)
+            return '{:.1f}%\n({v:,d} zł)'.format(pct, v=val).replace(",", " ")
         return my_format

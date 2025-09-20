@@ -102,6 +102,7 @@ class ControllerMain:
             master = self.master,
             dsc=self.dsc,
             leksykon_programu=self.leksykon_programu["order_window"],
+            leksykon_messagebox=self.leksykon_programu["messagebox_window"],
             messagebox_controller = self.messagebox_controller,
             sound = self.sound,
             konfiguracja_programu=self.konfiguracja_programu,
@@ -114,7 +115,7 @@ class ControllerMain:
         self.stat_controller = ControllerStatistic(
         master = self.master,
         dsc=self.dsc,
-        leksykon_programu=self.leksykon_programu["order_window"],
+        leksykon_programu=self.leksykon_programu["statistic"],
         messagebox_controller = self.messagebox_controller,
         sound = self.sound,
         konfiguracja_programu=self.konfiguracja_programu,

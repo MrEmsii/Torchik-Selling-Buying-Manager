@@ -1,9 +1,6 @@
 from model.db_model import SQLconnect, select, Kupujacy, Kategoria, Sklep, Firma, Zamowienie, Artykul_Lista, artykuly_relacja
 from view.ViewOrder import ViewOrder
-from controller.ControllerMessageBox import ControllerMessageBox
-# from view.self.messagebox_controller import self.messagebox_controller
 
-import os
 import string
 
 from tkinterdnd2 import DND_FILES, TkinterDnD
@@ -15,9 +12,10 @@ import datetime as datetime
 from view.base_view import BaseView
 
 class ControllerOrder(BaseView):
-    def __init__(self, master, dsc, leksykon_programu, konfiguracja_programu, sound = None, messagebox_controller = None, currency = None, language_code = None):
+    def __init__(self, master, dsc, leksykon_programu, leksykon_messagebox, konfiguracja_programu, sound = None, messagebox_controller = None, currency = None, language_code = None):
         self.dsc = dsc
         self.leksykon_programu = leksykon_programu
+        self.leksykon_messagebox = leksykon_messagebox
         self.konfiguracja_programu = konfiguracja_programu
         self.currency = currency
 
@@ -28,6 +26,7 @@ class ControllerOrder(BaseView):
             self.order_master, 
             dsc=self.dsc, 
             leksykon=self.leksykon_programu, 
+            currency=self.currency,
             konfiguracja_programu=konfiguracja_programu, 
             language_code=language_code
             )
@@ -43,9 +42,6 @@ class ControllerOrder(BaseView):
     def on_closing_order_window(self):
         if self.messagebox_controller.close_info():
             self.view.order_master.destroy() 
-
-    def ustawienia_programu(self):
-        print("dodać ustawienia")
 
     def load_zamowienia_daemon(self, widok = "pokaz"):
         print("load_zamowienia_daemon")
@@ -263,7 +259,6 @@ class ControllerOrder(BaseView):
             self.button_lista_kategorii(self.button_orders_frame)
             self.button_lista_firm(self.button_orders_frame)
             self.button_refresh_zamowienia(self.button_orders_frame)  
-            self.button_ustawienia(self.button_orders_frame) 
             self.button_usun_zamowienie(self.button_orders_frame)
 
         elif frame == "lista dodanych do zamowienia":
@@ -487,10 +482,6 @@ class ControllerOrder(BaseView):
         leksykon = self.leksykon_programu["button_refresh_zamowienia"]
         self.view.utworz_przycisk(frame, self.load_zamowienia_daemon, side='bottom', icon=self.view.refresh_icon, leksykon_programu=leksykon)
 
-    def button_ustawienia(self, frame):
-        leksykon = self.leksykon_programu["button_ustawienia"]
-        self.view.utworz_przycisk(frame, self.ustawienia_programu, pady=5, side='bottom', icon=self.view.setting_icon, leksykon_programu=leksykon)
-
     def button_back_pack(self, frame, commend = "main"):
         if commend == "main":
             commend = self.pokaz_order_frame
@@ -519,7 +510,6 @@ class ControllerOrder(BaseView):
 
         name = self.leksykon_programu["names_list"]
 
-
         self.artykuly_tree = self.view.artykuly_tree(parent_frame = self.view.secend_frame, label_text = name["select_art"])
         self.kategorie_tree = self.view.name_tree(self.view.order_frame, name["category"], True)
         
@@ -528,6 +518,12 @@ class ControllerOrder(BaseView):
 
         self.kategorie_tree.bind("<Double-1>", self.on_double_click_filtrowanie_kategoria)
         self.kategorie_tree.bind("<Double-3>", self.on_double_click_filtrowanie_kategoria_resetowanie)
+
+
+        if self.zamowienie_id:
+            print(self.zamowienie_id)
+            self.artykuly_tree.bind("<Double-1>", self.on_double_click_dodawanie_artykulu_do_zamowienia)
+
 
     def list_zamowienia(self):
         self.view.zamowienia_grid_setting()
@@ -566,11 +562,11 @@ class ControllerOrder(BaseView):
         self.load_kategorie_daemon()
 
     def stworz_sklep(self, value=None):
-        leksykon = self.leksykon_programu["add_messagebox"]
-        name = self.messagebox_controller.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["shop"]+"\t\t\t\t", value=value)
+        leksykon = self.leksykon_messagebox["add_messagebox"]
+        name = self.messagebox_controller.messagebox(type="ask", heading=leksykon["heading"], text=leksykon["text"]["shop"]+"\t\t\t\t", value=value)
         if name == "" or self.specjalne_znaki(name) :
-            leksykon = self.leksykon_programu["error_messagebox"]
-            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            leksykon = self.leksykon_messagebox["error_messagebox"]
+            self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.stworz_sklep(value=name)
 
         elif name is not None:
@@ -582,11 +578,11 @@ class ControllerOrder(BaseView):
             self.sound.play_confirm_sound()
 
     def stworz_kupujacy(self, value=None):
-        leksykon = self.leksykon_programu["add_messagebox"]
-        name = self.messagebox_controller.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["buyer"]+"\t\t\t\t", value=value)
+        leksykon = self.leksykon_messagebox["add_messagebox"]
+        name = self.messagebox_controller.messagebox(type="ask", heading=leksykon["heading"], text=leksykon["text"]["buyer"]+"\t\t\t\t", value=value)
         if name == "" or self.specjalne_znaki(name) :
-            leksykon = self.leksykon_programu["error_messagebox"]
-            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            leksykon = self.leksykon_messagebox["error_messagebox"]
+            self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.stworz_kupujacy(value=name)
 
         elif name is not None:
@@ -598,11 +594,11 @@ class ControllerOrder(BaseView):
             self.sound.play_confirm_sound()
 
     def stworz_kategoria(self, value=None):
-        leksykon = self.leksykon_programu["add_messagebox"]
-        name = self.messagebox_controller.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["category"]+"\t\t\t\t", value=value)
+        leksykon = self.leksykon_messagebox["add_messagebox"]
+        name = self.messagebox_controller.messagebox(type="ask", heading=leksykon["heading"], text=leksykon["text"]["category"]+"\t\t\t\t", value=value)
         if name == "" or self.specjalne_znaki(name):
-            leksykon = self.leksykon_programu["error_messagebox"]
-            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            leksykon = self.leksykon_messagebox["error_messagebox"]
+            self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.stworz_kategoria(value=name)
 
         elif name is not None:
@@ -614,11 +610,11 @@ class ControllerOrder(BaseView):
             self.sound.play_confirm_sound()
 
     def stworz_firma(self, value=None):
-        leksykon = self.leksykon_programu["add_messagebox"]
-        name = self.messagebox_controller.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["company"]+"\t\t\t\t", value=value)
+        leksykon = self.leksykon_messagebox["add_messagebox"]
+        name = self.messagebox_controller.messagebox(type="ask", heading=leksykon["heading"], text=leksykon["text"]["company"]+"\t\t\t\t", value=value)
         if name == "" or self.specjalne_znaki(name) :
-            leksykon = self.leksykon_programu["error_messagebox"]
-            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            leksykon = self.leksykon_messagebox["error_messagebox"]
+            self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.stworz_firma(value=name)
 
         elif name is not None:
@@ -638,8 +634,8 @@ class ControllerOrder(BaseView):
         kupujacy_id = element_value[0]
         stara_nazwa = element_value[1]
 
-        leksykon = self.leksykon_programu["edit_messagebox"]
-        new_value = self.messagebox_controller.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["buyer"]+"\t\t\t\t", value=stara_nazwa)
+        leksykon = self.leksykon_messagebox["edit_messagebox"]
+        new_value = self.messagebox_controller.messagebox(type="ask", heading=leksykon["heading"], text=leksykon["text"]["buyer"]+"\t\t\t\t", value=stara_nazwa)
 
         if new_value and new_value.strip() and not self.specjalne_znaki(new_value):
             kupujacy = self.db_session.query(Kupujacy).filter_by(id=kupujacy_id).first()
@@ -653,8 +649,8 @@ class ControllerOrder(BaseView):
                 self.sound.play_confirm_sound()
 
         elif self.specjalne_znaki(new_value):
-            leksykon = self.leksykon_programu["error_messagebox"]
-            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            leksykon = self.leksykon_messagebox["error_messagebox"]
+            self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.zmien_nazwa_kupujacy()
 
     def zmien_nazwa_sklep(self):
@@ -666,8 +662,8 @@ class ControllerOrder(BaseView):
         sklep_id = element_value[0]
         stara_nazwa = element_value[1]
 
-        leksykon = self.leksykon_programu["edit_messagebox"]
-        new_value = self.messagebox_controller.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["shop"]+"\t\t\t\t", value=stara_nazwa)
+        leksykon = self.leksykon_messagebox["edit_messagebox"]
+        new_value = self.messagebox_controller.messagebox(type="ask", heading=leksykon["heading"], text=leksykon["text"]["shop"]+"\t\t\t\t", value=stara_nazwa)
 
         if new_value and new_value.strip() and not self.specjalne_znaki(new_value):
             sklep = self.db_session.query(Sklep).filter_by(id=sklep_id).first()
@@ -676,13 +672,13 @@ class ControllerOrder(BaseView):
                 sklep.nazwa = new_value 
                 self.db_session.commit()
                 self.load_zamowienia_daemon(widok = "ukryj")
-                self.load_sklepy(widok = "ukryj")
+                self.load_sklepy(widok = "ukryj", select_item=sklep_id)
     
                 self.sound.play_confirm_sound()
 
         elif self.specjalne_znaki(new_value):
-            leksykon = self.leksykon_programu["error_messagebox"]
-            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            leksykon = self.leksykon_messagebox["error_messagebox"]
+            self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.zmien_nazwa_sklep()
 
     def zmien_nazwa_firma(self):
@@ -694,8 +690,8 @@ class ControllerOrder(BaseView):
         firma_id = element_value[0]
         stara_nazwa = element_value[1]
 
-        leksykon = self.leksykon_programu["edit_messagebox"]
-        new_value = self.messagebox_controller.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["company"]+"\t\t\t\t", value=stara_nazwa)
+        leksykon = self.leksykon_messagebox["edit_messagebox"]
+        new_value = self.messagebox_controller.messagebox(type="ask", heading=leksykon["heading"], text=leksykon["text"]["company"]+"\t\t\t\t", value=stara_nazwa)
 
         if new_value and new_value.strip():
             firma = self.db_session.query(Firma).filter_by(id=firma_id).first()
@@ -709,8 +705,8 @@ class ControllerOrder(BaseView):
                 self.sound.play_confirm_sound()
 
         elif self.specjalne_znaki(new_value):
-            leksykon = self.leksykon_programu["error_messagebox"]
-            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            leksykon = self.leksykon_messagebox["error_messagebox"]
+            self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.zmien_nazwa_firma()
 
     def zmien_nazwa_kategoria(self):
@@ -722,8 +718,8 @@ class ControllerOrder(BaseView):
         kategoria_id = element_value[0]
         stara_nazwa = element_value[1]
 
-        leksykon = self.leksykon_programu["edit_messagebox"]
-        new_value = self.messagebox_controller.messagebox(self, type="ask", heading=leksykon["heading"], text=leksykon["text"]["category"]+"\t\t\t\t", value=stara_nazwa)
+        leksykon = self.leksykon_messagebox["edit_messagebox"]
+        new_value = self.messagebox_controller.messagebox(type="ask", heading=leksykon["heading"], text=leksykon["text"]["category"]+"\t\t\t\t", value=stara_nazwa)
 
         if new_value and new_value.strip():
             kategoria = self.db_session.query(Kategoria).filter_by(id=kategoria_id).first()
@@ -737,8 +733,8 @@ class ControllerOrder(BaseView):
                 self.sound.play_confirm_sound()
 
         elif self.specjalne_znaki(new_value):
-            leksykon = self.leksykon_programu["error_messagebox"]
-            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            leksykon = self.leksykon_messagebox["error_messagebox"]
+            self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             self.zmien_nazwa_kategoria()
 
     def usun_zamowienie(self):
@@ -746,9 +742,9 @@ class ControllerOrder(BaseView):
         if not selected_item:
             return
 
-        leksykon = self.leksykon_programu["delete_messagebox"]
+        leksykon = self.leksykon_messagebox["delete_messagebox"]
 
-        dialog = self.messagebox_controller.messagebox(self, 
+        dialog = self.messagebox_controller.messagebox( 
                                  type="ask", 
                                  heading=leksykon["heading"], 
                                  text=leksykon["text"]["order"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
@@ -769,9 +765,9 @@ class ControllerOrder(BaseView):
         
         relacja_name = self.inside_tree.item(self.inside_tree.selection()[0], 'values')
 
-        leksykon = self.leksykon_programu["delete_messagebox"]
+        leksykon = self.leksykon_messagebox["delete_messagebox"]
 
-        dialog = self.messagebox_controller.messagebox(self, 
+        dialog = self.messagebox_controller.messagebox( 
                                  type="ask", 
                                  heading=leksykon["heading"], 
                                  text=leksykon["text"]["order"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
@@ -781,7 +777,7 @@ class ControllerOrder(BaseView):
                 artykuly_relacja.delete()
                 .where(artykuly_relacja.c.zamowienie_id == self.zamowienie_id,
                 artykuly_relacja.c.artykul_id == relacja_name[0],
-                artykuly_relacja.c.cena_jednostkowa == relacja_name[1],
+                artykuly_relacja.c.cena_jednostkowa == relacja_name[1].replace(" "+self.currency,"").replace(",","."),
                 artykuly_relacja.c.ilosc_artykulu == relacja_name[2]
                 )
             )
@@ -798,9 +794,9 @@ class ControllerOrder(BaseView):
         if not selected_item:
             return
         
-        leksykon = self.leksykon_programu["delete_messagebox"]
+        leksykon = self.leksykon_messagebox["delete_messagebox"]
 
-        dialog = self.messagebox_controller.messagebox(self, 
+        dialog = self.messagebox_controller.messagebox(
                                  type="ask", 
                                  heading=leksykon["heading"], 
                                  text=leksykon["text"]["buyer"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
@@ -820,9 +816,9 @@ class ControllerOrder(BaseView):
         if not selected_item:
             return
         
-        leksykon = self.leksykon_programu["delete_messagebox"]
+        leksykon = self.leksykon_messagebox["delete_messagebox"]
 
-        dialog = self.messagebox_controller.messagebox(self, 
+        dialog = self.messagebox_controller.messagebox( 
                                  type="ask", 
                                  heading=leksykon["heading"], 
                                  text=leksykon["text"]["shop"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
@@ -841,9 +837,9 @@ class ControllerOrder(BaseView):
         if not selected_item:
             return
         
-        leksykon = self.leksykon_programu["delete_messagebox"]
+        leksykon = self.leksykon_messagebox["delete_messagebox"]
 
-        dialog = self.messagebox_controller.messagebox(self, 
+        dialog = self.messagebox_controller.messagebox( 
                                  type="ask", 
                                  heading=leksykon["heading"], 
                                  text=leksykon["text"]["company"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
@@ -863,9 +859,9 @@ class ControllerOrder(BaseView):
         if not selected_item:
             return
         
-        leksykon = self.leksykon_programu["delete_messagebox"]
+        leksykon = self.leksykon_messagebox["delete_messagebox"]
 
-        dialog = self.messagebox_controller.messagebox(self, 
+        dialog = self.messagebox_controller.messagebox( 
                                  type="ask", 
                                  heading=leksykon["heading"], 
                                  text=leksykon["text"]["category"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
@@ -884,9 +880,9 @@ class ControllerOrder(BaseView):
         if not selected_item:
             return
 
-        leksykon = self.leksykon_programu["delete_messagebox"]
+        leksykon = self.leksykon_messagebox["delete_messagebox"]
 
-        dialog = self.messagebox_controller.messagebox(self, 
+        dialog = self.messagebox_controller.messagebox( 
                                  type="ask", 
                                  heading=leksykon["heading"], 
                                  text=leksykon["text"]["article"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
@@ -913,8 +909,8 @@ class ControllerOrder(BaseView):
         elif commend == "modyfikuj":
             selected_item = self.artykuly_tree.selection()
             if not selected_item:
-                leksykon = self.leksykon_programu["error_messagebox"]
-                self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["select_art"])
+                leksykon = self.leksykon_messagebox["error_messagebox"]
+                self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["select_art"])
                 return
                     
             self.artykul_modyfikacja_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
@@ -974,8 +970,8 @@ class ControllerOrder(BaseView):
         elif commend == "modyfikuj":
             selected_item = self.zamowienia_tree.selection()
             if not selected_item:
-                leksykon = self.leksykon_programu["error_messagebox"]
-                self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["order"])
+                leksykon = self.leksykon_messagebox["error_messagebox"]
+                self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["order"])
                 return
 
             self.zamowienie_id = self.zamowienia_tree.item(selected_item[0], 'values')[0]
@@ -999,45 +995,45 @@ class ControllerOrder(BaseView):
     def zatwierdz_nowy_modyfikuj_zamowienie(self, commend = "stworz"):
         selected_item = self.kupujacy_tree.selection()
         if not selected_item:
-            leksykon = self.leksykon_programu["error_messagebox"]
-            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["buyer"])
+            leksykon = self.leksykon_messagebox["error_messagebox"]
+            self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["buyer"])
             return
         
         selected_item = self.sklepy_tree.selection()
         if not selected_item:
-            leksykon = self.leksykon_programu["error_messagebox"]
-            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["shop"])
+            leksykon = self.leksykon_messagebox["error_messagebox"]
+            self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["shop"])
             return
 
         try:
             rabat_j = float(self.view.rabat_j_var.get().replace(',', '.'))
         except tk.TclError:
-            leksykon = self.leksykon_programu["error_messagebox"]
-            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["unit_discount"])
+            leksykon = self.leksykon_messagebox["error_messagebox"]
+            self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["unit_discount"])
             return
         
         except ValueError:
-            leksykon = self.leksykon_programu["error_messagebox"]
-            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["unit_discount"])
+            leksykon = self.leksykon_messagebox["error_messagebox"]
+            self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["unit_discount"])
             return
         
         try:
             rabat_procentowy = float(self.view.rabat_p_var.get().replace(',', '.'))
         except tk.TclError:
-            leksykon = self.leksykon_programu["error_messagebox"]
-            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["proc_discount"])
+            leksykon = self.leksykon_messagebox["error_messagebox"]
+            self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["proc_discount"])
             return
        
         except ValueError:
-            leksykon = self.leksykon_programu["error_messagebox"]
-            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["proc_discount"])
+            leksykon = self.leksykon_messagebox["error_messagebox"]
+            self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["proc_discount"])
             return
 
         try:
             data = self.konwersja_string_do_data(self.view.zamowienie_data.get())
         except ValueError:
-            leksykon = self.leksykon_programu["error_messagebox"]
-            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["date"])
+            leksykon = self.leksykon_messagebox["error_messagebox"]
+            self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["date"])
             return
         
         kupujacy_id = int(self.kupujacy_tree.item(self.kupujacy_tree.selection()[0], 'values')[0])
@@ -1065,20 +1061,20 @@ class ControllerOrder(BaseView):
     def zatwierdz_nowy_modyfikuj_artykul(self, commend = "stworz"):
         selected_item = self.firma_tree.selection()
         if not selected_item:
-            leksykon = self.leksykon_programu["error_messagebox"]
-            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["company"])
+            leksykon = self.leksykon_messagebox["error_messagebox"]
+            self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["company"])
             return
         
         selected_item = self.kategorie_tree.selection()
         if not selected_item:
-            leksykon = self.leksykon_programu["error_messagebox"]
-            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["category"])
+            leksykon = self.leksykon_messagebox["error_messagebox"]
+            self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["category"])
             return
 
         nazwa = self.view.nazwa_artykulu_string.get()
         if not nazwa:
-            leksykon = self.leksykon_programu["error_messagebox"]
-            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            leksykon = self.leksykon_messagebox["error_messagebox"]
+            self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
             return
        
         firma_id = int(self.firma_tree.item(self.firma_tree.selection()[0], 'values')[0])
@@ -1157,7 +1153,6 @@ class ControllerOrder(BaseView):
         
         relacja_name = self.inside_tree.item(self.inside_tree.selection()[0], 'values')
         cena = float(relacja_name[1].replace(" {self.currency}", ""))
-        print(relacja_name, cena)
 
         leksykon = self.leksykon_programu["edit_messagebox"]
         self.view.cena_ilosc_window(dsc = self.dsc, title=leksykon["heading"], id = relacja_name[0], relacja=relacja_name[2], cena = cena)
@@ -1175,20 +1170,16 @@ class ControllerOrder(BaseView):
         try:
             cena_artykulu_var = float(self.view.cena_artykulu_var.get().replace(",", "."))
         except ValueError:
-            leksykon = self.leksykon_programu["error_messagebox"]
-            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["price"])
+            leksykon = self.leksykon_messagebox["error_messagebox"]
+            self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["price"])
             return
 
         try:
             ilosc_artykulu_var =  float(self.view.ilosc_artykulu_var.get().replace(",", "."))
         except ValueError:
-            leksykon = self.leksykon_programu["error_messagebox"]
-            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["amount"])
+            leksykon = self.leksykon_messagebox["error_messagebox"]
+            self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["amount"])
             return
-
-        text = ["start", (self.zamowienie_id, self.view.id_artykulu, cena_artykulu_var, ilosc_artykulu_var), "end", (self.view.cena_artykulu_var_old, self.view.ilosc_artykulu_var_old)]
-        for i in text:
-            print(i)
         
         self.db_session.execute(
             artykuly_relacja.update()
@@ -1222,15 +1213,15 @@ class ControllerOrder(BaseView):
         try:
             cena_artykulu_var = float(self.view.cena_artykulu_var.get().replace(",", "."))
         except ValueError:
-            leksykon = self.leksykon_programu["error_messagebox"]
-            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["price"])
+            leksykon = self.leksykon_messagebox["error_messagebox"]
+            self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["price"])
             return
 
         try:
             ilosc_artykulu_var =  float(self.view.ilosc_artykulu_var.get().replace(",", "."))
         except ValueError:
-            leksykon = self.leksykon_programu["error_messagebox"]
-            self.messagebox_controller.messagebox(self, type="error", heading=leksykon["heading"], text=leksykon["text"]["amount"])
+            leksykon = self.leksykon_messagebox["error_messagebox"]
+            self.messagebox_controller.messagebox(type="error", heading=leksykon["heading"], text=leksykon["text"]["amount"])
             return
 
         zamowienie_id = self.zamowienie_dodawanie_artykulu_id
@@ -1254,7 +1245,7 @@ class ControllerOrder(BaseView):
     def specjalne_znaki(self, text: str) -> bool:
         if text == None:
             return
-        dozwolone_znaki = string.ascii_letters + string.digits
+        dozwolone_znaki = string.ascii_letters + string.digits + " .,-_/" + "ąćęłńóśźżĄĆĘŁŃÓŚŹŻ"
         return any(znaki not in dozwolone_znaki for znaki in text)
 
     def konwersja_string_do_data(self, date):
@@ -1309,7 +1300,7 @@ class ControllerOrder(BaseView):
             artykul_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
             self.cena_ilosc_select_item = artykul_id
 
-            leksykon = self.leksykon_programu["add_messagebox"]
+            leksykon = self.leksykon_messagebox["add_messagebox"]
             self.view.cena_ilosc_window(dsc = self.dsc, title=leksykon["heading"])
 
             self.button_manager(frame="wyjdź_z_cena_ilosc_dodawanie", back_target="wyjdź_z_cena_ilosc_dodawanie")

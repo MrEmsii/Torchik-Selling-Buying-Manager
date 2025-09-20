@@ -195,25 +195,36 @@
         "button_refresh_zamowienia": {
             "text": "Odśwież",
             "toolTip": "Odśwież listę zamówień"
-        },
-        "error_messagebox":{
-            "heading": "Błąd",
-            "text": {
-                "shop": "Brak wybranego sklepu! Wybierz sklep.",
-                "buyer": "Brak wybranego kupującego! Wybierz kupującego.",
-                "order": "Brak wybranego zamówienia! Wybierz zamówienie.",
-                "unit_discount": "Nieprawidłowa wartość rabatu! Wpisz liczbę.",
-                "proc_discount": "Nieprawidłowa wartość rabatu! Wpisz liczbę.",
-                "date": "Nieprawidłowa data! Wpisz poprawną datę.",
-                "category": "Brak wybranego kategorii! Wybierz kategorii.",
-                "company": "Brak wybranej firmy! Wybierz firmy.",
-                "price": "Nieprawidłowa wartość ceny! Wpisz liczbę.",
-                "amount": "Nieprawidłowa wartość ilości! Wpisz liczbę.",
-                "name": "Nieprawidłowa nazwa! Popraw nazwę.",
-                "select_art": "Brak wybranego artykułu! Wybierz artykuł."
-            }
         }
     },
+
+
+    "statistic":{
+        "button_exit": {
+            "text": "Wyjście",
+            "toolTip": "Zamknij aplikację"
+        },
+        "button_company": {
+            "text": "Koszt w\nfirmach",
+            "toolTip": "Pokaż koszty w firmach"
+        },
+        "button_buyers": {
+            "text": "Koszt w\nkupujących",
+            "toolTip": "Pokaż koszty w kupujących"
+        },
+        "button_shops": {
+            "text": "Koszt w\nsklepach",
+            "toolTip": "Pokaż koszty w sklepach"
+        },
+        "button_category": {
+            "text": "Koszt w\nkategoriach",
+            "toolTip": "Pokaż koszty w kategoriach"
+        },
+        "button_artykuly": {
+            "text": "Koszt w\nartykułach",
+            "toolTip": "Pokaż koszty w artykułach"
+        }
+    },  
 
     "messagebox_window": {
         "info_messagebox":{
@@ -257,6 +268,24 @@
                 "article": "Napewno chcesz usunąć artykuł z listy? \nCzynność NIE odwracalna!\nWpisz "
             },
             "agree": ["TAK", "YES"]
-        }
+        },
+        "error_messagebox":{
+            "heading": "Błąd",
+            "text": {
+                "shop": "Brak wybranego sklepu! Wybierz sklep.",
+                "buyer": "Brak wybranego kupującego! Wybierz kupującego.",
+                "order": "Brak wybranego zamówienia! Wybierz zamówienie.",
+                "unit_discount": "Nieprawidłowa wartość rabatu! Wpisz liczbę.",
+                "proc_discount": "Nieprawidłowa wartość rabatu! Wpisz liczbę.",
+                "date": "Nieprawidłowa data! Wpisz poprawną datę.",
+                "category": "Brak wybranego kategorii! Wybierz kategorii.",
+                "company": "Brak wybranej firmy! Wybierz firmy.",
+                "price": "Nieprawidłowa wartość ceny! Wpisz liczbę.",
+                "amount": "Nieprawidłowa wartość ilości! Wpisz liczbę.",
+                "name": "Nieprawidłowa nazwa! Popraw nazwę.",
+                "select_art": "Brak wybranego artykułu! Wybierz artykuł."
+            }
+        }   
     }
 }
+

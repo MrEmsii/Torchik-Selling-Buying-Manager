@@ -1,4 +1,4 @@
-from model.models import SQLconnect, select, Kupujacy, Kategoria, Sklep, Firma, Zamowienie, Artykul_Lista, artykuly_relacja
+from model.db_model import SQLconnect, select, Kupujacy, Kategoria, Sklep, Firma, Zamowienie, Artykul_Lista, artykuly_relacja
 from view.ViewOrder import ViewOrder
 from controller.ControllerMessageBox import ControllerMessageBox
 # from view.self.messagebox_controller import self.messagebox_controller
@@ -500,7 +500,7 @@ class ControllerOrder(BaseView):
             commend = lambda: self.load_inside_zamowienie(self.zamowienie_id)
 
         leksykon = self.leksykon_programu["button_back_pack"]    
-        self.view.utworz_przycisk(frame, commend, side='bottom', padx=5, pady=5, leksykon_programu=leksykon)
+        self.view.utworz_przycisk(frame, commend, side='bottom', padx=5, pady=5, leksykon_programu=leksykon, icon=self.view.backButton_icon)
 
     def zaznacz_wiersz_z_wartoscia(self, treeview, kolumna, wartosc):
         for item in treeview.get_children():

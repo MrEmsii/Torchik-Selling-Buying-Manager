@@ -2,3 +2,6 @@ main.py
 *.pyc
 *.db
 test_DB_alfa.py
+* — kopia.py
+stats.py
+test_DB_full_alfa.py

@@ -6,6 +6,8 @@ from view.ViewMain import ViewMain
 from controller.ControllerMessageBox import ControllerMessageBox
 
 from controller.ControllerOrder import ControllerOrder
+from controller.ControllerStatistic import ControllerStatistic
+
 
 import os
 import json
@@ -109,7 +111,18 @@ class ControllerMain:
         self.order_controller.run()
 
     def open_statistics_window(self):
-        pass
+        self.stat_controller = ControllerStatistic(
+        master = self.master,
+        dsc=self.dsc,
+        leksykon_programu=self.leksykon_programu["order_window"],
+        messagebox_controller = self.messagebox_controller,
+        sound = self.sound,
+        konfiguracja_programu=self.konfiguracja_programu,
+        currency=self.leksykon_programu["currency"],
+        language_code=self.language_code
+        )
+
+        self.stat_controller.run()
 
     def open_settings_window(self):
         pass

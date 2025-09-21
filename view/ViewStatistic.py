@@ -24,30 +24,16 @@ class ViewStatistic(BaseView):
         self.sound = ViewSound(dsc, konfiguracja_programu)
         self.language_code = language_code
 
-        self.tree = ttk.Treeview(self.table_frame, columns=("name", "value"), show="headings")
+        self.scrollbar = ttk.Scrollbar(self.table_frame, orient="vertical")
+
+        self.tree = ttk.Treeview(self.table_frame, columns=("name", "value"), show="headings", yscrollcommand=self.scrollbar.set)
         self.tree.heading("name", text="Nazwa")
         self.tree.heading("value", text="Wartość")
+
+        self.scrollbar.config(command=self.tree.yview)
+        self.scrollbar.pack(side='right', fill='y')
+
         self.tree.pack(fill="both", expand=True)
-
-        # self.master = master
-        # self.frame = tk.Frame(master)
-        # self.frame.pack(fill="both", expand=True, padx=10, pady=10)
-
-        # # zakładki
-        # self.notebook = ttk.Notebook(self.frame)
-        # self.notebook.pack(fill="both", expand=True)
-
-        # # Tabela
-        # self.table_frame = tk.Frame(self.notebook)
-        # self.tree = ttk.Treeview(self.table_frame, columns=("name", "value"), show="headings")
-        # self.tree.heading("name", text="Nazwa")
-        # self.tree.heading("value", text="Wartość")
-        # self.tree.pack(fill="both", expand=True)
-        # self.notebook.add(self.table_frame, text="Tabela")
-
-        # # Wykres
-        # self.chart_frame = tk.Frame(self.notebook)
-        # self.notebook.add(self.chart_frame, text="Wykres")
 
     def setup_styles(self, dsc):
         self.style = ttk.Style()
@@ -98,24 +84,44 @@ class ViewStatistic(BaseView):
         headers = ["Kolumna1", "Kolumna2", ...]
         data = [(val1, val2, ...), (...), ...]
         """
-        # wyczyść kolumny
         self.tree["columns"] = headers
-        for col in headers:
-            self.tree.heading(col, text=col)
-            self.tree.column(col, width=150, anchor="center")
 
-        # usuń stare dane
+        self.scrollbar.config(command=self.tree.yview)
+
+        self.tree.heading(headers[0], text=headers[0], anchor='center')
+        self.tree.column(headers[0], width=60, anchor='e')
+
+        self.tree.heading(headers[1], text=headers[1], anchor='center')
+        self.tree.column(headers[1], width=30, anchor='e')
+
         for row in self.tree.get_children():
             self.tree.delete(row)
-
-        # dodaj nowe
-        # for row in data:
-        #     self.tree.insert("", "end", values=row)
 
         for id, wartosc in data:
             self.tree.insert('', 'end', values=(id, f"{wartosc:,.2f} zł".replace(",", " ")))
 
-    def show_chart(self, labels, values, title="Wykres", master = None):
+    def show_chart(self, labels, values, title="Wykres", master=None):
+        for widget in master.winfo_children():
+            widget.destroy()
+
+        labels = labels[:20]
+        values = values[:20]
+
+        fig = Figure(figsize=(9, 6))
+        ax = fig.add_subplot(111)
+        ax.barh(labels, values)
+        ax.set_title(title)
+        ax.tick_params(axis="y", labelsize=8)
+
+        fig.subplots_adjust(left=0.25) 
+
+        ax.invert_yaxis()
+
+        canvas = FigureCanvasTkAgg(fig, master=master)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill="both", expand=True)
+
+    def show_chart_pie(self, labels, values, title="Wykres", master = None):
         """
         labels = etykiety (np. artykuły)
         values = wartości (np. koszty)
@@ -123,12 +129,14 @@ class ViewStatistic(BaseView):
         for widget in master.winfo_children():
             widget.destroy()
 
+        labels = labels[:10]
+        values = values[:10]
+
         fig = Figure(figsize=(5, 4))
         ax = fig.add_subplot(111)
-        # ax.bar(labels, values)
+
         ax.pie(values, labels=labels, startangle=140, autopct=self.autopct_format(values), textprops={'fontsize': 8}, pctdistance=0.75, labeldistance=1.1)
         ax.set_title(title)
-        # ax.set_ylabel("Wartość")
 
         canvas = FigureCanvasTkAgg(fig, master=master)
         canvas.draw()

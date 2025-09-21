@@ -319,7 +319,6 @@ class ControllerOrder(BaseView):
             self.button_zatwierdz_edycje_artykulu(self.view.button_cena_ilosc_frame)
             self.button_anuluj_dodanie_artykulu(self.view.button_cena_ilosc_frame)
 
-
         if frame != 'main':
             self.button_back_pack(self.button_orders_frame, back_target)
         
@@ -378,7 +377,6 @@ class ControllerOrder(BaseView):
         leksykon = self.leksykon_programu["button_anuluj_dodanie_artykulu"]
         self.view.utworz_przycisk(frame, self.anuluj_dodanie_artykulu_zamowienie, icon=self.view.backButton_icon, leksykon_programu=leksykon)
 
-
     # --- ZAMÓWIENIA ---
     def button_dodaj_zamowienie(self, frame):
         leksykon = self.leksykon_programu["button_dodaj_zamowienie"]
@@ -400,7 +398,6 @@ class ControllerOrder(BaseView):
         leksykon = self.leksykon_programu["button_usun_zamowienie"]
         self.view.utworz_przycisk(frame, self.usun_zamowienie, side='bottom', pady=(3,30), icon=self.view.delete_zamowienie_icon, leksykon_programu=leksykon)
 
-
     # --- SKLEPY ---
     def button_dodaj_sklep(self, frame):
         leksykon = self.leksykon_programu["button_dodaj_sklep"]
@@ -413,7 +410,6 @@ class ControllerOrder(BaseView):
     def button_usun_sklep(self, frame):
         leksykon = self.leksykon_programu["button_usun_sklep"]
         self.view.utworz_przycisk(frame, self.usun_sklep, icon=self.view.delete_sklep_icon, leksykon_programu=leksykon)
-
 
     # --- FIRMY ---
     def button_dodaj_firma(self, frame):
@@ -428,7 +424,6 @@ class ControllerOrder(BaseView):
         leksykon = self.leksykon_programu["button_usun_firma"]
         self.view.utworz_przycisk(frame, self.usun_firma, icon=self.view.delete_firma_icon, leksykon_programu=leksykon)
 
-
     # --- KATEGORIE ---
     def button_dodaj_kategoria(self, frame):
         leksykon = self.leksykon_programu["button_dodaj_kategoria"]
@@ -442,7 +437,6 @@ class ControllerOrder(BaseView):
         leksykon = self.leksykon_programu["button_usun_kategorie"]
         self.view.utworz_przycisk(frame, self.usun_kategorie, icon=self.view.delete_kategoria_icon, leksykon_programu=leksykon)
 
-
     # --- KUPUJĄCY ---
     def button_dodaj_kupujacy(self, frame):
         leksykon = self.leksykon_programu["button_dodaj_kupujacy"]
@@ -455,7 +449,6 @@ class ControllerOrder(BaseView):
     def button_usun_kupujacy(self, frame):
         leksykon = self.leksykon_programu["button_usun_kupujacy"]
         self.view.utworz_przycisk(frame, self.usun_kupujacego, icon=self.view.delete_kupujacy_icon, leksykon_programu=leksykon)
-
 
     # --- LISTY / INNE ---
     def button_lista_artykulow(self, frame):
@@ -519,11 +512,8 @@ class ControllerOrder(BaseView):
         self.kategorie_tree.bind("<Double-1>", self.on_double_click_filtrowanie_kategoria)
         self.kategorie_tree.bind("<Double-3>", self.on_double_click_filtrowanie_kategoria_resetowanie)
 
-
         if self.zamowienie_id:
-            print(self.zamowienie_id)
             self.artykuly_tree.bind("<Double-1>", self.on_double_click_dodawanie_artykulu_do_zamowienia)
-
 
     def list_zamowienia(self):
         self.view.zamowienia_grid_setting()
@@ -788,7 +778,6 @@ class ControllerOrder(BaseView):
 
         self.load_zamowienia_daemon()
 
-
     def usun_kupujacego(self):
         selected_item = self.kupujacy_tree.selection()
         if not selected_item:
@@ -843,7 +832,6 @@ class ControllerOrder(BaseView):
                                  type="ask", 
                                  heading=leksykon["heading"], 
                                  text=leksykon["text"]["company"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
-
 
         if dialog and dialog.lower() in [name.lower() for name in leksykon["agree"]]:
             firma_id = self.firma_tree.item(self.firma_tree.selection()[0], 'values')[0]
@@ -921,10 +909,8 @@ class ControllerOrder(BaseView):
             self.button_manager("modyfikacja_artykuly", back_target = 'lista_artykułów' )
             self.view.dodaj_modyfikuj_artykul_view(nazwa_artykulu_string = info[0], kolor_artykulu_string = info[1], szczegoly_artykulu_string = info[2])
 
-
         self.firma_tree = self.view.name_tree(self.view.order_frame, "Lista Firm", True)
         self.kategorie_tree = self.view.name_tree(self.view.secend_frame, "Kategorie Lista", True)
-
 
         if commend == "modyfikuj":
             firma_id_artykulu = info[4]
@@ -1152,14 +1138,15 @@ class ControllerOrder(BaseView):
             return 
         
         relacja_name = self.inside_tree.item(self.inside_tree.selection()[0], 'values')
-        cena = float(relacja_name[1].replace(" {self.currency}", ""))
+        cena = float(relacja_name[1].replace(" "+self.currency,"").replace(",","."))
 
-        leksykon = self.leksykon_programu["edit_messagebox"]
+        leksykon = self.leksykon_messagebox["edit_messagebox"]
         self.view.cena_ilosc_window(dsc = self.dsc, title=leksykon["heading"], id = relacja_name[0], relacja=relacja_name[2], cena = cena)
         self.button_manager("wyjdź_z_cena_ilosc_edycja", back_target = 'lista_artykułów')
         
         zamowienie_id = self.zamowienie_id
         self.load_inside_zamowienie(zamowienie_id)
+        self.load_zamowienia_daemon(widok="ukryj")
 
     def dodaj_list_artykulow(self):
         self.list_artykuly(backTarget='zamówienie')

@@ -134,13 +134,13 @@ class ViewOrder(BaseView):
 
         tree.pack( expand=True, fill='both')
 
-        tree.column(columns_name[0], width=50, anchor='e')
+        tree.column(columns_name[0], width=30, anchor='e')
         tree.heading(columns_name[0], text=columns_name[0], anchor='e')
 
-        tree.column(columns_name[1], width=100, anchor='e')
+        tree.column(columns_name[1], width=60, anchor='e')
         tree.heading(columns_name[1], text=columns_name[1], anchor='e')
 
-        tree.column(columns_name[2], width=100, anchor='w')
+        tree.column(columns_name[2], width=30, anchor='w')
         tree.heading(columns_name[2], text=columns_name[2], anchor='w')
 
         tree.column(columns_name[3], width=100, anchor='w')
@@ -149,7 +149,7 @@ class ViewOrder(BaseView):
         tree.column(columns_name[4], width=100, anchor='w')
         tree.heading(columns_name[4], text=columns_name[4], anchor='w')
 
-        tree.column(columns_name[5], width=100, anchor='w')
+        tree.column(columns_name[5], width=200, anchor='w')
         tree.heading(columns_name[5], text=columns_name[5], anchor='w')     
 
         tree.column(columns_name[6], width=100, anchor='w')

@@ -15,7 +15,6 @@ class ControllerStatistic:
         self.currency = currency
 
         self.order_master = tk.Toplevel(master)
-        # self.db_session = SQLconnect()
 
         self.view = ViewStatistic(
             self.order_master, 
@@ -96,7 +95,7 @@ class ControllerStatistic:
     def open_statistic_buyers(self):
         koszty = self.stats_model.koszt_w_kupujacych()
         self.view.update_table(["Kupujący", "Koszt"], koszty)
-        self.view.show_chart(
+        self.view.show_chart_pie(
             labels=[nazwa for nazwa, _ in koszty],
             values=[total for _, total in koszty],
             title="Koszt wygenerowany w kupujacych", 

@@ -14,13 +14,8 @@ import json
 
 class ControllerMain:
     def __init__(self):
-        #wczytanie słowników, podzielenie słowników na elementy, 
-        #uruchomienie okna głównego z możliwością wybory dalszego działania - check
-        #wybór między zamówienia, statystyki
-
         self.dsc = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
         self.master = TkinterDnD.Tk()
-
 
         if os.path.exists(self.dsc + "/resources/setting.json") == False:
             self.json_setting(status = "create")
@@ -29,7 +24,7 @@ class ControllerMain:
         self.konfiguracja_programu = self.json_setting(status="read")
         
         self.sound = ViewSound(self.dsc, self.konfiguracja_programu)
-        self.messagebox_controller = ControllerMessageBox(sound=self.sound)  # Tymczasowe przypisanie None, zostanie zaktualizowane później
+        self.messagebox_controller = ControllerMessageBox(sound=self.sound)
 
         self.language_code = self.konfiguracja_programu["language_code"]
         self.leksykon_programu = self.json_language(self.language_code)

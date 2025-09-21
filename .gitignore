@@ -5,3 +5,4 @@ test_DB_alfa.py
 * — kopia.py
 stats.py
 test_DB_full_alfa.py
+import pandas as pd.py

@@ -1,7 +1,7 @@
 from sqlalchemy import func, select
-from model.db_model import artykuly_relacja, Artykul_Lista, Firma, Kategoria, Zamowienie, Sklep, Kupujacy
+from model.stock_db_model import artykuly_relacja, Artykul_Lista, Firma, Kategoria, Zamowienie, Sklep, Kupujacy
 
-class StatisticsModel:
+class StatisticsStockModel:
     def __init__(self, session):
         self.session = session
 

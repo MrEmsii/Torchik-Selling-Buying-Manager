@@ -8,17 +8,17 @@ from view.base_view import BaseView
 import os
 
 class ViewMain(BaseView):
-    def __init__(self, master, dsc=None, leksykon = None, konfiguracja_programu = None, sound = None, refresh_icon=None):
+    def __init__(self, master, dsc=None, sound = None):
         self.master = master
         self.master.geometry("500x500+100+100")
         self.master.resizable(True, True)
 
-        self.leksykon = leksykon
+        # self.leksykon = leksykon
 
         self.setup_styles(dsc)
         self.setup_frames()
 
-        self.sound = ViewSound(dsc, konfiguracja_programu)
+        self.sound = sound
         self.sound.play_start_sound()
         self.button_icon_pack_main(dsc)
 

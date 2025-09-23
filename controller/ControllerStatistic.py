@@ -1,23 +1,32 @@
 import tkinter as tk
 from view.ViewStatistic import ViewStatistic
-from model.statistics_model import StatisticsModel
-from model.db_model import SQLconnect
+from model.statistics_stock_model import StatisticsStockModel
+from model.stock_db_model import SQLconnect
 
 class ControllerStatistic:
-    def __init__(self, master, dsc, leksykon_programu, konfiguracja_programu, sound = None, messagebox_controller = None, currency = None, language_code = None):
+    def __init__(
+            self, master, dsc, leksykon_programu, konfiguracja_programu, 
+            sound = None, 
+            messagebox_controller = None, 
+            currency = None, 
+            language_code = None,
+            main_controller=None
+            ):
         db_session = SQLconnect()
         self.session = db_session
-        self.stats_model = StatisticsModel(db_session)
+        self.stats_model = StatisticsStockModel(db_session)
 
         self.dsc = dsc
         self.leksykon_programu = leksykon_programu
         self.konfiguracja_programu = konfiguracja_programu
         self.currency = currency
+        self.main_controller = main_controller
 
-        self.order_master = tk.Toplevel(master)
+
+        self.statistic_master = tk.Toplevel(master)
 
         self.view = ViewStatistic(
-            self.order_master, 
+            self.statistic_master, 
             dsc=self.dsc, 
             leksykon=self.leksykon_programu, 
             konfiguracja_programu=konfiguracja_programu, 
@@ -30,13 +39,24 @@ class ControllerStatistic:
 
         self.button_manager()
 
+        self.statistic_master.protocol("WM_DELETE_WINDOW", self.on_closing_order_window)
+
+
     def run(self):
-        self.view.statistic_master.protocol("WM_DELETE_WINDOW", self.on_closing_order_window)
-        self.view.statistic_master.mainloop()
+        self.statistic_master.deiconify()
+
+    def close(self):
+        if self.session:
+            self.session.close()
+            self.session = None
 
     def on_closing_order_window(self):
         if self.messagebox_controller.close_info():
-            self.view.statistic_master.destroy() 
+            self.close()
+            if self.statistic_master.winfo_exists():
+                self.statistic_master.destroy()
+            if self.main_controller:
+                self.main_controller.close_statistic_window()
 
     def inicjalizacja_frame(self):
         self.statisic_frame = self.view.statistic_frame
@@ -121,36 +141,4 @@ class ControllerStatistic:
             title="Koszt wygenerowany w kategorii", 
             master=self.statisic_frame
         )
-
-
-
-    def open_statistics_window(self, root):
-        win = tk.Toplevel(root)
-        win.title("Statystyki artykułów")
-        win.geometry("800x600")
-
-        self.view = ViewStatistic(win)
-
-        # Koszt artykułów
-        koszty = self.stats_model.srednia_cena_artykulu()
-        self.view.update_table(["Artykuł", "Koszt"], koszty)
-        self.view.show_chart(
-            labels=[nazwa for nazwa, _ in koszty],
-            values=[total for _, total in koszty],
-            title="Koszt artykułów"
-        )
-        # Średnia cena
-        srednie = self.stats_model.srednia_cena_artykulu()
-        print("\nŚrednia cena artykułów:")
-        for nazwa, avg in srednie:
-            print(f"{nazwa}: {avg:.2f} zł")
-
-        # Najdroższa firma
-        firma = self.stats_model.firma_najwiekszy_koszt()
-        print(f"\nFirma z największym kosztem: {firma[0]} ({firma[1]} zł)")
-
-        # Najpopularniejsza kategoria
-        kategoria = self.stats_model.najpopularniejsza_kategoria()
-        print(f"\nNajpopularniejsza kategoria: {kategoria[0]} "
-              f"({kategoria[1]} artykułów, koszt: {kategoria[2]} zł)")
 

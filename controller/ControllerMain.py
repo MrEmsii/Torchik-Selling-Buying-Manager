@@ -1,13 +1,12 @@
 from tkinterdnd2 import DND_FILES, TkinterDnD
 
 from view.ViewSound import ViewSound
-
 from view.ViewMain import ViewMain
+
 from controller.ControllerMessageBox import ControllerMessageBox
 
-from controller.ControllerOrder import ControllerOrder
+from controller.ControllerStock import ControllerStock
 from controller.ControllerStatistic import ControllerStatistic
-
 
 import os
 import json
@@ -32,9 +31,15 @@ class ControllerMain:
         self.leksykon_messagebox = self.leksykon_programu["messagebox_window"]
         self.messagebox_controller.leksykon_messagebox = self.leksykon_messagebox
 
-        self.main_view = ViewMain(self.master, dsc=self.dsc, leksykon=self.leksykon_programu, konfiguracja_programu=self.konfiguracja_programu)
+        self.main_view = ViewMain(
+            self.master, 
+            dsc=self.dsc, 
+            sound=self.sound
+            )
+        
         self.main_view_frame = self.main_view.main_view_frame
         
+        self.button_stock_click(self.main_view_frame)
         self.button_order_click(self.main_view_frame)
         self.button_statistics_click(self.main_view_frame)
         self.button_settings_click(self.main_view_frame)
@@ -91,50 +96,72 @@ class ControllerMain:
                 json.dump(config, settings, ensure_ascii=False, indent=4)
 
             return config
-        
-    def open_order_window(self):
-        self.order_controller = ControllerOrder(
+            
+    def open_stock_window(self):
+        self.stock_controller = ControllerStock(
+            master=self.master,
+            dsc=self.dsc,
+            leksykon_programu=self.leksykon_programu["stock_window"],
+            leksykon_messagebox=self.leksykon_messagebox,
+            konfiguracja_programu=self.konfiguracja_programu,
+            sound=self.sound,
+            messagebox_controller=self.messagebox_controller,
+            currency=self.leksykon_programu["currency"],
+            language_code=self.language_code,
+            main_controller=self
+        )
+        self.stock_controller.run()
+
+    def close_stock_window(self):
+        if self.stock_controller:
+            print("Stock window closed.")
+            self.stock_controller.close()
+            self.stock_controller = None
+
+
+    def open_statistics_window(self):
+        self.stat_controller = ControllerStatistic(
             master = self.master,
             dsc=self.dsc,
-            leksykon_programu=self.leksykon_programu["order_window"],
-            leksykon_messagebox=self.leksykon_programu["messagebox_window"],
+            leksykon_programu=self.leksykon_programu["statistic_window"],
             messagebox_controller = self.messagebox_controller,
             sound = self.sound,
             konfiguracja_programu=self.konfiguracja_programu,
             currency=self.leksykon_programu["currency"],
-            language_code=self.language_code
-        )
-        self.order_controller.run()
-
-    def open_statistics_window(self):
-        self.stat_controller = ControllerStatistic(
-        master = self.master,
-        dsc=self.dsc,
-        leksykon_programu=self.leksykon_programu["statistic"],
-        messagebox_controller = self.messagebox_controller,
-        sound = self.sound,
-        konfiguracja_programu=self.konfiguracja_programu,
-        currency=self.leksykon_programu["currency"],
-        language_code=self.language_code
+            language_code=self.language_code,
+            main_controller=self
         )
 
         self.stat_controller.run()
 
+    def close_statistic_window(self):
+        if self.stat_controller:
+            print("Statistic window closed.")
+            self.stat_controller.close()
+            self.stat_controller = None
+
+    def open_order_window(self):
+        pass
+
     def open_settings_window(self):
         pass
 
+    def button_stock_click(self, frame):
+        leksykon = self.leksykon_programu["main_window"]["button_stan_magazynu"]
+        self.main_view.utworz_przycisk(frame, self.open_stock_window, icon=self.main_view.settings_button_icon, leksykon_programu=leksykon, row=0, column=0, pack=False)
+
     def button_order_click(self, frame):
         leksykon = self.leksykon_programu["main_window"]["button_zamowienia"]
-        self.main_view.utworz_przycisk(frame, self.open_order_window, icon=self.main_view.order_button_icon, leksykon_programu=leksykon)
+        self.main_view.utworz_przycisk(frame, self.open_order_window, icon=self.main_view.settings_button_icon, leksykon_programu=leksykon, row=0, column=1, pack=False)
 
     def button_statistics_click(self, frame):
         leksykon = self.leksykon_programu["main_window"]["button_statystyki"]
-        self.main_view.utworz_przycisk(frame, self.open_statistics_window, icon=self.main_view.statistics_button_icon, leksykon_programu=leksykon)
+        self.main_view.utworz_przycisk(frame, self.open_statistics_window, icon=self.main_view.settings_button_icon, leksykon_programu=leksykon, row=1, column=0, pack=False, columnspan=2)
 
     def button_settings_click(self, frame):
         leksykon = self.leksykon_programu["main_window"]["button_ustawienia"]
-        self.main_view.utworz_przycisk(frame, self.open_settings_window, icon=self.main_view.settings_button_icon, leksykon_programu=leksykon)
+        self.main_view.utworz_przycisk(frame, self.open_settings_window, icon=self.main_view.settings_button_icon, leksykon_programu=leksykon,row=2, column=0, pack=False, columnspan=2, pady=(50,3))
 
     def button_exit_click(self, frame):
         leksykon = self.leksykon_programu["main_window"]["button_wyjscie"]
-        self.main_view.utworz_przycisk(frame, self.on_closing_order_window, icon=self.main_view.exit_button_icon, leksykon_programu=leksykon)
+        self.main_view.utworz_przycisk(frame, self.on_closing_order_window, icon=self.main_view.exit_button_icon, leksykon_programu=leksykon, row=3, column=0, pack=False, columnspan=2)

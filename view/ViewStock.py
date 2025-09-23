@@ -8,7 +8,7 @@ import os
 from view.ViewSound import ViewSound
 from view.base_view import BaseView
 
-class ViewOrder(BaseView):
+class ViewStock(BaseView):
     def __init__(self, order_master, dsc=None, leksykon = None, currency=None, language_code = None, konfiguracja_programu = None):
         self.order_master = order_master
         self.order_master.geometry("1280x720+0+0")

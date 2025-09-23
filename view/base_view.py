@@ -6,7 +6,7 @@ class BaseView:
     def __init__(self, sound):
         self.sound = sound
 
-    def utworz_przycisk(self, frame, command, leksykon_programu, side='top', padx=1, pady=3, icon=None):
+    def utworz_przycisk(self, frame, command, leksykon_programu, side='top', padx=1, pady=3,columnspan=1, icon=None, pack = True, column=0, row=0):
         przycisk = ttk.Button(
             frame,
             text=leksykon_programu["text"],
@@ -15,7 +15,10 @@ class BaseView:
             image=icon,
             compound="left"
         )
-        przycisk.pack(side=side, padx=padx, pady=pady)
+        if pack:
+            przycisk.pack(side=side, padx=padx, pady=pady)
+        else:
+            przycisk.grid(row=row, column=column, padx=padx, pady=pady, sticky="ew", columnspan=columnspan)
         ToolTip(przycisk, msg=leksykon_programu["toolTip"], follow=True)
         return przycisk
 

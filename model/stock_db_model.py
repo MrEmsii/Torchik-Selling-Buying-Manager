@@ -1,5 +1,4 @@
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
-# from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import Table, Date, select
@@ -93,7 +92,7 @@ class Artykul_Lista(Base):
     firma = relationship('Firma', back_populates='art_lista')
 
 def SQLconnect():
-    db_path = os.path.join(os.path.dirname(__file__), '..', 'database', 'Torchik_database.db')
+    db_path = os.path.join(os.path.dirname(__file__), '..', 'database', 'stock_db.db')
     engine = create_engine(f'sqlite:///{db_path}')
     Base.metadata.create_all(engine)
 

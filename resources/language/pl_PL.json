@@ -12,6 +12,10 @@
             "text": "Zamówienia",
             "toolTip": "Przejdź do okna zarządzania zamówieniami"
         },
+        "button_stan_magazynu": {
+            "text": "Stan\nmagazynu",
+            "toolTip": "Przejdź do okna zarządzania stanem magazynu"
+        },
         "button_statystyki": {
             "text": "Statystyki",
             "toolTip": "Przejdź do okna statystyk"
@@ -27,7 +31,7 @@
     },
 
 
-    "order_window":{
+    "stock_window":{
         "labels": {
             "date": "Data: ",
             "proc_discount": "Rabat procentowy: ",
@@ -198,8 +202,7 @@
         }
     },
 
-
-    "statistic":{
+    "statistic_window":{
         "button_exit": {
             "text": "Wyjście",
             "toolTip": "Zamknij aplikację"

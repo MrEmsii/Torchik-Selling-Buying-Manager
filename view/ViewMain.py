@@ -13,8 +13,6 @@ class ViewMain(BaseView):
         self.master.geometry("500x500+100+100")
         self.master.resizable(True, True)
 
-        # self.leksykon = leksykon
-
         self.setup_styles(dsc)
         self.setup_frames()
 
@@ -23,11 +21,7 @@ class ViewMain(BaseView):
         self.button_icon_pack_main(dsc)
 
     def setup_frames(self):
-        # self.button_main_frame = ttk.Frame(self.master, padding=5)
-
         self.main_view_frame = ttk.Frame(self.master, padding=5)
-
-        # self.button_main_frame.grid(row=0, column=0, padx=5, pady=5)
         self.main_view_frame.grid(row=0, column=0, padx=5, pady=5)
 
     def setup_styles(self, dsc):

@@ -27,13 +27,25 @@ class ViewStatistic(BaseView):
         self.scrollbar = ttk.Scrollbar(self.table_frame, orient="vertical")
 
         self.tree = ttk.Treeview(self.table_frame, columns=("name", "value"), show="headings", yscrollcommand=self.scrollbar.set)
-        self.tree.heading("name", text="Nazwa")
-        self.tree.heading("value", text="Wartość")
+        
+        self.tree.heading("name", text=leksykon["heading"]["name"])
+        self.tree.heading("value", text=leksykon["heading"]["value"])
 
         self.scrollbar.config(command=self.tree.yview)
         self.scrollbar.pack(side='right', fill='y')
 
         self.tree.pack(fill="both", expand=True)
+
+        fig = Figure(figsize=(9, 6))
+
+        fig.text(0.5, 0.5, leksykon["charts"]["no_data"],
+                ha="center", va="center", fontsize=14)
+
+        canvas = FigureCanvasTkAgg(fig, master=self.statistic_frame)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill="both", expand=True)
+
+
 
     def setup_styles(self, dsc):
         self.style = ttk.Style()
@@ -58,9 +70,9 @@ class ViewStatistic(BaseView):
 
         self.statistic_master.grid_columnconfigure(0, weight=1)
         self.statistic_master.grid_columnconfigure(1, weight=2000)
-        self.statistic_master.grid_columnconfigure(2, weight=2000)
-        self.statistic_master.grid_columnconfigure(3, weight=2000)
-        self.statistic_master.grid_columnconfigure(4, weight=2000)
+        self.statistic_master.grid_columnconfigure(2, weight=500)
+        self.statistic_master.grid_columnconfigure(3, weight=500)
+        self.statistic_master.grid_columnconfigure(4, weight=500)
 
     def setup_frames(self):
         self.button_statistic_frame = ttk.Frame(self.statistic_master, padding=5)
@@ -99,6 +111,7 @@ class ViewStatistic(BaseView):
 
         for id, wartosc in data:
             self.tree.insert('', 'end', values=(id, f"{wartosc:,.2f} zł".replace(",", " ")))
+
 
     def show_chart(self, labels, values, title="Wykres", master=None):
         for widget in master.winfo_children():

@@ -36,6 +36,7 @@
             "date": "Data: ",
             "proc_discount": "Rabat procentowy: ",
             "unit_discount": "Rabat jednostkowy: ",
+            "invoice_id": "Faktura ID: ",
             "price": "Cena: ",
             "amount": "Ilość: ",
             "name": "Nazwa: ",
@@ -47,7 +48,7 @@
             "inside_tree_columns": ["id", "Cena: ", "Ilosc: ", "Kategoria: ", "Marka: ", "Artykul: ", "Kolor: ", "Szczegoly: "],
             "artykuly_tree_columns": ["id", "Kategoria: ", "Firma: ", "Artykuł: ","Kolor: ","Szczegóły: "],
             "name_tree_columns": ["id", "Nazwa: "],
-            "zamowienia_tree_columns": ["id", "Data: ", "Kupujący: ", "Sklep: ", "Rabat jednostkowy: ", "Rabat procentowy: ", "Cena: ", "Cena po rabacie: "]
+            "zamowienia_tree_columns": ["id", "Data: ", "Faktura_id", "Kupujący: ", "Sklep: ", "Rabat jednostkowy: ", "Rabat procentowy: ", "Cena: ", "Cena po rabacie: "]
         },
 
         "names_list":{
@@ -203,29 +204,38 @@
     },
 
     "statistic_window":{
-        "button_exit": {
-            "text": "Wyjście",
-            "toolTip": "Zamknij aplikację"
+        "buttons":{
+            "button_exit": {
+                "text": "Wyjście",
+                "toolTip": "Zamknij aplikację"
+            },
+            "button_company": {
+                "text": "Koszt w\nfirmach",
+                "toolTip": "Pokaż koszty w firmach"
+            },
+            "button_buyers": {
+                "text": "Koszt w\nkupujących",
+                "toolTip": "Pokaż koszty w kupujących"
+            },
+            "button_shops": {
+                "text": "Koszt w\nsklepach",
+                "toolTip": "Pokaż koszty w sklepach"
+            },
+            "button_category": {
+                "text": "Koszt w\nkategoriach",
+                "toolTip": "Pokaż koszty w kategoriach"
+            },
+            "button_artykuly": {
+                "text": "Koszt w\nartykułach",
+                "toolTip": "Pokaż koszty w artykułach"
+            }
         },
-        "button_company": {
-            "text": "Koszt w\nfirmach",
-            "toolTip": "Pokaż koszty w firmach"
+        "heading":{
+            "name":"Nazwa: ",
+            "value":"Wartość: "
         },
-        "button_buyers": {
-            "text": "Koszt w\nkupujących",
-            "toolTip": "Pokaż koszty w kupujących"
-        },
-        "button_shops": {
-            "text": "Koszt w\nsklepach",
-            "toolTip": "Pokaż koszty w sklepach"
-        },
-        "button_category": {
-            "text": "Koszt w\nkategoriach",
-            "toolTip": "Pokaż koszty w kategoriach"
-        },
-        "button_artykuly": {
-            "text": "Koszt w\nartykułach",
-            "toolTip": "Pokaż koszty w artykułach"
+        "charts" : {
+            "no_data": "Brak danych do wyświetlenia"
         }
     },  
 
@@ -289,6 +299,17 @@
                 "select_art": "Brak wybranego artykułu! Wybierz artykuł."
             }
         }   
-    }
+    },
+    
+    "implementation_state": [
+        "Nowe", 
+        "W realizacji", 
+        "Oczekuje na zapłatę",
+        "Zlecenie magazynowe",
+        "Własne", 
+        "Wstrzymane", 
+        "Wycofano",
+        "Zrealizowane"
+    ]
 }
 

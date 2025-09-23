@@ -1,6 +1,6 @@
 import tkinter as tk
 from view.ViewStatistic import ViewStatistic
-from model.statistics_stock_model import StatisticsStockModel
+from model.statistics_model import StatisticsStockModel
 from model.stock_db_model import SQLconnect
 
 class ControllerStatistic:
@@ -72,23 +72,23 @@ class ControllerStatistic:
 
 
     def button_category_stats(self, frame):
-        leksykon = self.leksykon_programu["button_category"]
+        leksykon = self.leksykon_programu["buttons"]["button_category"]
         self.view.utworz_przycisk(frame, self.open_statistic_category, leksykon_programu=leksykon, icon=self.view.category_icon)
 
     def button_company_stats(self, frame):
-        leksykon = self.leksykon_programu["button_company"]
+        leksykon = self.leksykon_programu["buttons"]["button_company"]
         self.view.utworz_przycisk(frame, self.open_statistic_company, leksykon_programu=leksykon, icon=self.view.company_icon)
 
     def button_buyers_stats(self, frame):
-        leksykon = self.leksykon_programu["button_buyers"]
+        leksykon = self.leksykon_programu["buttons"]["button_buyers"]
         self.view.utworz_przycisk(frame, self.open_statistic_buyers, leksykon_programu=leksykon, icon=self.view.buyers_icon)
 
     def button_shops_stats(self, frame):
-        leksykon = self.leksykon_programu["button_shops"]
+        leksykon = self.leksykon_programu["buttons"]["button_shops"]
         self.view.utworz_przycisk(frame, self.open_statistic_shops, leksykon_programu=leksykon, icon=self.view.shops_icon)
 
     def button_artykuly_stats(self, frame):
-        leksykon = self.leksykon_programu["button_artykuly"]
+        leksykon = self.leksykon_programu["buttons"]["button_artykuly"]
         self.view.utworz_przycisk(frame, self.open_statistic_arts, leksykon_programu=leksykon, icon=self.view.arts_icon)
 
 

@@ -2,6 +2,7 @@ from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import Table, Date, select
+
 import datetime
 import os
 
@@ -47,6 +48,7 @@ class Zamowienie(Base):
     __tablename__ = 'zamowienie'
     id = Column(Integer, primary_key=True)
     data = Column(Date, default=datetime.date.today)
+    faktura_id = Column(String, default=None)
     rabat_j = Column(Integer, default=0)
     rabat_procent= Column(Integer, default=0)
     kupujacy_id = Column(Integer, ForeignKey('kupujacy.id'))  # Klucz obcy do tabeli Firma
@@ -70,12 +72,11 @@ class Zamowienie(Base):
         return self.oblicz_cene(session)* rabat_proc  - self.rabat_j
     
     def get_ilosc_artykul(self, artykul, session):
-        # Pobiera ilość danego elementu w projekcie
         wynik = self._get_zamowienie_artykul_miejsce(artykul, session)
         return wynik[3] if wynik is not None else 1
 
     def _get_zamowienie_artykul_miejsce(self, artykul, session):
-        stmt = select(artykuly_relacja).where(artykuly_relacja.c.zamowienie_id == self.id, artykuly_relacja.c.artykul_id == artykul.id) # Tworzenie zapytania select
+        stmt = select(artykuly_relacja).where(artykuly_relacja.c.zamowienie_id == self.id, artykuly_relacja.c.artykul_id == artykul.id)
         wynik = session.execute(stmt).fetchone()
         return wynik
 

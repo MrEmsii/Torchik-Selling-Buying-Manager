@@ -283,12 +283,15 @@ class ViewStock(BaseView):
         tree.column(columns_name[7], width=100, anchor='e')
         tree.heading(columns_name[7], text=columns_name[7], anchor='e')
 
+        tree.column(columns_name[8], width=100, anchor='e')
+        tree.heading(columns_name[8], text=columns_name[8], anchor='e')
         return tree    
 
-    def dodaj_modyfikuj_zamowienie_view(self, zamowienie_rabat_j=0, zamowienie_rabat_procentowy=0):
+    def dodaj_modyfikuj_zamowienie_view(self, zamowienie_rabat_j=0, zamowienie_rabat_procentowy=0, faktura_id=""):
         self.rabat_j_var = tk.StringVar(value=zamowienie_rabat_j)
         self.rabat_p_var = tk.StringVar(value=zamowienie_rabat_procentowy)
         self.zamowienie_data = tk.StringVar()
+        self.faktura_id = tk.StringVar(value=faktura_id)
         self.zamowienie_view()
 
     def dodaj_modyfikuj_artykul_view(self, nazwa_artykulu_string = None, kolor_artykulu_string = None, szczegoly_artykulu_string = None):
@@ -345,9 +348,11 @@ class ViewStock(BaseView):
        
         rabat_j_label = ttk.Label(self.third_frame, text = label_name["unit_discount"], font=('calibre', 10, 'bold'), anchor='center')
         rabat_p_label = ttk.Label(self.third_frame, text = label_name["proc_discount"], font=('calibre',10, 'bold'), anchor='center')
+        faktura_id_label = ttk.Label(self.third_frame, text = label_name["invoice_id"], font=('calibre', 10, 'bold'), anchor='center')
 
         rabat_j_entry = ttk.Entry(self.third_frame, textvariable = self.rabat_j_var, font=('calibre',10,'normal'), width=10)
         rabat_p_entry = ttk.Entry(self.third_frame, textvariable = self.rabat_p_var, font=('calibre',10,'normal'), width=10)
+        faktura_id_entry = ttk.Entry(self.third_frame, textvariable = self.faktura_id, font=('calibre',10,'normal'), width=10)
 
         self.date_entry = DateEntry(self.third_frame, localestr=self.language_code, date_pattern="yyyy-mm-dd", textvariable=self.zamowienie_data, width=10, set_date=datetime.date(2023,4,2))
 
@@ -355,7 +360,8 @@ class ViewStock(BaseView):
         self.third_frame.grid_rowconfigure(1, weight=1)
         self.third_frame.grid_rowconfigure(2, weight=1)
         self.third_frame.grid_rowconfigure(3, weight=1)
-        self.third_frame.grid_rowconfigure(4, weight=80)
+        self.third_frame.grid_rowconfigure(4, weight=1)
+        self.third_frame.grid_rowconfigure(5, weight=80)
 
         self.third_frame.grid_columnconfigure(0, weight=1)
         self.third_frame.grid_columnconfigure(1, weight=10)
@@ -363,10 +369,12 @@ class ViewStock(BaseView):
         date_label.grid(row=1,column=0, sticky='e')
         rabat_j_label.grid(row=2,column=0, sticky='e')
         rabat_p_label.grid(row=3,column=0, sticky='e')
+        faktura_id_label.grid(row=4,column=0, sticky='e')
 
         self.date_entry.grid(row=1,column=1)
         rabat_j_entry.grid(row=2,column=1)
         rabat_p_entry.grid(row=3,column=1)
+        faktura_id_entry.grid(row=4,column=1)
 
         self.order_frame.grid(row=0, column=1, columnspan=5, rowspan=1, sticky="nsew", padx=5, pady=5)
         self.secend_frame.grid(row=1, column=1, columnspan=5, rowspan=3, sticky="nsew", padx=5, pady=5)

@@ -6,3 +6,4 @@ test_DB_alfa.py
 stats.py
 test_DB_full_alfa.py
 import pandas as pd.py
+test.py

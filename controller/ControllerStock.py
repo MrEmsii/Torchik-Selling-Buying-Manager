@@ -240,21 +240,22 @@ class ControllerStock(BaseView):
             for zamow in zamowienia:
                 zamow_id = zamow.id
                 zamow_data = zamow.data
+                faktura_id = zamow.faktura_id
                 zamow_kupujacy = zamow.kupujacy.nazwa if zamow.kupujacy else " "
                 zamow_sklep = zamow.sklep.nazwa if zamow.sklep else " "
                 rabat_j = f"{zamow.rabat_j:.2f} {self.currency}"
                 rabat_proc = f"{zamow.rabat_procent :.0f} %"
                 zamow_cena = f"{zamow.oblicz_cene(self.db_session):,.2f} {self.currency}".replace(",", " ")
                 zamow_cena_rabat = f"{zamow.oblicz_cene_rabat(self.db_session):,.2f} {self.currency}".replace(",", " ")
-                zamowienia_data.append((zamow_id, zamow_data, zamow_kupujacy, zamow_sklep, rabat_j, rabat_proc, zamow_cena, zamow_cena_rabat))
+                zamowienia_data.append((zamow_id, zamow_data, faktura_id, zamow_kupujacy, zamow_sklep, rabat_j, rabat_proc, zamow_cena, zamow_cena_rabat))
 
             zamowienia_data.sort(key=lambda x: x[0], reverse=True)
             zamowienia_data.sort(key=lambda x: x[1], reverse=True)
 
             def update_gui():
                 self.zamowienia_tree.delete(*self.zamowienia_tree.get_children())
-                for z_id, data, kupujacy, sklep, rabat_1, rabat_2, cena, cena_rabat in zamowienia_data:
-                    self.zamowienia_tree.insert('', 'end', values=(z_id, data, kupujacy, sklep, rabat_1, rabat_2, cena, cena_rabat))
+                for z_id, data, faktura_id, kupujacy, sklep, rabat_1, rabat_2, cena, cena_rabat in zamowienia_data:
+                    self.zamowienia_tree.insert('', 'end', values=(z_id, data, faktura_id, kupujacy, sklep, rabat_1, rabat_2, cena, cena_rabat))
                 self.hide_message_async()
 
             self.order_master.after(0, update_gui)
@@ -962,8 +963,9 @@ class ControllerStock(BaseView):
         zamowienie_rabat_procentowy = zamowienie.rabat_procent #2
         zamowienie_kupujacy_id = zamowienie.kupujacy_id #3
         zamowienie_sklep_id = zamowienie.sklep_id #4
+        zamowienie_faktura_id = zamowienie.faktura_id #5
 
-        return (zamowienie_data_modyfikacja, zamowienie_rabat_j, zamowienie_rabat_procentowy, zamowienie_kupujacy_id, zamowienie_sklep_id)
+        return (zamowienie_data_modyfikacja, zamowienie_rabat_j, zamowienie_rabat_procentowy, zamowienie_kupujacy_id, zamowienie_sklep_id, zamowienie_faktura_id)
 
     def dodaj_modyfikuj_zamowienie(self, commend = "stworz"):
         if commend == "stworz":
@@ -983,7 +985,7 @@ class ControllerStock(BaseView):
             info = self.wczytaj_informacje_zamowienie(self.zamowienie_id)
             
             self.button_manager("modyfikuj_zamowienie")
-            self.view.dodaj_modyfikuj_zamowienie_view(info[1], info[2])
+            self.view.dodaj_modyfikuj_zamowienie_view(info[1], info[2], info[5])
 
             self.view.date_entry.set_date(info[0])
             select_kupujacy = info[3]
@@ -1043,9 +1045,10 @@ class ControllerStock(BaseView):
         
         kupujacy_id = int(self.kupujacy_tree.item(self.kupujacy_tree.selection()[0], 'values')[0])
         sklep_id = int(self.sklepy_tree.item(self.sklepy_tree.selection()[0], 'values')[0])
+        faktura_id = self.view.faktura_id.get() if self.view.faktura_id.get() != 0 else ""
         
         if commend == "stworz":
-            zamowienie = Zamowienie(data=data, kupujacy_id=kupujacy_id, sklep_id=sklep_id, rabat_j=rabat_j, rabat_procent=rabat_procentowy)
+            zamowienie = Zamowienie(data=data, kupujacy_id=kupujacy_id, sklep_id=sklep_id, rabat_j=rabat_j, rabat_procent=rabat_procentowy, faktura_id=faktura_id)
             self.db_session.add(zamowienie)
             
         elif commend == "modyfikuj":
@@ -1057,6 +1060,7 @@ class ControllerStock(BaseView):
                 zamowienie.rabat_procent = rabat_procentowy
                 zamowienie.kupujacy_id = kupujacy_id
                 zamowienie.sklep_id = sklep_id
+                zamowienie.faktura_id = faktura_id
 
         self.sound.play_confirm_sound()
 

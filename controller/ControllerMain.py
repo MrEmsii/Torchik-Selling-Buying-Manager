@@ -7,6 +7,7 @@ from controller.ControllerMessageBox import ControllerMessageBox
 
 from controller.ControllerStock import ControllerStock
 from controller.ControllerStatistic import ControllerStatistic
+from controller.ControllerOrder import ControllerOrder
 
 import os
 import json
@@ -141,10 +142,27 @@ class ControllerMain:
             self.stat_controller = None
 
     def open_order_window(self):
-        pass
+        self.order_controller = ControllerOrder(
+            master = self.master,
+            dsc=self.dsc,
+            leksykon_programu=self.leksykon_programu["order_window"],
+            leksykon_messagebox=self.leksykon_messagebox,
+            messagebox_controller = self.messagebox_controller,
+            sound = self.sound,
+            konfiguracja_programu=self.konfiguracja_programu,
+            currency=self.leksykon_programu["currency"],
+            language_code=self.language_code,
+            main_controller=self
+        )
+
+        self.order_controller.run()
 
     def open_settings_window(self):
-        pass
+        sound = 1
+        if sound == 1:
+            self.json_setting(status="edit", key="volume", value=1)
+            self.konfiguracja_programu = self.json_setting(status="read")
+            self.sound.config = self.konfiguracja_programu
 
     def button_stock_click(self, frame):
         leksykon = self.leksykon_programu["main_window"]["button_stan_magazynu"]

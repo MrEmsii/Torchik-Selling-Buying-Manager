@@ -1,16 +1,23 @@
 import tkinter as tk
 from tkinter import ttk, PhotoImage
 
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import os
 
-from view.base_view import BaseView
-from view.ViewSound import ViewSound
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+from view.base_view import BaseView
 
 class ViewStatistic(BaseView):
-    def __init__(self, statistic_master, dsc=None, leksykon = None, language_code = None, konfiguracja_programu = None):
+    def __init__(
+            self, statistic_master, 
+            dsc=None, 
+            leksykon = None, 
+            language_code = None, 
+            konfiguracja_programu = None,
+            sound = None
+            ):
+        
         self.statistic_master = statistic_master
         self.statistic_master.geometry("1280x720+0+0")
         self.statistic_master.resizable(True, True)
@@ -21,7 +28,7 @@ class ViewStatistic(BaseView):
         self.setup_frames()
         self.setup_styles(dsc)
 
-        self.sound = ViewSound(dsc, konfiguracja_programu)
+        self.sound = sound
         self.language_code = language_code
 
         self.scrollbar = ttk.Scrollbar(self.table_frame, orient="vertical")

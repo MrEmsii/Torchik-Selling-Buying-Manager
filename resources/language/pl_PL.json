@@ -30,7 +30,6 @@
         }
     },
 
-
     "stock_window":{
         "labels": {
             "date": "Data: ",
@@ -300,16 +299,24 @@
             }
         }   
     },
-    
-    "implementation_state": [
-        "Nowe", 
-        "W realizacji", 
-        "Oczekuje na zapłatę",
-        "Zlecenie magazynowe",
-        "Własne", 
-        "Wstrzymane", 
-        "Wycofano",
-        "Zrealizowane"
-    ]
-}
 
+    "order_window":{
+        "buttons":{
+            "button_test": {
+                "text": "Test",
+                "toolTip": "Zamknij aplikację"
+            }
+        }
+    },
+
+    "implementation_state": [
+            "Nowe",  
+            "W realizacji", 
+            "Oczekuje na zapłatę",
+            "Zlecenie magazynowe",
+            "Własne", 
+            "Wstrzymane", 
+            "Wycofano",
+            "Zrealizowane"
+        ]
+}

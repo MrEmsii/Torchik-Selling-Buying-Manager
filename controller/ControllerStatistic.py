@@ -12,16 +12,15 @@ class ControllerStatistic:
             language_code = None,
             main_controller=None
             ):
-        db_session = SQLconnect()
-        self.session = db_session
-        self.stats_model = StatisticsStockModel(db_session)
+        
+        self.session = SQLconnect()
+        self.stats_model = StatisticsStockModel(self.session)
 
         self.dsc = dsc
         self.leksykon_programu = leksykon_programu
         self.konfiguracja_programu = konfiguracja_programu
         self.currency = currency
         self.main_controller = main_controller
-
 
         self.statistic_master = tk.Toplevel(master)
 
@@ -30,7 +29,8 @@ class ControllerStatistic:
             dsc=self.dsc, 
             leksykon=self.leksykon_programu, 
             konfiguracja_programu=konfiguracja_programu, 
-            language_code=language_code
+            language_code=language_code,
+            sound=sound
             )
 
         self.sound = sound

@@ -5,14 +5,22 @@ from tkcalendar import DateEntry
 import datetime
 import os
 
-from view.ViewSound import ViewSound
 from view.base_view import BaseView
 
 class ViewStock(BaseView):
-    def __init__(self, order_master, dsc=None, leksykon = None, currency=None, language_code = None, konfiguracja_programu = None):
-        self.order_master = order_master
-        self.order_master.geometry("1280x720+0+0")
-        self.order_master.resizable(True, True)
+    def __init__(
+            self, stock_master, 
+            dsc=None, 
+            leksykon = None, 
+            currency=None, 
+            language_code = None, 
+            konfiguracja_programu = None,
+            sound = None
+            ):
+        
+        self.stock_master = stock_master
+        self.stock_master.geometry("1280x720+0+0")
+        self.stock_master.resizable(True, True)
 
         self.leksykon = leksykon
         self.currency = currency
@@ -21,7 +29,7 @@ class ViewStock(BaseView):
         self.setup_frames()
         self.setup_styles(dsc)
 
-        self.sound = ViewSound(dsc, konfiguracja_programu)
+        self.sound = sound
         self.language_code = language_code
 
     def setup_styles(self, dsc):
@@ -31,35 +39,35 @@ class ViewStock(BaseView):
         self.style.configure("Treeview", background="#D8E8E8", foreground="#2F3131", rowheight=20, fieldbackground="#E7E7E7", font=('Arial', 8))
         self.style.map("Treeview", background=[('selected', "#2F3131")], foreground=[('selected', '#D8E8E8')])
 
-        self.order_master.title("Torchik - Order Window")
-        self.order_master.iconbitmap(os.path.join(dsc, "resources", "image", "icon.ico"))
+        self.stock_master.title("Torchik - Order Window")
+        self.stock_master.iconbitmap(os.path.join(dsc, "resources", "image", "icon.ico"))
 
         self.style.configure('TButton', justify="left", anchor='w')
         self.background_image = PhotoImage(file=os.path.join(dsc, "resources", "image", "background.png"))
-        self.background_label = ttk.Label(self.order_master, image=self.background_image)
+        self.background_label = ttk.Label(self.stock_master, image=self.background_image)
         self.background_label.place(x=0, y=0, relwidth=1, relheight=1) 
         self.background_label.lower()
 
-        self.order_master.grid_rowconfigure(0, weight=4)
-        self.order_master.grid_rowconfigure(1, weight=4)
-        self.order_master.grid_rowconfigure(2, weight=4)
-        self.order_master.grid_rowconfigure(3, weight=4)
+        self.stock_master.grid_rowconfigure(0, weight=4)
+        self.stock_master.grid_rowconfigure(1, weight=4)
+        self.stock_master.grid_rowconfigure(2, weight=4)
+        self.stock_master.grid_rowconfigure(3, weight=4)
 
-        self.order_master.grid_columnconfigure(0, weight=1)
-        self.order_master.grid_columnconfigure(1, weight=2000)
-        self.order_master.grid_columnconfigure(2, weight=2000)
-        self.order_master.grid_columnconfigure(3, weight=2000)
+        self.stock_master.grid_columnconfigure(0, weight=1)
+        self.stock_master.grid_columnconfigure(1, weight=2000)
+        self.stock_master.grid_columnconfigure(2, weight=2000)
+        self.stock_master.grid_columnconfigure(3, weight=2000)
 
     def setup_frames(self):
-        self.button_orders_frame = ttk.Frame(self.order_master, padding=5)
+        self.button_stock_frame = ttk.Frame(self.stock_master, padding=5)
 
-        self.order_frame = ttk.Frame(self.order_master, padding=5)
-        self.zamowienia_frame = ttk.Frame(self.order_master, padding=5)
-        self.secend_frame = ttk.Frame(self.order_master, padding=5)
-        self.third_frame = ttk.Frame(self.order_master, padding=5)
+        self.stock_frame = ttk.Frame(self.stock_master, padding=5)
+        self.zamowienia_frame = ttk.Frame(self.stock_master, padding=5)
+        self.secend_frame = ttk.Frame(self.stock_master, padding=5)
+        self.third_frame = ttk.Frame(self.stock_master, padding=5)
 
-        self.button_orders_frame.grid(row=0, column=0, rowspan=5, sticky="nsew", padx=5, pady=5)
-        self.order_frame.grid(row=0, column=1, columnspan=5, rowspan=5, sticky="nsew", padx=5, pady=5)
+        self.button_stock_frame.grid(row=0, column=0, rowspan=5, sticky="nsew", padx=5, pady=5)
+        self.stock_frame.grid(row=0, column=1, columnspan=5, rowspan=5, sticky="nsew", padx=5, pady=5)
 
     def button_icon_pack(self, dsc):
             self.add_firma_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_firma_icon.png")).subsample(8, 8)
@@ -105,11 +113,11 @@ class ViewStock(BaseView):
         self.zamowienia_frame.grid(row=0, column=1, columnspan=3, rowspan=5, sticky="nsew", padx=5, pady=5)
 
     def artukuly_list_grid_setting(self):
-        self.order_frame.grid(row=0, column=1, columnspan=1, rowspan=5, sticky="nsew", padx=5, pady=5)
+        self.stock_frame.grid(row=0, column=1, columnspan=1, rowspan=5, sticky="nsew", padx=5, pady=5)
         self.secend_frame.grid(row=0, column=2, columnspan=2, rowspan=5, sticky="nsew", padx=5, pady=5)
     
     def start_grid_setting(self):
-        self.order_frame.grid(row=0, column=1, columnspan=5, rowspan=5, sticky="nsew", padx=5, pady=5)
+        self.stock_frame.grid(row=0, column=1, columnspan=5, rowspan=5, sticky="nsew", padx=5, pady=5)
 
     def inside_tree(self, parent_frame, label_text):
         columns_name = self.leksykon["columns"]["inside_tree_columns"]
@@ -301,13 +309,13 @@ class ViewStock(BaseView):
         self.artykul_view()
 
     def artykuly_lista_view(self):
-        self.secend_frame = ttk.Frame(self.order_master, padding=5)
+        self.secend_frame = ttk.Frame(self.stock_master, padding=5)
         
     def artykul_view(self):
         label_name = self.leksykon["labels"]
 
-        self.secend_frame = ttk.Frame(self.order_master, padding=5)
-        self.third_frame = ttk.Frame(self.order_master, padding=5)
+        self.secend_frame = ttk.Frame(self.stock_master, padding=5)
+        self.third_frame = ttk.Frame(self.stock_master, padding=5)
 
         nazwa_label = ttk.Label(self.third_frame, text = label_name["name"], font=('calibre', 10, 'bold'), anchor='center')
         kolor_label = ttk.Label(self.third_frame, text = label_name["color"], font=('calibre', 10, 'bold'), anchor='center')
@@ -334,15 +342,15 @@ class ViewStock(BaseView):
         kolor_entry.grid(row=2,column=1)
         szczegoly_entry.grid(row=3,column=1)
 
-        self.order_frame.grid(row=0, column=1, columnspan=5, rowspan=2, sticky="nsew", padx=5, pady=5)
+        self.stock_frame.grid(row=0, column=1, columnspan=5, rowspan=2, sticky="nsew", padx=5, pady=5)
         self.secend_frame.grid(row=2, column=1, columnspan=5, rowspan=2, sticky="nsew", padx=5, pady=5)
         self.third_frame.grid(row=0, column=6, columnspan=1, rowspan=4, sticky="nsew", padx=5, pady=5)
         
     def zamowienie_view(self):
         label_name = self.leksykon["labels"]
         
-        self.secend_frame = ttk.Frame(self.order_master, padding=5)
-        self.third_frame = ttk.Frame(self.order_master, padding=5)
+        self.secend_frame = ttk.Frame(self.stock_master, padding=5)
+        self.third_frame = ttk.Frame(self.stock_master, padding=5)
 
         date_label = ttk.Label(self.third_frame, text = label_name["date"], font=('calibre', 10, 'bold'), anchor='center')
        
@@ -376,7 +384,7 @@ class ViewStock(BaseView):
         rabat_p_entry.grid(row=3,column=1)
         faktura_id_entry.grid(row=4,column=1)
 
-        self.order_frame.grid(row=0, column=1, columnspan=5, rowspan=1, sticky="nsew", padx=5, pady=5)
+        self.stock_frame.grid(row=0, column=1, columnspan=5, rowspan=1, sticky="nsew", padx=5, pady=5)
         self.secend_frame.grid(row=1, column=1, columnspan=5, rowspan=3, sticky="nsew", padx=5, pady=5)
         self.third_frame.grid(row=0, column=6, columnspan=1, rowspan=4, sticky="nsew", padx=5, pady=5)
         
@@ -422,7 +430,7 @@ class ViewStock(BaseView):
         self.filament_frame.grid_rowconfigure(3, weight=80)
 
     def cena_ilosc_window(self, dsc, title, relacja = 1, cena = 0, id = None):
-        self.window = tk.Toplevel(self.order_master)
+        self.window = tk.Toplevel(self.stock_master)
         self.window.geometry("400x180+500+300")
         self.window.title(title)
 

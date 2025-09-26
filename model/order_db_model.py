@@ -10,8 +10,8 @@ artykuly_relacja = Table(
     Column('zamowienie_id', Integer, ForeignKey('zamowienie.id')),
     Column('artykul_id', Integer, ForeignKey('artykul_lista.id')),
     Column("ilosc_artykulu", Integer, default=1),
-    Column("czas_druku", Integer, default=0),
-    Column("cena_sprzedazy", Integer, default=0)
+    Column("czas_druku_1_elem", Integer, default=0),
+    Column("cena_sprzedazy_1_elem", Integer, default=0)
 )
 
 

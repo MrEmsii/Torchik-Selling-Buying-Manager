@@ -9,9 +9,7 @@ import tkinter as tk
 import threading
 import datetime as datetime
 
-from view.base_view import BaseView
-
-class ControllerStock(BaseView):
+class ControllerStock():
     def __init__(
             self, master, dsc, leksykon_programu, leksykon_messagebox, konfiguracja_programu, 
             sound = None, 
@@ -28,26 +26,28 @@ class ControllerStock(BaseView):
         self.currency = currency
         self.main_controller = main_controller
 
-        self.order_master = tk.Toplevel(master)
+        self.stock_master = tk.Toplevel(master)
         self.db_session = SQLconnect()
 
         self.view = ViewStock(
-            self.order_master, 
+            self.stock_master, 
             dsc=self.dsc, 
             leksykon=self.leksykon_programu, 
             currency=self.currency,
             konfiguracja_programu=konfiguracja_programu, 
-            language_code=language_code
+            language_code=language_code,
+            sound=sound
             )
 
-        self.sound = sound
         self.messagebox_controller = messagebox_controller 
         self.inicjalizacja_frame()
+        self.list_zamowienia()
 
-        self.order_master.protocol("WM_DELETE_WINDOW", self.on_closing_order_window)
+
+        self.stock_master.protocol("WM_DELETE_WINDOW", self.on_closing_order_window)
 
     def run(self):
-        self.order_master.deiconify()
+        self.stock_master.deiconify()
 
     def close(self):
         if self.db_session:
@@ -57,8 +57,8 @@ class ControllerStock(BaseView):
     def on_closing_order_window(self):
         if self.messagebox_controller.close_info():
             self.close()
-            if self.order_master.winfo_exists():
-                self.order_master.destroy()
+            if self.stock_master.winfo_exists():
+                self.stock_master.destroy()
             if self.main_controller:
                 self.main_controller.close_stock_window()
 
@@ -114,7 +114,7 @@ class ControllerStock(BaseView):
                 self.zaznacz_wiersz_z_wartoscia(self.sklepy_tree, 'id', select_item)
                 self.hide_message_async()
             
-            self.order_master.after(0, update_gui)
+            self.stock_master.after(0, update_gui)
 
         threading.Thread(target=task, daemon=True).start()
 
@@ -147,7 +147,7 @@ class ControllerStock(BaseView):
                     self.artykuly_tree.insert('', 'end', values=(id, kategoria, firma, nazwa, kolor, szczegoly))
                 
                 self.hide_message_async()
-            self.order_master.after(0, update_gui)
+            self.stock_master.after(0, update_gui)
         threading.Thread(target=task, daemon=True).start()
 
     def load_kupujacy(self, widok, select_item):
@@ -173,7 +173,7 @@ class ControllerStock(BaseView):
                 self.zaznacz_wiersz_z_wartoscia(self.kupujacy_tree, 'id', select_item)
                 self.hide_message_async()
 
-            self.order_master.after(0, update_gui)
+            self.stock_master.after(0, update_gui)
 
         threading.Thread(target=task, daemon=True).start()
 
@@ -199,7 +199,7 @@ class ControllerStock(BaseView):
                 self.zaznacz_wiersz_z_wartoscia(self.kategorie_tree, 'id', select_item)
                 self.hide_message_async()
 
-            self.order_master.after(0, update_gui)
+            self.stock_master.after(0, update_gui)
 
         threading.Thread(target=task, daemon=True).start()
 
@@ -225,7 +225,7 @@ class ControllerStock(BaseView):
                 self.zaznacz_wiersz_z_wartoscia(self.firma_tree, 'id', select_item)
                 self.hide_message_async()
 
-            self.order_master.after(0, update_gui)
+            self.stock_master.after(0, update_gui)
 
         threading.Thread(target=task, daemon=True).start()
 
@@ -258,78 +258,78 @@ class ControllerStock(BaseView):
                     self.zamowienia_tree.insert('', 'end', values=(z_id, data, faktura_id, kupujacy, sklep, rabat_1, rabat_2, cena, cena_rabat))
                 self.hide_message_async()
 
-            self.order_master.after(0, update_gui)
+            self.stock_master.after(0, update_gui)
 
         threading.Thread(target=task, daemon=True).start()
 
     def button_manager(self, frame, back_target = 'main', startup = False):
         if startup == False:
-            for widget in self.order_frame.winfo_children():
+            for widget in self.stock_frame.winfo_children():
                 widget.destroy()
 
-            for widget in self.button_orders_frame.winfo_children():
+            for widget in self.button_stock_frame.winfo_children():
                 widget.destroy()
         
         if frame == "main":
-            self.button_dodaj_zamowienie(self.button_orders_frame)
-            self.button_modyfikuj_zamowienie(self.button_orders_frame)
-            self.button_lista_artykulow(self.button_orders_frame)
-            self.button_lista_sklepow(self.button_orders_frame)
-            self.button_lista_kupujacych(self.button_orders_frame)
-            self.button_lista_kategorii(self.button_orders_frame)
-            self.button_lista_firm(self.button_orders_frame)
-            self.button_refresh_zamowienia(self.button_orders_frame)  
-            self.button_usun_zamowienie(self.button_orders_frame)
+            self.button_dodaj_zamowienie(self.button_stock_frame)
+            self.button_modyfikuj_zamowienie(self.button_stock_frame)
+            self.button_lista_artykulow(self.button_stock_frame)
+            self.button_lista_sklepow(self.button_stock_frame)
+            self.button_lista_kupujacych(self.button_stock_frame)
+            self.button_lista_kategorii(self.button_stock_frame)
+            self.button_lista_firm(self.button_stock_frame)
+            self.button_refresh_zamowienia(self.button_stock_frame)  
+            self.button_usun_zamowienie(self.button_stock_frame)
 
         elif frame == "lista dodanych do zamowienia":
-            self.button_dodaj_artykul_zamowienie(self.button_orders_frame)
-            self.button_edytuj_artykul_zamowienie(self.button_orders_frame)
-            self.button_usun_artykul_zamowienie(self.button_orders_frame)
+            self.button_dodaj_artykul_zamowienie(self.button_stock_frame)
+            self.button_edytuj_artykul_zamowienie(self.button_stock_frame)
+            self.button_usun_artykul_zamowienie(self.button_stock_frame)
 
         elif frame == "kupujacy":
-            self.button_dodaj_kupujacy(self.button_orders_frame)
-            self.button_zmiana_nazwa_kupujacy(self.button_orders_frame)
-            self.button_usun_kupujacy(self.button_orders_frame)
+            self.button_dodaj_kupujacy(self.button_stock_frame)
+            self.button_zmiana_nazwa_kupujacy(self.button_stock_frame)
+            self.button_usun_kupujacy(self.button_stock_frame)
 
         elif frame == "sklepy":
-            self.button_dodaj_sklep(self.button_orders_frame) 
-            self.button_zmiana_nazwa_sklep(self.button_orders_frame)
-            self.button_usun_sklep(self.button_orders_frame)
+            self.button_dodaj_sklep(self.button_stock_frame) 
+            self.button_zmiana_nazwa_sklep(self.button_stock_frame)
+            self.button_usun_sklep(self.button_stock_frame)
 
         elif frame == "firmy":
-            self.button_dodaj_firma(self.button_orders_frame) 
-            self.button_zmiana_nazwa_firma(self.button_orders_frame)
-            self.button_usun_firma(self.button_orders_frame)
+            self.button_dodaj_firma(self.button_stock_frame) 
+            self.button_zmiana_nazwa_firma(self.button_stock_frame)
+            self.button_usun_firma(self.button_stock_frame)
 
         elif frame == "lista_artykuly":
-            self.button_stworz_artykul(self.button_orders_frame) 
-            self.button_modyfikuj_artykul(self.button_orders_frame) 
-            self.button_zniszcz_artykul(self.button_orders_frame)
+            self.button_stworz_artykul(self.button_stock_frame) 
+            self.button_modyfikuj_artykul(self.button_stock_frame) 
+            self.button_zniszcz_artykul(self.button_stock_frame)
 
         elif frame == "dodaj_zamowienie":
-            self.buttons_zatwierdz_zamowienia(self.button_orders_frame) 
-            self.button_dodaj_kupujacy(self.button_orders_frame)
-            self.button_dodaj_sklep(self.button_orders_frame) 
+            self.buttons_zatwierdz_zamowienia(self.button_stock_frame) 
+            self.button_dodaj_kupujacy(self.button_stock_frame)
+            self.button_dodaj_sklep(self.button_stock_frame) 
 
         elif frame == "modyfikuj_zamowienie":
-            self.button_zatwierdz_edycje_zamowienie(self.button_orders_frame) 
-            self.button_dodaj_kupujacy(self.button_orders_frame)
-            self.button_dodaj_sklep(self.button_orders_frame) 
+            self.button_zatwierdz_edycje_zamowienie(self.button_stock_frame) 
+            self.button_dodaj_kupujacy(self.button_stock_frame)
+            self.button_dodaj_sklep(self.button_stock_frame) 
 
         elif frame == "kategorie":
-            self.button_dodaj_kategoria(self.button_orders_frame) 
-            self.button_zmiana_nazwa_kategoria(self.button_orders_frame)
-            self.button_usun_kategorie(self.button_orders_frame)
+            self.button_dodaj_kategoria(self.button_stock_frame) 
+            self.button_zmiana_nazwa_kategoria(self.button_stock_frame)
+            self.button_usun_kategorie(self.button_stock_frame)
 
         elif frame == 'tworzenie_artykuly':
-            self.button_zatwierdz_artykul(self.button_orders_frame)
-            self.button_dodaj_firma(self.button_orders_frame)
-            self.button_dodaj_kategoria(self.button_orders_frame) 
+            self.button_zatwierdz_artykul(self.button_stock_frame)
+            self.button_dodaj_firma(self.button_stock_frame)
+            self.button_dodaj_kategoria(self.button_stock_frame) 
 
         elif frame == 'modyfikacja_artykuly':
-            self.button_zatwierdz_edycje_artykul(self.button_orders_frame)
-            self.button_dodaj_firma(self.button_orders_frame)
-            self.button_dodaj_kategoria(self.button_orders_frame) 
+            self.button_zatwierdz_edycje_artykul(self.button_stock_frame)
+            self.button_dodaj_firma(self.button_stock_frame)
+            self.button_dodaj_kategoria(self.button_stock_frame) 
 
         elif frame == "wyjdź_z_cena_ilosc_dodawanie":
             self.button_zatwierdz_dodanie_artykulu(self.view.button_cena_ilosc_frame)
@@ -340,17 +340,16 @@ class ControllerStock(BaseView):
             self.button_anuluj_dodanie_artykulu(self.view.button_cena_ilosc_frame)
 
         if frame != 'main':
-            self.button_back_pack(self.button_orders_frame, back_target)
+            self.button_back_pack(self.button_stock_frame, back_target)
         
         ViewStock.start_grid_setting(self)
 
     def inicjalizacja_frame(self):
-        self.order_frame = self.view.order_frame
-        self.button_orders_frame = self.view.button_orders_frame
+        self.stock_frame = self.view.stock_frame
+        self.button_stock_frame = self.view.button_stock_frame
         self.zamowienia_frame = self.view.zamowienia_frame
         self.zamowienie_id = None
 
-        self.list_zamowienia()
 
     # --- ARTYKUŁY ---
     def button_stworz_artykul(self, frame):
@@ -497,7 +496,7 @@ class ControllerStock(BaseView):
 
     def button_back_pack(self, frame, commend = "main"):
         if commend == "main":
-            commend = self.pokaz_order_frame
+            commend = self.pokaz_stock_frame
         elif commend == "lista_artykułów":
             commend = self.powrot_do_lista_artykulow
         elif commend == "zamówienie":
@@ -524,7 +523,7 @@ class ControllerStock(BaseView):
         name = self.leksykon_programu["names_list"]
 
         self.artykuly_tree = self.view.artykuly_tree(parent_frame = self.view.secend_frame, label_text = name["select_art"])
-        self.kategorie_tree = self.view.name_tree(self.view.order_frame, name["category"], True)
+        self.kategorie_tree = self.view.name_tree(self.view.stock_frame, name["category"], True)
         
         self.load_artykuly_deaemon("ukryj")
         self.load_kategorie_daemon()
@@ -547,28 +546,28 @@ class ControllerStock(BaseView):
         self.zamowienia_frame.grid_remove()
         self.button_manager("kupujacy")
         name = self.leksykon_programu["names_list"]["buyer"]
-        self.kupujacy_tree = self.view.name_tree(self.order_frame, name, True)
+        self.kupujacy_tree = self.view.name_tree(self.stock_frame, name, True)
         self.load_kupujacy_daemon()
 
     def list_firmy(self):
         self.zamowienia_frame.grid_remove()
         self.button_manager(frame="firmy")
         name = self.leksykon_programu["names_list"]["company"]
-        self.firma_tree = self.view.name_tree(self.order_frame, name, True)
+        self.firma_tree = self.view.name_tree(self.stock_frame, name, True)
         self.load_firmy_deaemon()
 
     def list_sklepy(self):
         self.zamowienia_frame.grid_remove()
         self.button_manager("sklepy")
         name = self.leksykon_programu["names_list"]["shop"]
-        self.sklepy_tree = self.view.name_tree(self.order_frame, name, True)
+        self.sklepy_tree = self.view.name_tree(self.stock_frame, name, True)
         self.load_sklepy_daemon()
 
     def list_kategorie(self):
         self.zamowienia_frame.grid_remove()
         self.button_manager(frame="kategorie")
         name = self.leksykon_programu["names_list"]["category"]
-        self.kategorie_tree = self.view.name_tree(self.order_frame, name, True)
+        self.kategorie_tree = self.view.name_tree(self.stock_frame, name, True)
         self.load_kategorie_daemon()
 
     def stworz_sklep(self, value=None):
@@ -929,7 +928,7 @@ class ControllerStock(BaseView):
             self.button_manager("modyfikacja_artykuly", back_target = 'lista_artykułów' )
             self.view.dodaj_modyfikuj_artykul_view(nazwa_artykulu_string = info[0], kolor_artykulu_string = info[1], szczegoly_artykulu_string = info[2])
 
-        self.firma_tree = self.view.name_tree(self.view.order_frame, "Lista Firm", True)
+        self.firma_tree = self.view.name_tree(self.view.stock_frame, "Lista Firm", True)
         self.kategorie_tree = self.view.name_tree(self.view.secend_frame, "Kategorie Lista", True)
 
         if commend == "modyfikuj":
@@ -993,7 +992,7 @@ class ControllerStock(BaseView):
 
         self.zamowienia_frame.grid_remove()
 
-        self.kupujacy_tree = self.view.name_tree(self.view.order_frame, "Kupujacy", True)
+        self.kupujacy_tree = self.view.name_tree(self.view.stock_frame, "Kupujacy", True)
         self.sklepy_tree = self.view.name_tree(self.view.secend_frame, "Sklepy", True)
 
         self.load_kupujacy_daemon(widok="ukryj", select_item = select_kupujacy)
@@ -1111,7 +1110,7 @@ class ControllerStock(BaseView):
         self.zamowienia_frame.grid_remove()
         self.usun_all_widgets()
         self.button_manager("lista dodanych do zamowienia")
-        self.inside_tree = self.view.inside_tree(self.order_frame, 'Lista artykułów dodatych do zamówienia') 
+        self.inside_tree = self.view.inside_tree(self.stock_frame, 'Lista artykułów dodatych do zamówienia') 
         self.inside_tree.delete(*self.inside_tree.get_children())
 
         wynik_all = self.db_session.execute(
@@ -1263,14 +1262,14 @@ class ControllerStock(BaseView):
         date = datetime.datetime.strptime(date, format).date()
         return date
     
-    def pokaz_order_frame(self):
+    def pokaz_stock_frame(self):
         if not self.zamowienia_frame.winfo_ismapped():
             self.usun_all_widgets()
             self.zamowienia_frame.grid()
             self.button_manager(frame="main", startup=True)
 
     def powrot_do_glownego_okna(self):
-        self.pokaz_order_frame()
+        self.pokaz_stock_frame()
         self.load_zamowienia_daemon()
 
     def powrot_do_lista_artykulow(self):
@@ -1286,17 +1285,17 @@ class ControllerStock(BaseView):
         except AttributeError:
             pass
 
-        for widget in self.view.order_frame.winfo_children():
+        for widget in self.view.stock_frame.winfo_children():
             widget.destroy()
 
-        for widget in self.view.button_orders_frame.winfo_children():
+        for widget in self.view.button_stock_frame.winfo_children():
             widget.destroy()
 
     def show_message_async(self):
-        self.messagebox_controller.show_message_async(master=self.order_master)
+        self.messagebox_controller.show_message_async(master=self.stock_master)
 
     def hide_message_async(self):
-        self.messagebox_controller.ukryj_message_async(master=self.order_master)
+        self.messagebox_controller.ukryj_message_async(master=self.stock_master)
 
     def on_double_click_dodawanie_artykulu_do_zamowienia(self, event):
         try:

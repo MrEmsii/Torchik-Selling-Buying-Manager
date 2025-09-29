@@ -22,26 +22,25 @@ class Kupujacy(Base):
 
     zamowienia = relationship('Zamowienie', back_populates='kupujacy')
 
-
 class Zamowienie(Base):
     __tablename__ = 'zamowienie'
     id = Column(Integer, primary_key=True)
-    realizacja = Column(Integer, default=0)
-    data_zlozenia_zamoweinia = Column(Date, default=datetime.date.today)
+    realizacja_id = Column(Integer, default=0)
+    data_zlozenia_zamowienia = Column(Date, default=datetime.date.today)
     data_deadline = Column(Date, nullable=True)
     data_wysylki = Column(Date, nullable=True)
 
     faktura_id = Column(Integer, ForeignKey("faktury.id"), nullable=True)
+    kupujacy_id = Column(Integer, ForeignKey('kupujacy.id'))
 
+    nazwa_zamowienia = Column(String, default="")
     rabat_j = Column(Integer, default=0)
     rabat_procent = Column(Integer, default=0)
-    kupujacy_id = Column(Integer, ForeignKey('kupujacy.id'))
-    nazwa_zamowienia = Column(String, default="")
 
     kupujacy = relationship('Kupujacy', back_populates='zamowienia')
     faktura = relationship('Faktury', back_populates='zamowienie', uselist=False)
     artykuly = relationship('Artykul_Lista', secondary=artykuly_relacja, back_populates='zamowienia')
-
+    
     def oblicz_przychod(self, session):
         total = 0
         for artykul in self.artykuly:
@@ -54,6 +53,7 @@ class Zamowienie(Base):
 
     def oblicz_dochod(self, session):
         rabat_proc = max((100 - self.rabat_procent) / 100, 0)
+        #dodać koszta!!!
         return self.oblicz_przychod(session) * rabat_proc - self.rabat_j
 
     def oblicz_przychod_na_1h_druku(self, session):

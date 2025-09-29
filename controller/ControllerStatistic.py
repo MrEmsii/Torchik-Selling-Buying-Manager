@@ -21,6 +21,8 @@ class ControllerStatistic:
         self.konfiguracja_programu = konfiguracja_programu
         self.currency = currency
         self.main_controller = main_controller
+        self.sound = sound
+        self.messagebox_controller = messagebox_controller 
 
         self.statistic_master = tk.Toplevel(master)
 
@@ -30,11 +32,9 @@ class ControllerStatistic:
             leksykon=self.leksykon_programu, 
             konfiguracja_programu=konfiguracja_programu, 
             language_code=language_code,
-            sound=sound
+            sound=self.sound
             )
 
-        self.sound = sound
-        self.messagebox_controller = messagebox_controller 
         self.inicjalizacja_frame()
 
         self.button_manager()

@@ -306,17 +306,39 @@
                 "text": "Test",
                 "toolTip": "Zamknij aplikację"
             }
-        }
-    },
+        },
+        
+        "columns":{
+            "order_tree_columns": ["id", "Status realizacji: ", "Data utworzenia: ", "Deadline: ", "Faktura nr: ", "Kupujący: ", "Nazwa zamówienia: ", "Cena: ", "Cena po rabacie: "],
+            "realizacja_tree_columns": ["id", "Status"],
+            "list_added_to_order_columns": ["Artykuł nazwa: ", "Ilość artykułu: ", "Czas druku 1 elem: ", "Cena sprzedaży 1 elem: "],
+            "more_info_in_order_columns": ["Nazwa", "Wartość"]
+        },
+        
+        "more_order_inside_tree": [
+            "Data wysyłki: ", 
+            "Rabat jednostkowy: ", 
+            "Rabat procentowy: ", 
+            "Suma rabatu: ", 
+            "Koszta: "
+        ],
+    
+        "implementation_state": [
+                "Nowe",  
+                "W realizacji", 
+                "Oczekuje na zapłatę",
+                "Zlecenie magazynowe",
+                "Własne", 
+                "Wstrzymane", 
+                "Wycofano",
+                "Zrealizowane"
+            ],
 
-    "implementation_state": [
-            "Nowe",  
-            "W realizacji", 
-            "Oczekuje na zapłatę",
-            "Zlecenie magazynowe",
-            "Własne", 
-            "Wstrzymane", 
-            "Wycofano",
-            "Zrealizowane"
-        ]
+        "names_list":{
+                "order": "Lista zamówień",
+                "rezalizacja_status": "Stan realizacji",
+                "list_added_to_order": "Lista elementów w zamówieniu",
+                "more_info_in_order": "Więcej inforamcji"
+            }
+        }
 }

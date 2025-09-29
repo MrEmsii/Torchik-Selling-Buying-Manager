@@ -157,6 +157,12 @@ class ControllerMain:
 
         self.order_controller.run()
 
+    def close_order_window(self):
+        if self.order_controller:
+            print("Order window closed.")
+            self.order_controller.close()
+            self.order_controller = None
+
     def open_settings_window(self):
         sound = 1
         if sound == 1:

@@ -25,6 +25,7 @@ class ControllerStock():
         self.konfiguracja_programu = konfiguracja_programu
         self.currency = currency
         self.main_controller = main_controller
+        self.sound = sound
 
         self.stock_master = tk.Toplevel(master)
         self.db_session = SQLconnect()
@@ -36,13 +37,12 @@ class ControllerStock():
             currency=self.currency,
             konfiguracja_programu=konfiguracja_programu, 
             language_code=language_code,
-            sound=sound
+            sound=self.sound
             )
 
         self.messagebox_controller = messagebox_controller 
         self.inicjalizacja_frame()
         self.list_zamowienia()
-
 
         self.stock_master.protocol("WM_DELETE_WINDOW", self.on_closing_order_window)
 
@@ -112,7 +112,7 @@ class ControllerStock():
                 for sklep_id, sklep_nazwa in sklepy_data:
                     self.sklepy_tree.insert('', 'end', values=(sklep_id, sklep_nazwa))
                 self.zaznacz_wiersz_z_wartoscia(self.sklepy_tree, 'id', select_item)
-                self.hide_message_async()
+                if widok == "pokaz": self.hide_message_async()
             
             self.stock_master.after(0, update_gui)
 
@@ -146,7 +146,7 @@ class ControllerStock():
                 for id, kategoria, firma, nazwa, kolor, szczegoly in artykuly_data:
                     self.artykuly_tree.insert('', 'end', values=(id, kategoria, firma, nazwa, kolor, szczegoly))
                 
-                self.hide_message_async()
+                if widok == "pokaz": self.hide_message_async()
             self.stock_master.after(0, update_gui)
         threading.Thread(target=task, daemon=True).start()
 
@@ -171,7 +171,7 @@ class ControllerStock():
                     self.kupujacy_tree.insert('', 'end', values=(kup_id, kup_nazwa))
                 
                 self.zaznacz_wiersz_z_wartoscia(self.kupujacy_tree, 'id', select_item)
-                self.hide_message_async()
+                if widok == "pokaz": self.hide_message_async()
 
             self.stock_master.after(0, update_gui)
 
@@ -197,7 +197,7 @@ class ControllerStock():
                 for kategoria_id, kategoria_name in kategorie_data:
                     self.kategorie_tree.insert('', 'end', values=(kategoria_id, kategoria_name))    
                 self.zaznacz_wiersz_z_wartoscia(self.kategorie_tree, 'id', select_item)
-                self.hide_message_async()
+                if widok == "pokaz": self.hide_message_async()
 
             self.stock_master.after(0, update_gui)
 
@@ -223,7 +223,7 @@ class ControllerStock():
                 for firma_id, firma_name in firmy_data:
                     self.firma_tree.insert('', 'end', values=(firma_id, firma_name))  
                 self.zaznacz_wiersz_z_wartoscia(self.firma_tree, 'id', select_item)
-                self.hide_message_async()
+                if widok == "pokaz": self.hide_message_async()
 
             self.stock_master.after(0, update_gui)
 
@@ -256,7 +256,7 @@ class ControllerStock():
                 self.zamowienia_tree.delete(*self.zamowienia_tree.get_children())
                 for z_id, data, faktura_id, kupujacy, sklep, rabat_1, rabat_2, cena, cena_rabat in zamowienia_data:
                     self.zamowienia_tree.insert('', 'end', values=(z_id, data, faktura_id, kupujacy, sklep, rabat_1, rabat_2, cena, cena_rabat))
-                self.hide_message_async()
+                if widok == "pokaz": self.hide_message_async()
 
             self.stock_master.after(0, update_gui)
 
@@ -525,8 +525,8 @@ class ControllerStock():
         self.artykuly_tree = self.view.artykuly_tree(parent_frame = self.view.secend_frame, label_text = name["select_art"])
         self.kategorie_tree = self.view.name_tree(self.view.stock_frame, name["category"], True)
         
-        self.load_artykuly_deaemon("ukryj")
-        self.load_kategorie_daemon()
+        self.load_artykuly_deaemon()
+        self.load_kategorie_daemon("ukryj")
 
         self.kategorie_tree.bind("<Double-1>", self.on_double_click_filtrowanie_kategoria)
         self.kategorie_tree.bind("<Double-3>", self.on_double_click_filtrowanie_kategoria_resetowanie)
@@ -951,9 +951,6 @@ class ControllerStock():
 
         return (nazwa_artykulu_string, kolor_artykulu_string, szczegoly_artykulu_string, kategoria_id_artykulu, firma_id_artykulu)
 
-    def wczytaj_informacje_artykul_inside(self, arty):
-        return
-
     def wczytaj_informacje_zamowienie(self, zamowienie_id):
         zamowienie = self.db_session.query(Zamowienie).filter_by(id=zamowienie_id).first()
 
@@ -1106,6 +1103,7 @@ class ControllerStock():
         self.db_session.commit()
         self.powrot_do_lista_artykulow()
 
+#do poprawki
     def load_inside_zamowienie(self, id_zamowienia):
         self.zamowienia_frame.grid_remove()
         self.usun_all_widgets()

@@ -18,7 +18,7 @@ class BaseView:
         if pack:
             przycisk.pack(side=side, padx=padx, pady=pady)
         else:
-            przycisk.grid(row=row, column=column, padx=padx, pady=pady, sticky="ew", columnspan=columnspan)
+            przycisk.grid(row=row, column=column, padx=padx, pady=pady, sticky="nsew", columnspan=columnspan)
         ToolTip(przycisk, msg=leksykon_programu["toolTip"], follow=True)
         return przycisk
 

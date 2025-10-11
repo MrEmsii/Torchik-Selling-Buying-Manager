@@ -7,6 +7,8 @@ from view.base_view import BaseView
 
 import os
 
+import sv_ttk
+
 class ViewMain(BaseView):
     def __init__(self, master, dsc=None, sound = None):
         self.master = master
@@ -25,16 +27,13 @@ class ViewMain(BaseView):
         self.main_view_frame.grid(row=0, column=0, padx=5, pady=5)
 
     def setup_styles(self, dsc):
-        self.style = ttk.Style()
-        self.master.tk.call('source', dsc + '/resources/themes/awdark.tcl')
-
-        self.style.theme_use("awdark")
-        self.style.configure("Treeview", background="#D8E8E8", foreground="#2F3131", rowheight=20, fieldbackground="#E7E7E7", font=('Arial', 8))
-        self.style.map("Treeview", background=[('selected', "#2F3131")], foreground=[('selected', '#D8E8E8')])
-
         self.master.title("Torchik")
         self.master.iconbitmap(os.path.join(dsc, "resources", "image", "icon.ico"))
 
+        sv_ttk.set_theme("dark")
+
+        self.style = ttk.Style()
+        self.style.configure("Treeview", font=('Arial', 8))
         self.style.configure('TButton', justify="left", anchor='w')
         self.background_image = PhotoImage(file=os.path.join(dsc, "resources", "image", "background.png"))
         self.background_label = ttk.Label(self.master, image=self.background_image)

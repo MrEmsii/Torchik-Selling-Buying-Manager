@@ -1,12 +1,16 @@
 from tkinter import ttk, messagebox, simpledialog
 import tkinter as tk
 
+import sv_ttk
+
 class ViewMessageBox():
     def show_message_async(self, master, leksykon):
         def pokaz_okno(master):
             self.msg_windows = tk.Toplevel(master)
             self.msg_windows.geometry("300x50+340+160")
             self.msg_windows.title(leksykon["info_initializing"]["heading"])
+
+            sv_ttk.set_theme("dark")
 
             label = tk.Label(self.msg_windows, text=leksykon["info_initializing"]["text"], padx=20, pady=10)
             label.pack()

@@ -32,22 +32,22 @@
 
     "stock_window":{
         "labels": {
-            "date": "Data: ",
-            "proc_discount": "Rabat procentowy: ",
-            "unit_discount": "Rabat jednostkowy: ",
-            "invoice_id": "Faktura ID: ",
-            "price": "Cena: ",
-            "amount": "Ilość: ",
-            "name": "Nazwa: ",
-            "color": "Ewentualny kolor: ",
+            "date": "Data:",
+            "proc_discount": "Rabat procentowy:",
+            "unit_discount": "Rabat jednostkowy:",
+            "invoice_id": "Faktura ID:",
+            "price": "Cena:",
+            "amount": "Ilość:",
+            "name": "Nazwa:",
+            "color": "Ewentualny kolor:",
             "details": "Ewentualne szczegóły: "
         },
 
         "columns":{
-            "inside_tree_columns": ["id", "Cena: ", "Ilosc: ", "Kategoria: ", "Marka: ", "Artykul: ", "Kolor: ", "Szczegoly: "],
-            "artykuly_tree_columns": ["id", "Kategoria: ", "Firma: ", "Artykuł: ","Kolor: ","Szczegóły: "],
-            "name_tree_columns": ["id", "Nazwa: "],
-            "zamowienia_tree_columns": ["id", "Data: ", "Faktura_id", "Kupujący: ", "Sklep: ", "Rabat jednostkowy: ", "Rabat procentowy: ", "Cena: ", "Cena po rabacie: "]
+            "inside_tree_columns": ["id", "Cena brutto:", "Ilosc:","Wartość brutto:", "Kategoria:", "Marka:", "Artykul:", "Kolor:", "Szczegoly:"],
+            "artykuly_tree_columns": ["id", "Kategoria:", "Firma:", "Artykuł:","Kolor:","Szczegóły:"],
+            "name_tree_columns": ["id", "Nazwa:"],
+            "zamowienia_tree_columns": ["id", "Data:", "Faktura_id", "Kupujący:", "Sklep:", "Rabat jednostkowy:", "Rabat procentowy:", "Cena:", "Cena po rabacie:"]
         },
 
         "names_list":{
@@ -115,6 +115,10 @@
         "button_modyfikuj_artykul": {
             "text": "Modyfikuj\nartykułu",
             "toolTip": "Edytuj istniejący artykuł"
+        },
+        "button_dublikuj_artykul": {
+            "text": "Dublikuj\nartykuł",
+            "toolTip": "Dublikuj zaznaczony artykuł"
         },
         "button_zatwierdz_artykul": {
             "text": "Zatwierdź\nartykuł",
@@ -230,7 +234,7 @@
             }
         },
         "heading":{
-            "name":"Nazwa: ",
+            "name":"Nazwa:",
             "value":"Wartość: "
         },
         "charts" : {
@@ -295,7 +299,8 @@
                 "price": "Nieprawidłowa wartość ceny! Wpisz liczbę.",
                 "amount": "Nieprawidłowa wartość ilości! Wpisz liczbę.",
                 "name": "Nieprawidłowa nazwa! Popraw nazwę.",
-                "select_art": "Brak wybranego artykułu! Wybierz artykuł."
+                "select_art": "Brak wybranego artykułu! Wybierz artykuł.",
+                "not_empty": "Wybacz, ale zamówienie nie jest puste!"
             }
         }   
     },
@@ -305,22 +310,26 @@
             "button_test": {
                 "text": "Test",
                 "toolTip": "Zamknij aplikację"
+            },
+            "button_back": {
+                "text": "Wróć",
+                "toolTip": "Wróć do poprzedniego okna (głównego, listy artykułów lub zamówienia)"
             }
         },
         
         "columns":{
-            "order_tree_columns": ["id", "Status realizacji: ", "Data utworzenia: ", "Deadline: ", "Faktura nr: ", "Kupujący: ", "Nazwa zamówienia: ", "Cena: ", "Cena po rabacie: "],
+            "order_tree_columns": ["id", "Status realizacji:", "Data utworzenia:", "Deadline:", "Kupujący:", "Nazwa zamówienia:", "Cena:", "Cena po rabacie:"],
             "realizacja_tree_columns": ["id", "Status"],
-            "list_added_to_order_columns": ["Artykuł nazwa: ", "Ilość artykułu: ", "Czas druku 1 elem: ", "Cena sprzedaży 1 elem: "],
-            "more_info_in_order_columns": ["Nazwa", "Wartość"]
+            "list_added_to_order_columns": ["Artykuł nazwa:", "Czas druku 1 elem:", "Waga 1 elem:", "Koszt 1 elem:", "Cena 1 elem:", "Ilość artykułu:", "Waga*ilość:", "Czas*ilość:", "Koszt całkowity:", "Cena całkowita:"],
+            "more_info_in_order_columns": ["Nazwa:", "Wartość:"]
         },
         
         "more_order_inside_tree": [
-            "Data wysyłki: ", 
-            "Rabat jednostkowy: ", 
-            "Rabat procentowy: ", 
-            "Suma rabatu: ", 
-            "Koszta: "
+            "Data wysyłki:", 
+            "Rabat jednostkowy:", 
+            "Rabat procentowy:", 
+            "Suma rabatu:", 
+            "Koszta:"
         ],
     
         "implementation_state": [

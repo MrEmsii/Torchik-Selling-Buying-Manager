@@ -7,6 +7,8 @@ import os
 
 from view.base_view import BaseView
 
+import sv_ttk
+
 class ViewStock(BaseView):
     def __init__(
             self, stock_master, 
@@ -33,15 +35,13 @@ class ViewStock(BaseView):
         self.language_code = language_code
 
     def setup_styles(self, dsc):
-        self.style = ttk.Style()
-
-        self.style.theme_use("awdark")
-        self.style.configure("Treeview", background="#D8E8E8", foreground="#2F3131", rowheight=20, fieldbackground="#E7E7E7", font=('Arial', 8))
-        self.style.map("Treeview", background=[('selected', "#2F3131")], foreground=[('selected', '#D8E8E8')])
-
-        self.stock_master.title("Torchik - Order Window")
+        self.stock_master.title("Torchik - Stock Window")
         self.stock_master.iconbitmap(os.path.join(dsc, "resources", "image", "icon.ico"))
 
+        sv_ttk.set_theme("dark")
+
+        self.style = ttk.Style()
+        self.style.configure("Treeview", font=('Arial', 8))
         self.style.configure('TButton', justify="left", anchor='w')
         self.background_image = PhotoImage(file=os.path.join(dsc, "resources", "image", "background.png"))
         self.background_label = ttk.Label(self.stock_master, image=self.background_image)
@@ -70,45 +70,45 @@ class ViewStock(BaseView):
         self.stock_frame.grid(row=0, column=1, columnspan=5, rowspan=5, sticky="nsew", padx=5, pady=5)
 
     def button_icon_pack(self, dsc):
-            self.add_firma_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_firma_icon.png")).subsample(8, 8)
-            self.edit_firma_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_firma_icon.png")).subsample(8, 8)
-            self.delete_firma_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_firma_icon.png")).subsample(8, 8)
-            
-            self.add_sklep_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_sklep_icon.png")).subsample(8, 8)
-            self.edit_sklep_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_sklep_icon.png")).subsample(8, 8)
-            self.delete_sklep_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_sklep_icon.png")).subsample(8, 8)
+        self.add_firma_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_firma_icon.png")).subsample(8, 8)
+        self.edit_firma_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_firma_icon.png")).subsample(8, 8)
+        self.delete_firma_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_firma_icon.png")).subsample(8, 8)
+        
+        self.add_sklep_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_sklep_icon.png")).subsample(8, 8)
+        self.edit_sklep_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_sklep_icon.png")).subsample(8, 8)
+        self.delete_sklep_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_sklep_icon.png")).subsample(8, 8)
 
-            self.add_kategoria_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_kategoria_icon.png")).subsample(8, 8)
-            self.edit_kategoria_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_kategoria_icon.png")).subsample(8, 8)
-            self.delete_kategoria_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_kategoria_icon.png")).subsample(8, 8)
-            
-            self.add_kupujacy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_kupujacy_icon.png")).subsample(8, 8)
-            self.edit_kupujacy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_kupujacy_icon.png")).subsample(8, 8)
-            self.delete_kupujacy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_kupujacy_icon.png")).subsample(8, 8)
-            
-            self.add_artykul_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_artykul_icon.png")).subsample(8, 8)
-            self.edit_artykul_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_artykul_icon.png")).subsample(8, 8)
-            self.delete_artykul_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_artykul_icon.png")).subsample(8, 8)
-            
-            self.add_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_zamowienie_icon.png")).subsample(8, 8)
-            self.edit_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_zamowienie_icon.png")).subsample(8, 8)
-            self.delete_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_zamowienie_icon.png")).subsample(8, 8)
-            
-            self.add_artykul_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_artykul_zamowienie_icon.png")).subsample(8, 8)
-            self.edit_artykul_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_artykul_zamowienie_icon.png")).subsample(8, 8)
-            self.delete_artykul_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_artykul_zamowienie_icon.png")).subsample(8, 8)
-            
-            self.lista_firmy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_firmy_icon.png")).subsample(8, 8)
-            self.lista_sklepy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_sklepy_icon.png")).subsample(8, 8)
-            self.lista_zamowien_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_zamowien_icon.png")).subsample(8, 8)
-            self.lista_kupujacy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_kupujacy_icon.png")).subsample(8, 8)
-            self.lista_kategorie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_kategorie_icon.png")).subsample(8, 8)
-            self.lista_artykulow_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_artykulow_icon.png")).subsample(8, 8)
+        self.add_kategoria_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_kategoria_icon.png")).subsample(8, 8)
+        self.edit_kategoria_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_kategoria_icon.png")).subsample(8, 8)
+        self.delete_kategoria_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_kategoria_icon.png")).subsample(8, 8)
+        
+        self.add_kupujacy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_kupujacy_icon.png")).subsample(8, 8)
+        self.edit_kupujacy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_kupujacy_icon.png")).subsample(8, 8)
+        self.delete_kupujacy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_kupujacy_icon.png")).subsample(8, 8)
+        
+        self.add_artykul_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_artykul_icon.png")).subsample(8, 8)
+        self.edit_artykul_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_artykul_icon.png")).subsample(8, 8)
+        self.delete_artykul_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_artykul_icon.png")).subsample(8, 8)
+        
+        self.add_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_zamowienie_icon.png")).subsample(8, 8)
+        self.edit_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_zamowienie_icon.png")).subsample(8, 8)
+        self.delete_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_zamowienie_icon.png")).subsample(8, 8)
+        
+        self.add_artykul_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "add_artykul_zamowienie_icon.png")).subsample(8, 8)
+        self.edit_artykul_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "edit_artykul_zamowienie_icon.png")).subsample(8, 8)
+        self.delete_artykul_zamowienie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "delete_artykul_zamowienie_icon.png")).subsample(8, 8)
+        
+        self.lista_firmy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_firmy_icon.png")).subsample(8, 8)
+        self.lista_sklepy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_sklepy_icon.png")).subsample(8, 8)
+        self.lista_zamowien_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_zamowien_icon.png")).subsample(8, 8)
+        self.lista_kupujacy_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_kupujacy_icon.png")).subsample(8, 8)
+        self.lista_kategorie_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_kategorie_icon.png")).subsample(8, 8)
+        self.lista_artykulow_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_artykulow_icon.png")).subsample(8, 8)
 
-            self.backButton_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "backButton_icon.png")).subsample(8, 8)
-            self.refresh_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "refresh_icon.png")).subsample(8, 8)
-            self.setting_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "setting_icon.png")).subsample(8, 8)
-            
+        self.backButton_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "backButton_icon.png")).subsample(8, 8)
+        self.refresh_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "refresh_icon.png")).subsample(8, 8)
+        self.setting_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "setting_icon.png")).subsample(8, 8)
+        
     def zamowienia_grid_setting(self):
         self.zamowienia_frame.grid(row=0, column=1, columnspan=3, rowspan=5, sticky="nsew", padx=5, pady=5)
 
@@ -143,28 +143,31 @@ class ViewStock(BaseView):
         tree.pack( expand=True, fill='both')
 
         tree.column(columns_name[0], width=30, anchor='e')
-        tree.heading(columns_name[0], text=columns_name[0], anchor='e')
+        tree.heading(columns_name[0], text=columns_name[0], anchor='center')
 
         tree.column(columns_name[1], width=60, anchor='e')
-        tree.heading(columns_name[1], text=columns_name[1], anchor='e')
+        tree.heading(columns_name[1], text=columns_name[1], anchor='center')
 
         tree.column(columns_name[2], width=30, anchor='w')
-        tree.heading(columns_name[2], text=columns_name[2], anchor='w')
+        tree.heading(columns_name[2], text=columns_name[2], anchor='center')
 
-        tree.column(columns_name[3], width=100, anchor='w')
-        tree.heading(columns_name[3], text=columns_name[3], anchor='w')
+        tree.column(columns_name[3], width=90, anchor='e')
+        tree.heading(columns_name[3], text=columns_name[3], anchor='center')
 
         tree.column(columns_name[4], width=100, anchor='w')
-        tree.heading(columns_name[4], text=columns_name[4], anchor='w')
+        tree.heading(columns_name[4], text=columns_name[4], anchor='center')
 
-        tree.column(columns_name[5], width=200, anchor='w')
-        tree.heading(columns_name[5], text=columns_name[5], anchor='w')     
+        tree.column(columns_name[5], width=100, anchor='w')
+        tree.heading(columns_name[5], text=columns_name[5], anchor='center')
 
-        tree.column(columns_name[6], width=100, anchor='w')
-        tree.heading(columns_name[6], text=columns_name[6], anchor='w')   
+        tree.column(columns_name[6], width=200, anchor='w')
+        tree.heading(columns_name[6], text=columns_name[6], anchor='center')     
 
-        tree.column(columns_name[7], width=300, anchor='w')
-        tree.heading(columns_name[7], text=columns_name[7], anchor='w')
+        tree.column(columns_name[7], width=100, anchor='w')
+        tree.heading(columns_name[7], text=columns_name[7], anchor='center')   
+
+        tree.column(columns_name[8], width=300, anchor='w')
+        tree.heading(columns_name[8], text=columns_name[8], anchor='center')
 
         tree.pack(expand=True, fill='both')
 
@@ -194,22 +197,22 @@ class ViewStock(BaseView):
         tree.pack( expand=True, fill='both')
 
         tree.column(columns_name[0], width=20, anchor='e')
-        tree.heading(columns_name[0], text=columns_name[0], anchor='e')
+        tree.heading(columns_name[0], text=columns_name[0], anchor='center')
 
         tree.column(columns_name[1], width=50, anchor='w')
-        tree.heading(columns_name[1], text=columns_name[1], anchor='w')
+        tree.heading(columns_name[1], text=columns_name[1], anchor='center')
 
         tree.column(columns_name[2], width=50, anchor='w')
-        tree.heading(columns_name[2], text=columns_name[2], anchor='w')
+        tree.heading(columns_name[2], text=columns_name[2], anchor='center')
 
         tree.column(columns_name[3], width=100, anchor='w')
-        tree.heading(columns_name[3], text=columns_name[3], anchor='w')        
+        tree.heading(columns_name[3], text=columns_name[3], anchor='center')        
 
         tree.column(columns_name[4], width=100, anchor='w')
-        tree.heading(columns_name[4], text=columns_name[4], anchor='w')
+        tree.heading(columns_name[4], text=columns_name[4], anchor='center')
 
         tree.column(columns_name[5], width=100, anchor='w')
-        tree.heading(columns_name[5], text=columns_name[5], anchor='w')
+        tree.heading(columns_name[5], text=columns_name[5], anchor='center')
        
         return tree       
 
@@ -237,10 +240,10 @@ class ViewStock(BaseView):
         tree.pack( expand=True, fill='both')
         
         tree.column(columns_name[0], width=10, anchor='e')
-        tree.heading(columns_name[0], text=columns_name[0], anchor='e')
+        tree.heading(columns_name[0], text=columns_name[0], anchor='center')
 
         tree.column(columns_name[1], width=100, anchor='w')
-        tree.heading(columns_name[1], text=columns_name[1], anchor='w')
+        tree.heading(columns_name[1], text=columns_name[1], anchor='center')
         tree.pack(expand=status, fill='both')
 
         return tree  
@@ -268,31 +271,31 @@ class ViewStock(BaseView):
         tree.pack( expand=True, fill='both')
 
         tree.column(columns_name[0], width=50, anchor='e')
-        tree.heading(columns_name[0], text=columns_name[0], anchor='e')
+        tree.heading(columns_name[0], text=columns_name[0], anchor='center')
 
         tree.column(columns_name[1], width=100, anchor='w')
-        tree.heading(columns_name[1], text=columns_name[1], anchor='w')
+        tree.heading(columns_name[1], text=columns_name[1], anchor='center')
 
         tree.column(columns_name[2], width=100, anchor='w')
-        tree.heading(columns_name[2], text=columns_name[2], anchor='w')
+        tree.heading(columns_name[2], text=columns_name[2], anchor='center')
 
         tree.column(columns_name[3], width=100, anchor='w')
-        tree.heading(columns_name[3], text=columns_name[3], anchor='w')
+        tree.heading(columns_name[3], text=columns_name[3], anchor='center')
 
         tree.column(columns_name[4], width=100, anchor='e')
-        tree.heading(columns_name[4], text=columns_name[4], anchor='e')        
+        tree.heading(columns_name[4], text=columns_name[4], anchor='center')        
 
         tree.column(columns_name[5], width=100, anchor='e')
-        tree.heading(columns_name[5], text=columns_name[5], anchor='e')
+        tree.heading(columns_name[5], text=columns_name[5], anchor='center')
 
         tree.column(columns_name[6], width=100, anchor='e')
-        tree.heading(columns_name[6], text=columns_name[6], anchor='e')
+        tree.heading(columns_name[6], text=columns_name[6], anchor='center')
 
         tree.column(columns_name[7], width=100, anchor='e')
-        tree.heading(columns_name[7], text=columns_name[7], anchor='e')
+        tree.heading(columns_name[7], text=columns_name[7], anchor='center')
 
         tree.column(columns_name[8], width=100, anchor='e')
-        tree.heading(columns_name[8], text=columns_name[8], anchor='e')
+        tree.heading(columns_name[8], text=columns_name[8], anchor='center')
         return tree    
 
     def dodaj_modyfikuj_zamowienie_view(self, zamowienie_rabat_j=0, zamowienie_rabat_procentowy=0, faktura_id=""):
@@ -317,9 +320,9 @@ class ViewStock(BaseView):
         self.secend_frame = ttk.Frame(self.stock_master, padding=5)
         self.third_frame = ttk.Frame(self.stock_master, padding=5)
 
-        nazwa_label = ttk.Label(self.third_frame, text = label_name["name"], font=('calibre', 10, 'bold'), anchor='center')
-        kolor_label = ttk.Label(self.third_frame, text = label_name["color"], font=('calibre', 10, 'bold'), anchor='center')
-        szczegoly_label = ttk.Label(self.third_frame, text = label_name["details"], font=('calibre', 10, 'bold'), anchor='w')
+        nazwa_label = ttk.Label(self.third_frame, text = label_name["name"] + 5*" ", font=('calibre', 10, 'bold'), anchor='center')
+        kolor_label = ttk.Label(self.third_frame, text = label_name["color"] + 5*" ", font=('calibre', 10, 'bold'), anchor='center')
+        szczegoly_label = ttk.Label(self.third_frame, text = label_name["details"] + 5*" ", font=('calibre', 10, 'bold'), anchor='w')
 
         nazwa_entry = ttk.Entry(self.third_frame, textvariable = self.nazwa_artykulu_string, font=('calibre',10,'normal'), width=30)
         kolor_entry = ttk.Entry(self.third_frame, textvariable = self.kolor_artykulu_string, font=('calibre',10,'normal'), width=30)
@@ -352,17 +355,16 @@ class ViewStock(BaseView):
         self.secend_frame = ttk.Frame(self.stock_master, padding=5)
         self.third_frame = ttk.Frame(self.stock_master, padding=5)
 
-        date_label = ttk.Label(self.third_frame, text = label_name["date"], font=('calibre', 10, 'bold'), anchor='center')
-       
-        rabat_j_label = ttk.Label(self.third_frame, text = label_name["unit_discount"], font=('calibre', 10, 'bold'), anchor='center')
-        rabat_p_label = ttk.Label(self.third_frame, text = label_name["proc_discount"], font=('calibre',10, 'bold'), anchor='center')
-        faktura_id_label = ttk.Label(self.third_frame, text = label_name["invoice_id"], font=('calibre', 10, 'bold'), anchor='center')
+        date_label = ttk.Label(self.third_frame, text = label_name["date"] + 5*" ", font=('calibre', 10, 'bold'), anchor='center')
+        rabat_j_label = ttk.Label(self.third_frame, text = label_name["unit_discount"] + 5*" ", font=('calibre', 10, 'bold'), anchor='center')
+        rabat_p_label = ttk.Label(self.third_frame, text = label_name["proc_discount"] + 5*" ", font=('calibre',10, 'bold'), anchor='center')
+        faktura_id_label = ttk.Label(self.third_frame, text = label_name["invoice_id"] + 5*" ", font=('calibre', 10, 'bold'), anchor='center')
 
-        rabat_j_entry = ttk.Entry(self.third_frame, textvariable = self.rabat_j_var, font=('calibre',10,'normal'), width=10)
-        rabat_p_entry = ttk.Entry(self.third_frame, textvariable = self.rabat_p_var, font=('calibre',10,'normal'), width=10)
-        faktura_id_entry = ttk.Entry(self.third_frame, textvariable = self.faktura_id, font=('calibre',10,'normal'), width=10)
+        rabat_j_entry = ttk.Entry(self.third_frame, textvariable = self.rabat_j_var, font=('calibre',10,'normal'), width=20)
+        rabat_p_entry = ttk.Entry(self.third_frame, textvariable = self.rabat_p_var, font=('calibre',10,'normal'), width=20)
+        faktura_id_entry = ttk.Entry(self.third_frame, textvariable = self.faktura_id, font=('calibre',10,'normal'), width=20)
 
-        self.date_entry = DateEntry(self.third_frame, localestr=self.language_code, date_pattern="yyyy-mm-dd", textvariable=self.zamowienie_data, width=10, set_date=datetime.date(2023,4,2))
+        self.date_entry = DateEntry(self.third_frame, localestr=self.language_code, date_pattern="yyyy-mm-dd", textvariable=self.zamowienie_data, width=15, set_date=datetime.date(2023,4,2))
 
         self.third_frame.grid_rowconfigure(0, weight=80)
         self.third_frame.grid_rowconfigure(1, weight=1)
@@ -379,14 +381,14 @@ class ViewStock(BaseView):
         rabat_p_label.grid(row=3,column=0, sticky='e')
         faktura_id_label.grid(row=4,column=0, sticky='e')
 
-        self.date_entry.grid(row=1,column=1)
-        rabat_j_entry.grid(row=2,column=1)
-        rabat_p_entry.grid(row=3,column=1)
-        faktura_id_entry.grid(row=4,column=1)
+        self.date_entry.grid(row=1,column=1, sticky='w')
+        rabat_j_entry.grid(row=2,column=1, sticky='w')
+        rabat_p_entry.grid(row=3,column=1, sticky='w')
+        faktura_id_entry.grid(row=4,column=1, sticky='w')
 
-        self.stock_frame.grid(row=0, column=1, columnspan=5, rowspan=1, sticky="nsew", padx=5, pady=5)
-        self.secend_frame.grid(row=1, column=1, columnspan=5, rowspan=3, sticky="nsew", padx=5, pady=5)
-        self.third_frame.grid(row=0, column=6, columnspan=1, rowspan=4, sticky="nsew", padx=5, pady=5)
+        self.stock_frame.grid(row=0, column=1, columnspan=3, rowspan=1, sticky="nsew", padx=5, pady=5)
+        self.secend_frame.grid(row=1, column=1, columnspan=3, rowspan=3, sticky="nsew", padx=5, pady=5)
+        self.third_frame.grid(row=0, column=4, columnspan=2, rowspan=4, sticky="nsew", padx=5, pady=5)
         
     def cena_ilosc_view(self, cena_artykulu_var = 0, ilosc_artykulu_var = 1):
         label_name = self.leksykon["labels"]

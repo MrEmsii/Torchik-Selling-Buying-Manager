@@ -7,11 +7,13 @@ Base = declarative_base()
 
 artykuly_relacja = Table(
     'lista_dodanie', Base.metadata,
-    Column('zamowienie_id', Integer, ForeignKey('zamowienie.id')),
     Column('artykul_id', Integer, ForeignKey('artykul_lista.id')),
+    Column('zamowienie_id', Integer, ForeignKey('zamowienie.id')),
     Column("ilosc_artykulu", Integer, default=1),
     Column("czas_druku_1_elem", Integer, default=0),
-    Column("cena_sprzedazy_1_elem", Integer, default=0)
+    Column("waga_1_elem", Integer, default=0),
+    Column("koszt_1kg_materialu", Integer, default=0),
+    Column("cena_1_elem", Integer, default=0)
 )
 
 
@@ -47,7 +49,7 @@ class Zamowienie(Base):
             wynik = self._get_zamowienie_artykul_miejsce(artykul, session)
             if wynik is not None:
                 ilosc = wynik[2] if wynik[2] is not None else 1 
-                cena = wynik[4] if wynik[4] is not None else 0 
+                cena = wynik[6] if wynik[6] is not None else 0 
                 total += ilosc * cena
         return total
 
@@ -55,10 +57,22 @@ class Zamowienie(Base):
         rabat_proc = max((100 - self.rabat_procent) / 100, 0)
         #dodać koszta!!!
         return self.oblicz_przychod(session) * rabat_proc - self.rabat_j
+    
+    def oblicz_koszta(self, session):
+        total = 0
+        for artykul in self.artykuly:
+            wynik = self._get_zamowienie_artykul_miejsce(artykul, session)
+            if wynik is not None:
+                ilosc = wynik[2] if wynik[2] is not None else 1 
+                koszt_1kg_materialu = wynik[5] if wynik[5] is not None else 0 
+                waga_1_elem = wynik[4] if wynik[4] is not None else 0 
+                total += ilosc * koszt_1kg_materialu * waga_1_elem
+        return total
 
     def oblicz_przychod_na_1h_druku(self, session):
         total_hours = sum(self.get_ilosc_artykul(art, session) * (self._get_czas_druku(art, session) or 0)
                           for art in self.artykuly)
+        #dodać koszta!!!
         return self.oblicz_przychod(session) / total_hours if total_hours > 0 else 0
 
     def oblicz_dochod_na_1h_druku(self, session):

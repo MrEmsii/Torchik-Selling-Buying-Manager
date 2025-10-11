@@ -8,6 +8,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from view.base_view import BaseView
 
+import sv_ttk
+
 class ViewStatistic(BaseView):
     def __init__(
             self, statistic_master, 
@@ -55,15 +57,13 @@ class ViewStatistic(BaseView):
 
 
     def setup_styles(self, dsc):
-        self.style = ttk.Style()
-
-        self.style.theme_use("awdark")
-        self.style.configure("Treeview", background="#D8E8E8", foreground="#2F3131", rowheight=20, fieldbackground="#E7E7E7", font=('Arial', 8))
-        self.style.map("Treeview", background=[('selected', "#2F3131")], foreground=[('selected', '#D8E8E8')])
-
         self.statistic_master.title("Torchik - Statistic Window")
         self.statistic_master.iconbitmap(os.path.join(dsc, "resources", "image", "icon.ico"))
 
+        sv_ttk.set_theme("dark")
+
+        self.style = ttk.Style()
+        self.style.configure("Treeview", font=('Arial', 8))
         self.style.configure('TButton', justify="left", anchor='w')
         self.background_image = PhotoImage(file=os.path.join(dsc, "resources", "image", "background.png"))
         self.background_label = ttk.Label(self.statistic_master, image=self.background_image)
@@ -152,7 +152,7 @@ class ViewStatistic(BaseView):
         labels = labels[:10]
         values = values[:10]
 
-        fig = Figure(figsize=(5, 4))
+        fig = Figure(figsize=(9, 6))
         ax = fig.add_subplot(111)
 
         ax.pie(values, labels=labels, startangle=140, autopct=self.autopct_format(values), textprops={'fontsize': 8}, pctdistance=0.75, labeldistance=1.1)

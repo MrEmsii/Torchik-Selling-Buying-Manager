@@ -3,6 +3,8 @@ from view.ViewStatistic import ViewStatistic
 from model.statistics_model import StatisticsStockModel
 from model.stock_db_model import SQLconnect
 
+import customtkinter as ct
+
 class ControllerStatistic:
     def __init__(
             self, master, dsc, leksykon_programu, konfiguracja_programu, 
@@ -24,7 +26,7 @@ class ControllerStatistic:
         self.sound = sound
         self.messagebox_controller = messagebox_controller 
 
-        self.statistic_master = tk.Toplevel(master)
+        self.statistic_master = ct.CTkToplevel(master)
 
         self.view = ViewStatistic(
             self.statistic_master, 
@@ -40,7 +42,6 @@ class ControllerStatistic:
         self.button_manager()
 
         self.statistic_master.protocol("WM_DELETE_WINDOW", self.on_closing_order_window)
-
 
     def run(self):
         self.statistic_master.deiconify()
@@ -70,7 +71,6 @@ class ControllerStatistic:
         self.button_shops_stats(self.button_statistic_frame)
         self.button_artykuly_stats(self.button_statistic_frame)
 
-
     def button_category_stats(self, frame):
         leksykon = self.leksykon_programu["buttons"]["button_category"]
         self.view.utworz_przycisk(frame, self.open_statistic_category, leksykon_programu=leksykon, icon=self.view.category_icon)
@@ -90,7 +90,6 @@ class ControllerStatistic:
     def button_artykuly_stats(self, frame):
         leksykon = self.leksykon_programu["buttons"]["button_artykuly"]
         self.view.utworz_przycisk(frame, self.open_statistic_arts, leksykon_programu=leksykon, icon=self.view.arts_icon)
-
 
     def open_statistic_arts(self):
         koszty = self.stats_model.koszt_artykulow()

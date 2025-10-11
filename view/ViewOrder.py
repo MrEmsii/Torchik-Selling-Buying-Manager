@@ -1,8 +1,6 @@
-import tkinter as tk
 from tkinter import ttk, PhotoImage
 
 import os
-import sv_ttk
 
 from view.base_view import BaseView
 
@@ -14,7 +12,8 @@ class ViewOrder(BaseView):
             currency=None, 
             language_code = None, 
             konfiguracja_programu = None,
-            sound = None
+            sound = None,
+            style=None
             ):
         
         self.order_master = order_master
@@ -22,20 +21,19 @@ class ViewOrder(BaseView):
         self.order_master.resizable(True, True)
 
         self.leksykon = leksykon
+        self.style = style
         self.currency = currency
-
-        self.button_icon_pack(dsc)
-        self.setup_frames()
-        self.setup_styles(dsc)
-
         self.sound = sound
         self.language_code = language_code
 
+        self.setup_styles(dsc)
+        self.button_icon_pack(dsc)
+        self.setup_frames()
+
     def setup_styles(self, dsc):
         self.order_master.title("Torchik - Order Window")
-        self.order_master.iconbitmap(os.path.join(dsc, "resources", "image", "icon.ico"))
-
-        sv_ttk.set_theme("dark")
+        icon_path = os.path.join(dsc, "resources", "image", "icon.ico")
+        self.order_master.after(1000, lambda: self.order_master.wm_iconbitmap(icon_path))
 
         self.style = ttk.Style()
         self.style.configure("Treeview", font=('Arial', 8))

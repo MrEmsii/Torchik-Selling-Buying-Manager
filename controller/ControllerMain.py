@@ -12,10 +12,13 @@ from controller.ControllerOrder import ControllerOrder
 import os
 import json
 
+import customtkinter as ct
+
 class ControllerMain:
     def __init__(self):
         self.dsc = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-        self.master = TkinterDnD.Tk()
+        self.master = ct.CTk()
+        # self.master = TkinterDnD.Tk()
 
         if os.path.exists(self.dsc + "/resources/setting.json") == False:
             self.json_setting(status = "create")

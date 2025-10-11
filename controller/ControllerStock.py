@@ -6,6 +6,8 @@ import string
 from tkinterdnd2 import DND_FILES, TkinterDnD
 import tkinter as tk
 
+import customtkinter as ct
+
 import threading
 import datetime as datetime
 
@@ -27,7 +29,7 @@ class ControllerStock():
         self.main_controller = main_controller
         self.sound = sound
 
-        self.stock_master = tk.Toplevel(master)
+        self.stock_master = ct.CTkToplevel(master)
         self.db_session = SQLconnect()
 
         self.view = ViewStock(

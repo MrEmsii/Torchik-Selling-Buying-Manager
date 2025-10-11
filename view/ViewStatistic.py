@@ -8,8 +8,6 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from view.base_view import BaseView
 
-import sv_ttk
-
 class ViewStatistic(BaseView):
     def __init__(
             self, statistic_master, 
@@ -54,13 +52,10 @@ class ViewStatistic(BaseView):
         canvas.draw()
         canvas.get_tk_widget().pack(fill="both", expand=True)
 
-
-
     def setup_styles(self, dsc):
         self.statistic_master.title("Torchik - Statistic Window")
-        self.statistic_master.iconbitmap(os.path.join(dsc, "resources", "image", "icon.ico"))
-
-        sv_ttk.set_theme("dark")
+        icon_path = os.path.join(dsc, "resources", "image", "icon.ico")
+        self.statistic_master.after(1000, lambda: self.statistic_master.wm_iconbitmap(icon_path))
 
         self.style = ttk.Style()
         self.style.configure("Treeview", font=('Arial', 8))

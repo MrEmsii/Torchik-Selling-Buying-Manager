@@ -139,7 +139,8 @@ class ControllerStock():
                 art_szczegoly = art.szczegoly if art.szczegoly else  " "
                 artykuly_data.append((art_id, art_kategoria, art_firma, art_nazwa, art_kolor, art_szczegoly))
 
-            artykuly_data.sort(key=lambda x:x[3])
+            artykuly_data.sort(key=lambda x:x[4].lower())
+            artykuly_data.sort(key=lambda x:x[3].lower())
 
             def update_gui():
                 self.artykuly_tree.delete(*self.artykuly_tree.get_children())
@@ -304,6 +305,7 @@ class ControllerStock():
         elif frame == "lista_artykuly":
             self.button_stworz_artykul(self.button_stock_frame) 
             self.button_modyfikuj_artykul(self.button_stock_frame) 
+            self.button_dublikuj_artykul(self.button_stock_frame)
             self.button_zniszcz_artykul(self.button_stock_frame)
 
         elif frame == "dodaj_zamowienie":
@@ -359,6 +361,10 @@ class ControllerStock():
     def button_modyfikuj_artykul(self, frame):
         leksykon = self.leksykon_programu["button_modyfikuj_artykul"]
         self.view.utworz_przycisk(frame, lambda: self.dodaj_modyfikuj_artykul(commend="modyfikuj"), icon=self.view.edit_artykul_icon, leksykon_programu=leksykon)
+
+    def button_dublikuj_artykul(self, frame):
+        leksykon = self.leksykon_programu["button_dublikuj_artykul"]
+        self.view.utworz_przycisk(frame, lambda: self.dodaj_modyfikuj_artykul(commend="duplikuj"), icon=self.view.edit_artykul_icon, leksykon_programu=leksykon)
 
     def button_zatwierdz_artykul(self, frame):
         leksykon = self.leksykon_programu["button_zatwierdz_artykul"]
@@ -760,6 +766,16 @@ class ControllerStock():
 
         if dialog and dialog.lower() in [name.lower() for name in leksykon["agree"]]:
             zamowienie_id = self.zamowienia_tree.item(selected_item[0], 'values')[0]
+            zamowienie = self.db_session.query(Zamowienie).get(zamowienie_id)
+            
+            if zamowienie.artykuly:
+                leksykon = self.leksykon_messagebox["error_messagebox"]
+                self.messagebox_controller.messagebox(
+                    type="error",
+                    heading=leksykon["heading"], 
+                    text = leksykon["text"]["not_empty"]
+                )
+                return
             
             self.db_session.query(Zamowienie).filter_by(id=zamowienie_id).delete(synchronize_session=False)
             self.db_session.commit()
@@ -928,12 +944,35 @@ class ControllerStock():
             self.button_manager("modyfikacja_artykuly", back_target = 'lista_artykułów' )
             self.view.dodaj_modyfikuj_artykul_view(nazwa_artykulu_string = info[0], kolor_artykulu_string = info[1], szczegoly_artykulu_string = info[2])
 
-        self.firma_tree = self.view.name_tree(self.view.stock_frame, "Lista Firm", True)
-        self.kategorie_tree = self.view.name_tree(self.view.secend_frame, "Kategorie Lista", True)
-
-        if commend == "modyfikuj":
             firma_id_artykulu = info[4]
             kategoria_id_artykulu = info[3]
+
+        elif commend == "duplikuj":
+            selected_item = self.artykuly_tree.selection()
+            if not selected_item:
+                leksykon = self.leksykon_messagebox["error_messagebox"]
+                self.messagebox_controller.messagebox(
+                    type="error",
+                    heading=leksykon["heading"],
+                    text=leksykon["text"]["select_art"]
+                )
+                return
+            self.artykul_modyfikacja_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
+            info = self.wczytaj_informacje_artykul(self.artykul_modyfikacja_id)
+
+            self.usun_all_widgets()
+            self.button_manager("tworzenie_artykuly", back_target='lista_artykułów')
+            self.view.dodaj_modyfikuj_artykul_view(
+                nazwa_artykulu_string=info[0],
+                kolor_artykulu_string=info[1],
+                szczegoly_artykulu_string=info[2]
+            )
+
+            firma_id_artykulu = info[4]
+            kategoria_id_artykulu = info[3]
+
+        self.firma_tree = self.view.name_tree(self.view.stock_frame, "Lista Firm", True)
+        self.kategorie_tree = self.view.name_tree(self.view.secend_frame, "Kategorie Lista", True)
 
         self.sound.play_confirm_sound()
 
@@ -1128,8 +1167,11 @@ class ControllerStock():
 
         for wynik in wynik_all:
             id_art = wynik.artykul_id
-            cena = f"{wynik.cena_jednostkowa if wynik.cena_jednostkowa else 0:.2f} {self.currency}"
+            cena_netto = float(wynik.cena_jednostkowa)
             ilosc = wynik.ilosc_artykulu if wynik.ilosc_artykulu else 1
+            wartosc_brutto = f"{cena_netto*ilosc if cena_netto*ilosc else 0:.2f} {self.currency}"
+
+            cena_netto = f"{cena_netto if cena_netto else 0:.2f} {self.currency}"
 
             artykul = self.db_session.query(Artykul_Lista).filter_by(id=id_art).first()
             kategoria = artykul.kategoria.nazwa if artykul.kategoria else None
@@ -1145,9 +1187,9 @@ class ControllerStock():
                 counter += 1
 
             existing_iids.add(unique_id)
-            artykul_data.append((unique_id, id_art, cena, ilosc, kategoria, firma, nazwa, kolor, szczegoly))
+            artykul_data.append((unique_id, id_art, cena_netto, ilosc, wartosc_brutto, kategoria, firma, nazwa, kolor, szczegoly))
 
-        artykul_data.sort(key=lambda x: x[6].lower())
+        artykul_data.sort(key=lambda x: x[7].lower())
 
         for row in artykul_data:
             self.inside_tree.insert('', 'end', iid=row[0], values=row[1:])

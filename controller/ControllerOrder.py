@@ -1,6 +1,8 @@
 import threading
 import tkinter as tk
 
+import customtkinter as ct
+
 from sqlalchemy import select
 
 from view.ViewOrder import ViewOrder
@@ -24,7 +26,7 @@ class ControllerOrder:
         self.main_controller = main_controller
         self.sound = sound
 
-        self.order_master = tk.Toplevel(master)
+        self.order_master = ct.CTkToplevel(master)
         self.db_session = SQLconnect()
 
         self.view = ViewOrder(

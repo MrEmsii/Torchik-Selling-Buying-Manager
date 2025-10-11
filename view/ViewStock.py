@@ -7,8 +7,6 @@ import os
 
 from view.base_view import BaseView
 
-import sv_ttk
-
 class ViewStock(BaseView):
     def __init__(
             self, stock_master, 
@@ -36,9 +34,8 @@ class ViewStock(BaseView):
 
     def setup_styles(self, dsc):
         self.stock_master.title("Torchik - Stock Window")
-        self.stock_master.iconbitmap(os.path.join(dsc, "resources", "image", "icon.ico"))
-
-        sv_ttk.set_theme("dark")
+        icon_path = os.path.join(dsc, "resources", "image", "icon.ico")
+        self.stock_master.after(1000, lambda: self.stock_master.wm_iconbitmap(icon_path))
 
         self.style = ttk.Style()
         self.style.configure("Treeview", font=('Arial', 8))

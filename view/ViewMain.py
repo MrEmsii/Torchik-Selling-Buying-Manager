@@ -1,13 +1,11 @@
 from tkinter import ttk, PhotoImage
 from TkToolTip import ToolTip
 import tkinter as tk
+import sv_ttk
 
-from view.ViewSound import ViewSound
 from view.base_view import BaseView
 
 import os
-
-import sv_ttk
 
 class ViewMain(BaseView):
     def __init__(self, master, dsc=None, sound = None):

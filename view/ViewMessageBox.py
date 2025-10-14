@@ -1,32 +1,68 @@
-from tkinter import ttk, messagebox, simpledialog
+from tkinter import messagebox, simpledialog
 from CustomTkinterMessagebox import CTkMessagebox
-import tkinter as tk
+from ctkcomponents import *
 
-class ViewMessageBox():
+import customtkinter as ct
+
+
+class ViewMessageBox:
+    """Widok obsługujący różne typy komunikatów i popupów w aplikacji."""
+
+    def __init__(self):
+        self.my_progress = None
+        self.msg_window = None
+
     def show_message_async(self, master, leksykon):
-        def pokaz_okno(master):
-            self.msg_windows = tk.Toplevel(master)
-            self.msg_windows.geometry("300x50+340+160")
-            self.msg_windows.title(leksykon["info_initializing"]["heading"])
+        """Pokazuje asynchroniczny komunikat z paskiem postępu."""
+        self.my_progress = CTkProgressPopup(
+            master=master,
+            title="Background Tasks",
+            label=leksykon.get("progress_label", "Working..."),
+            message=leksykon.get("progress_message", "Please wait..."),
+            side="left_top"
+        )
 
-            label = tk.Label(self.msg_windows, text=leksykon["info_initializing"]["text"], padx=20, pady=10)
-            label.pack()
+    def hide_message_async(self):
+        """Zamyka asynchroniczne okno progressu, jeśli istnieje."""
+        if self.my_progress:
+            try:
+                self.my_progress.cancel_task()
+            except Exception:
+                print("Error closing progress popup")
+                pass
+            self.my_progress = None
+        else:
+            print("No progress popup to close")
 
-        master.after(0, pokaz_okno(master))
+    def update_progress(self, progress: float):
+        """Aktualizuje pasek postępu (0.0–1.0)."""
+        if self.my_progress:
+            try:
+                self.my_progress.update_progress(progress)
+            except Exception:
+                print("Error updating progress popup")
+                pass
+        else:
+            pass
+        
+    def messagebox(self, type, language_code=None, heading=None, text=None, value=None, app=None):
+        """Obsługuje różne typy komunikatów w wersji CustomTkinter."""
+        type = type.lower().strip()
 
-    def ukryj_message_async(self, master):
-        def zamknij_okno():
-            if hasattr(self, 'msg_windows') and self.msg_windows.winfo_exists():
-                self.msg_windows.destroy()
-
-        master.after(0, zamknij_okno)
-
-    def messagebox(self, type, language_code = None, heading = None, text = None, value = None):
         if type == "error" or type == "language" and language_code:
-            return messagebox.showerror(heading, text)
+            return CTkNotification(master=app, state="error", message=f"{heading}\n{text}", side="left_top")
+
         elif type == "info":
-            return messagebox.showinfo(heading, text)
+            return CTkNotification(master=app, state="info", message=text, side="left_top")
+
         elif type == "close":
-            return messagebox.askokcancel(heading, text)
+            alert = CTkAlert(state="info", title=heading or "Exit", body_text=text or "Do you want to exit?",
+                             btn1="Exit", btn2="Cancel")
+            return alert.get() == "Exit"
+
         elif type == "ask":
-            return simpledialog.askstring(heading, text, initialvalue=value)
+            return simpledialog.askstring(heading or "Input", text or "", initialvalue=value)
+
+        else:
+            raise ValueError(f"Unknown messagebox type: {type}")
+

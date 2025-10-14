@@ -1,4 +1,9 @@
-from tkinter import ttk, PhotoImage
+from tkinter import ttk
+
+import customtkinter as ct
+from customtkinter import CTkImage
+from PIL import Image
+
 
 import os
 
@@ -35,14 +40,6 @@ class ViewOrder(BaseView):
         icon_path = os.path.join(dsc, "resources", "image", "icon.ico")
         self.order_master.after(1000, lambda: self.order_master.wm_iconbitmap(icon_path))
 
-        self.style = ttk.Style()
-        self.style.configure("Treeview", font=('Arial', 8))
-        self.style.configure('TButton', justify="left", anchor='w')
-        self.background_image = PhotoImage(file=os.path.join(dsc, "resources", "image", "background.png"))
-        self.background_label = ttk.Label(self.order_master, image=self.background_image)
-        self.background_label.place(x=0, y=0, relwidth=1, relheight=1) 
-        self.background_label.lower()
-
         self.order_master.grid_rowconfigure(0, weight=4)
         self.order_master.grid_rowconfigure(1, weight=4)
         self.order_master.grid_rowconfigure(2, weight=4)
@@ -55,22 +52,20 @@ class ViewOrder(BaseView):
         self.order_master.grid_columnconfigure(4, weight=2000)
 
     def setup_frames(self):
-        self.button_orders_frame = ttk.Frame(self.order_master, padding=5)
+        self.button_orders_frame = ct.CTkFrame(self.order_master)
 
-        self.realizacja_frame = ttk.Frame(self.order_master, padding=5)
-        self.order_frame = ttk.Frame(self.order_master, padding=5)
-        # self.third_frame = ttk.Frame(self.order_master, padding=5)
+        self.realizacja_frame = ct.CTkFrame(self.order_master)
+        self.order_frame = ct.CTkFrame(self.order_master)
 
         self.button_orders_frame.grid(row=0, column=0, rowspan=5, sticky="nsew", padx=5, pady=5)
 
     def button_icon_pack(self, dsc):
-        self.category_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_kategorie_icon.png")).subsample(8, 8)
-        self.buyers_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_kupujacy_icon.png")).subsample(8, 8)
+        self.category_icon = CTkImage(dark_image=Image.open(os.path.join(dsc, "resources", "image", "lista_kategorie_icon.png")))
+        self.buyers_icon = CTkImage(dark_image=Image.open(os.path.join(dsc, "resources", "image", "lista_kupujacy_icon.png")))
 
     def order_grid_setting(self):
         self.realizacja_frame.grid(row=0, column=1, columnspan=1, rowspan=5, sticky="nsew", padx=5, pady=5)
         self.order_frame.grid(row=0, column=2, columnspan=5, rowspan=5, sticky="nsew", padx=5, pady=5)
-        # self.order_frame.grid(row=0, column=1, columnspan=3, rowspan=5, sticky="nsew", padx=5, pady=5)
 
     def inside_grid_setting(self):
         self.order_frame.grid(row=0, column=1, columnspan=5, rowspan=4, sticky="nsew", padx=5, pady=5)
@@ -78,22 +73,23 @@ class ViewOrder(BaseView):
         
     def order_tree(self, parent_frame, label_text):
         columns_name = self.leksykon["columns"]["order_tree_columns"]
-        label = ttk.Label(parent_frame, text=label_text, font=("Arial", 12))
+        label = ct.CTkLabel(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)
 
-        container = ttk.Frame(parent_frame)
+        container = ct.CTkFrame(parent_frame)
         container.pack(expand=True, fill='both')
 
-        scrollbar = ttk.Scrollbar(container, orient="vertical")
+        scrollbar = ct.CTkScrollbar(container, orientation="vertical")
 
         tree = ttk.Treeview(
             container,
             columns=columns_name,
             show='headings',
             yscrollcommand=scrollbar.set,
+            bootstyle="secondary"
         )
 
-        scrollbar.config(command=tree.yview)
+        scrollbar.configure(command=tree.yview)
         scrollbar.pack(side='right', fill='y')
 
         tree.pack( expand=True, fill='both')
@@ -126,22 +122,23 @@ class ViewOrder(BaseView):
     def inside_tree(self, parent_frame, label_text, status=True):
         columns_name = self.leksykon["columns"]["list_added_to_order_columns"]
 
-        label = ttk.Label(parent_frame, text=label_text, font=("Arial", 12))
+        label = ct.CTkLabel(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)
 
-        container = ttk.Frame(parent_frame)
+        container = ct.CTkFrame(parent_frame)
         container.pack(expand=True, fill='both')
 
-        scrollbar = ttk.Scrollbar(container, orient="vertical")
+        scrollbar = ct.CTkScrollbar(container, orientation="vertical")
 
         tree = ttk.Treeview(
-            container, 
-            columns=columns_name, 
-            show='headings', 
-            yscrollcommand=scrollbar.set
-            )
+            container,
+            columns=columns_name,
+            show='headings',
+            yscrollcommand=scrollbar.set,
+            bootstyle="secondary"
+        )
         
-        scrollbar.config(command=tree.yview)
+        scrollbar.configure(command=tree.yview)
         scrollbar.pack(side='right', fill='y')
 
         tree.pack( expand=True, fill='both')
@@ -182,22 +179,23 @@ class ViewOrder(BaseView):
     def name_tree(self, parent_frame, label_text, status=True):
         columns_name = self.leksykon["columns"]["realizacja_tree_columns"]
 
-        label = ttk.Label(parent_frame, text=label_text, font=("Arial", 12))
+        label = ct.CTkLabel(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)
 
-        container = ttk.Frame(parent_frame)
+        container = ct.CTkFrame(parent_frame)
         container.pack(expand=True, fill='both')
 
-        scrollbar = ttk.Scrollbar(container, orient="vertical")
+        scrollbar = ct.CTkScrollbar(container, orientation= "vertical")
 
         tree = ttk.Treeview(
-            container, 
-            columns=columns_name, 
-            show='headings', 
-            yscrollcommand=scrollbar.set
-            )
+            container,
+            columns=columns_name,
+            show='headings',
+            yscrollcommand=scrollbar.set,
+            bootstyle="secondary"
+        )
         
-        scrollbar.config(command=tree.yview)
+        scrollbar.configure(command=tree.yview)
         scrollbar.pack(side='right', fill='y')
 
         tree.pack( expand=True, fill='both')
@@ -214,22 +212,23 @@ class ViewOrder(BaseView):
     def info_tree(self, parent_frame, label_text, status=True):
         columns_name = self.leksykon["columns"]["more_info_in_order_columns"]
 
-        label = ttk.Label(parent_frame, text=label_text, font=("Arial", 12))
+        label = ct.CTkLabel(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)
 
-        container = ttk.Frame(parent_frame)
+        container = ct.CTkFrame(parent_frame)
         container.pack(expand=True, fill='both')
 
-        scrollbar = ttk.Scrollbar(container, orient="vertical")
+        scrollbar = ct.CTkScrollbar(container, orientation="vertical")
 
         tree = ttk.Treeview(
-            container, 
-            columns=columns_name, 
-            show='headings', 
-            yscrollcommand=scrollbar.set
-            )
+            container,
+            columns=columns_name,
+            show='headings',
+            yscrollcommand=scrollbar.set,
+            bootstyle="secondary"
+        )
         
-        scrollbar.config(command=tree.yview)
+        scrollbar.configure(command=tree.yview)
         scrollbar.pack(side='right', fill='y')
 
         tree.pack( expand=True, fill='both')

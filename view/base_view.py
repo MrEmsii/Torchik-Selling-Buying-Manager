@@ -1,25 +1,28 @@
-import tkinter as tk
-from tkinter import ttk
-from TkToolTip import ToolTip
+import CTkToolTip
+
+import customtkinter as ct
+
 
 class BaseView:
     def __init__(self, sound):
         self.sound = sound
 
-    def utworz_przycisk(self, frame, command, leksykon_programu, side='top', padx=1, pady=3,columnspan=1, icon=None, pack = True, column=0, row=0):
-        przycisk = ttk.Button(
+    def utworz_przycisk(self, frame, command, leksykon_programu, side='top', padx=5, pady=5, columnspan=1, icon=None, pack = True, column=0, row=0):
+        przycisk = ct.CTkButton(
             frame,
             text=leksykon_programu["text"],
             command=self._click_sound(command),
-            width=12,
+            width=100,
             image=icon,
-            compound="left"
+            compound="left",
+            anchor="w",
+            corner_radius=8
         )
         if pack:
-            przycisk.pack(side=side, padx=padx, pady=pady)
+            przycisk.pack(side=side, padx=padx, pady=pady, fill='x')
         else:
             przycisk.grid(row=row, column=column, padx=padx, pady=pady, sticky="nsew", columnspan=columnspan)
-        ToolTip(przycisk, msg=leksykon_programu["toolTip"], follow=True)
+        CTkToolTip.CTkToolTip(przycisk, message=leksykon_programu["toolTip"])
         return przycisk
 
     def _click_sound(self, func):
@@ -29,3 +32,19 @@ class BaseView:
         return wrapper
 
 
+    def create_entry_with_placeholder(self, parent, textvariable, placeholder, **kwargs):
+        entry = ct.CTkEntry(parent, textvariable=textvariable, **kwargs)
+        if not textvariable.get():
+            entry.insert(0, placeholder)
+            entry.configure(fg_color="gray25")
+            def on_focus_in(e):
+                if entry.get() == placeholder:
+                    entry.delete(0, "end")
+                    entry.configure(fg_color="gray10")
+            def on_focus_out(e):
+                if entry.get() == "":
+                    entry.insert(0, placeholder)
+                    entry.configure(fg_color="gray25")
+            entry.bind("<FocusIn>", on_focus_in)
+            entry.bind("<FocusOut>", on_focus_out)
+        return entry

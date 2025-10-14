@@ -124,7 +124,7 @@
             "text": "Zatwierdź\nartykuł",
             "toolTip": "Zatwierdź dodawany artykuł"
         },
-        "button_zatwierdz_edycje_artykul": {
+        "button_zatwierdz_edycje_artykulu": {
             "text": "Zatwierdź\nedycję\nartykułu",
             "toolTip": "Zatwierdź edytowany artykuł"
         },
@@ -136,7 +136,7 @@
             "text": "Dodaj\nartykuł do\nzamowienia",
             "toolTip": "Dodaj artykuł do zamówienia"
         },
-        "button_modyfikuj_artykul_zamowienie": {
+        "button_edytuj_artykul_zamowienie": {
             "text": "Modyfikuj\nartykuł",
             "toolTip": "Modyfikuj artykuł w zamówieniu"
         },
@@ -276,12 +276,12 @@
         "delete_messagebox":{
             "heading": "Usuń",
             "text": {
-                "shop": "Napewno chcesz usunąć sklep z listy? \nCzynność NIE odwracalna!\nWpisz ",
-                "buyer": "Napewno chcesz usunąć kupującego z listy? \nCzynność NIE odwracalna!\nWpisz ",
-                "order": "Napewno chcesz usunąć zamówienie z listy? \nCzynność NIE odwracalna!\nWpisz ",
-                "category": "Napewno chcesz usunąć kategorię z listy? \nCzynność NIE odwracalna!\nWpisz ",
-                "company": "Napewno chcesz usunąć firmę z listy? \nCzynność NIE odwracalna!\nWpisz ",
-                "article": "Napewno chcesz usunąć artykuł z listy? \nCzynność NIE odwracalna!\nWpisz "
+                "shop": "Napewno chcesz usunąć sklep z listy?\nCzynność NIE odwracalna!\nWpisz ",
+                "buyer": "Napewno chcesz usunąć kupującego z listy?\nCzynność NIE odwracalna!\nWpisz ",
+                "order": "Napewno chcesz usunąć zamówienie z listy?\nCzynność NIE odwracalna!\nWpisz ",
+                "category": "Napewno chcesz usunąć kategorię z listy?\nCzynność NIE odwracalna!\nWpisz ",
+                "company": "Napewno chcesz usunąć firmę z listy?\nCzynność NIE odwracalna!\nWpisz ",
+                "article": "Napewno chcesz usunąć artykuł z listy?\nCzynność NIE odwracalna!\nWpisz "
             },
             "agree": ["TAK", "YES"]
         },

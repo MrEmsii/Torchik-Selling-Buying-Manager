@@ -1,12 +1,20 @@
-import tkinter as tk
-from tkinter import ttk, PhotoImage
+from tkinter import ttk
 
 import os
+
+import customtkinter as ct
+from customtkinter import CTkImage
+from PIL import Image
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from view.base_view import BaseView
+
+DARK_BG = "#2B2B2B"
+LIGHT_FG = "white"
+
+COLOR_PALETTE = ["#4F8DD6", "#D67F4F", "#4FD69F", "#D64FD6", "#F2C94C", "#56CCF2", "#BB6BD9"]
 
 class ViewStatistic(BaseView):
     def __init__(
@@ -31,22 +39,21 @@ class ViewStatistic(BaseView):
         self.sound = sound
         self.language_code = language_code
 
-        self.scrollbar = ttk.Scrollbar(self.table_frame, orient="vertical")
+        self.scrollbar = ct.CTkScrollbar(self.table_frame, orientation="vertical")
 
         self.tree = ttk.Treeview(self.table_frame, columns=("name", "value"), show="headings", yscrollcommand=self.scrollbar.set)
         
         self.tree.heading("name", text=leksykon["heading"]["name"])
         self.tree.heading("value", text=leksykon["heading"]["value"])
 
-        self.scrollbar.config(command=self.tree.yview)
+        self.scrollbar.configure(command=self.tree.yview)
         self.scrollbar.pack(side='right', fill='y')
 
         self.tree.pack(fill="both", expand=True)
 
-        fig = Figure(figsize=(9, 6))
+        fig = Figure(figsize=(9, 6), facecolor="#2B2B2B")
 
-        fig.text(0.5, 0.5, leksykon["charts"]["no_data"],
-                ha="center", va="center", fontsize=14)
+        fig.text(0.5, 0.5, leksykon["charts"]["no_data"], ha="center", va="center", fontsize=14, color="white")
 
         canvas = FigureCanvasTkAgg(fig, master=self.statistic_frame)
         canvas.draw()
@@ -56,14 +63,6 @@ class ViewStatistic(BaseView):
         self.statistic_master.title("Torchik - Statistic Window")
         icon_path = os.path.join(dsc, "resources", "image", "icon.ico")
         self.statistic_master.after(1000, lambda: self.statistic_master.wm_iconbitmap(icon_path))
-
-        self.style = ttk.Style()
-        self.style.configure("Treeview", font=('Arial', 8))
-        self.style.configure('TButton', justify="left", anchor='w')
-        self.background_image = PhotoImage(file=os.path.join(dsc, "resources", "image", "background.png"))
-        self.background_label = ttk.Label(self.statistic_master, image=self.background_image)
-        self.background_label.place(x=0, y=0, relwidth=1, relheight=1) 
-        self.background_label.lower()
 
         self.statistic_master.grid_rowconfigure(0, weight=4)
         self.statistic_master.grid_rowconfigure(1, weight=4)
@@ -77,21 +76,21 @@ class ViewStatistic(BaseView):
         self.statistic_master.grid_columnconfigure(4, weight=500)
 
     def setup_frames(self):
-        self.button_statistic_frame = ttk.Frame(self.statistic_master, padding=5)
+        self.button_statistic_frame = ct.CTkFrame(self.statistic_master)
 
-        self.statistic_frame = ttk.Frame(self.statistic_master, padding=5)
-        self.table_frame = ttk.Frame(self.statistic_master, padding=5)
+        self.statistic_frame = ct.CTkFrame(self.statistic_master)
+        self.table_frame = ct.CTkFrame(self.statistic_master)
 
         self.button_statistic_frame.grid(row=0, column=0, rowspan=5, sticky="nsew", padx=5, pady=5)
         self.statistic_frame.grid(row=0, column=1, columnspan=2, rowspan=5, sticky="nsew", padx=5, pady=5)
         self.table_frame.grid(row=0, column=3, columnspan=2, rowspan=5, sticky="nsew", padx=5, pady=5)
 
     def button_icon_pack(self, dsc):
-        self.category_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_kategorie_icon.png")).subsample(8, 8)
-        self.buyers_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_kupujacy_icon.png")).subsample(8, 8)
-        self.arts_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_artykulow_icon.png")).subsample(8, 8)
-        self.company_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_firmy_icon.png")).subsample(8, 8)
-        self.shops_icon = PhotoImage(file=os.path.join(dsc, "resources", "image", "lista_sklepy_icon.png")).subsample(8, 8)
+        self.category_icon = CTkImage(dark_image=Image.open(os.path.join(dsc, "resources", "image", "lista_kategorie_icon.png")))
+        self.buyers_icon = CTkImage(dark_image=Image.open(os.path.join(dsc, "resources", "image", "lista_kupujacy_icon.png")))
+        self.arts_icon = CTkImage(dark_image=Image.open(os.path.join(dsc, "resources", "image", "lista_artykulow_icon.png")))
+        self.company_icon = CTkImage(dark_image=Image.open(os.path.join(dsc, "resources", "image", "lista_firmy_icon.png")))
+        self.shops_icon = CTkImage(dark_image=Image.open(os.path.join(dsc, "resources", "image", "lista_sklepy_icon.png")))
             
     def update_table(self, headers, data):
         """
@@ -100,7 +99,7 @@ class ViewStatistic(BaseView):
         """
         self.tree["columns"] = headers
 
-        self.scrollbar.config(command=self.tree.yview)
+        self.scrollbar.configure(command=self.tree.yview)
 
         self.tree.heading(headers[0], text=headers[0], anchor='center')
         self.tree.column(headers[0], width=60, anchor='e')
@@ -122,36 +121,42 @@ class ViewStatistic(BaseView):
         labels = labels[:20]
         values = values[:20]
 
-        fig = Figure(figsize=(9, 6))
-        ax = fig.add_subplot(111)
-        ax.barh(labels, values)
-        ax.set_title(title)
-        ax.tick_params(axis="y", labelsize=8)
+        fig = Figure(figsize=(9, 6), facecolor=DARK_BG)
+        ax = fig.add_subplot(111, facecolor=DARK_BG)
 
-        fig.subplots_adjust(left=0.25) 
+        ax.barh(labels, values, color=COLOR_PALETTE[:len(values)])
 
+        ax.set_title(title, color=LIGHT_FG)
+        ax.tick_params(axis="y", labelsize=8, colors=LIGHT_FG)
+        ax.tick_params(axis="x", labelsize=8, colors=LIGHT_FG)
+        fig.subplots_adjust(left=0.25)
         ax.invert_yaxis()
 
         canvas = FigureCanvasTkAgg(fig, master=master)
         canvas.draw()
         canvas.get_tk_widget().pack(fill="both", expand=True)
 
-    def show_chart_pie(self, labels, values, title="Wykres", master = None):
-        """
-        labels = etykiety (np. artykuły)
-        values = wartości (np. koszty)
-        """
+    def show_chart_pie(self, labels, values, title="Wykres", master=None):
         for widget in master.winfo_children():
             widget.destroy()
 
         labels = labels[:10]
         values = values[:10]
 
-        fig = Figure(figsize=(9, 6))
-        ax = fig.add_subplot(111)
+        fig = Figure(figsize=(9, 6), facecolor=DARK_BG)
+        ax = fig.add_subplot(111, facecolor=DARK_BG)
 
-        ax.pie(values, labels=labels, startangle=140, autopct=self.autopct_format(values), textprops={'fontsize': 8}, pctdistance=0.75, labeldistance=1.1)
-        ax.set_title(title)
+        ax.pie(
+            values,
+            labels=labels,
+            startangle=140,
+            autopct=self.autopct_format(values),
+            textprops={'fontsize': 8, 'color': LIGHT_FG},
+            pctdistance=0.75,
+            labeldistance=1.1,
+            colors=COLOR_PALETTE[:len(values)]
+        )
+        ax.set_title(title, color=LIGHT_FG)
 
         canvas = FigureCanvasTkAgg(fig, master=master)
         canvas.draw()

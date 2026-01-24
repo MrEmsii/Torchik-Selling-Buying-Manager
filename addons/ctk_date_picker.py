@@ -1,5 +1,5 @@
 import tkinter as tk
-import customtkinter as ctk
+import addons.customtkinter as ctk
 from datetime import datetime
 import calendar
 

@@ -21,10 +21,10 @@ Classes:
 Each class corresponds to a unique widget that can be used in your customtkinter application.
 
 Author: rudymohammadbali (https://github.com/rudymohammadbali)
-Date: 2024/02/26
-Version: 20240226
+Date: 2024/02/28
+Version: 0.4
 """
-__version__ = '20240226'
+__version__ = '0.4'
 
 from .ctk_components import CTkAlert
 from .ctk_components import CTkBanner
@@ -37,3 +37,5 @@ from .ctk_components import CTkPopupMenu
 from .ctk_components import CTkProgressPopup
 from .ctk_components import CTkTreeview
 from .ctk_components import do_popup
+from .ctk_components import demo
+import os

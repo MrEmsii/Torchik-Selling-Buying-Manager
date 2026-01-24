@@ -1,4 +1,4 @@
-import customtkinter as ctk
+import addons.customtkinter as ctk
 from PIL import Image
 
 

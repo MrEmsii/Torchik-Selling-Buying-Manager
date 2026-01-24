@@ -1,9 +1,12 @@
-import sys
+"""
+CTkToolTip Widget
+version: 0.8
+"""
+
 import time
+import sys
+import addons.customtkinter as customtkinter
 from tkinter import Toplevel, Frame
-
-import customtkinter as ctk
-
 
 class CTkToolTip(Toplevel):
     """
@@ -17,9 +20,9 @@ class CTkToolTip(Toplevel):
             delay: float = 0.2,
             follow: bool = True,
             x_offset: int = +20,
-            y_offset: int = 0,
+            y_offset: int = +10,
             bg_color: str = None,
-            corner_radius: int = 5,
+            corner_radius: int = 10,
             border_width: int = 0,
             border_color: str = None,
             alpha: float = 0.95,
@@ -37,7 +40,7 @@ class CTkToolTip(Toplevel):
 
         if sys.platform.startswith("win"):
             self.transparent_color = self.widget._apply_appearance_mode(
-                ctk.ThemeManager.theme["CTkToplevel"]["fg_color"])
+                customtkinter.ThemeManager.theme["CTkToplevel"]["fg_color"])
             self.attributes("-transparentcolor", self.transparent_color)
             self.transient()
         elif sys.platform.startswith("darwin"):
@@ -55,7 +58,7 @@ class CTkToolTip(Toplevel):
         self.config(background=self.transparent_color)
 
         # StringVar instance for msg string
-        self.messageVar = ctk.StringVar()
+        self.messageVar = customtkinter.StringVar()
         self.message = message
         self.messageVar.set(self.message)
 
@@ -67,7 +70,7 @@ class CTkToolTip(Toplevel):
         self.alpha = alpha
         self.border_width = border_width
         self.padding = padding
-        self.bg_color = ctk.ThemeManager.theme["CTkFrame"]["fg_color"] if bg_color is None else bg_color
+        self.bg_color = customtkinter.ThemeManager.theme["CTkFrame"]["fg_color"] if bg_color is None else bg_color
         self.border_color = border_color
         self.disable = False
 
@@ -86,13 +89,13 @@ class CTkToolTip(Toplevel):
         self.transparent_frame = Frame(self, bg=self.transparent_color)
         self.transparent_frame.pack(padx=0, pady=0, fill="both", expand=True)
 
-        self.frame = ctk.CTkFrame(self.transparent_frame, bg_color=self.transparent_color,
-                                  corner_radius=self.corner_radius,
-                                  border_width=self.border_width, fg_color=self.bg_color,
-                                  border_color=self.border_color)
+        self.frame = customtkinter.CTkFrame(self.transparent_frame, bg_color=self.transparent_color,
+                                            corner_radius=self.corner_radius,
+                                            border_width=self.border_width, fg_color=self.bg_color,
+                                            border_color=self.border_color)
         self.frame.pack(padx=0, pady=0, fill="both", expand=True)
 
-        self.message_label = ctk.CTkLabel(self.frame, textvariable=self.messageVar, **message_kwargs)
+        self.message_label = customtkinter.CTkLabel(self.frame, textvariable=self.messageVar, **message_kwargs)
         self.message_label.pack(fill="both", padx=self.padding[0] + self.border_width,
                                 pady=self.padding[1] + self.border_width, expand=True)
 
@@ -100,7 +103,7 @@ class CTkToolTip(Toplevel):
             if self.frame.cget("fg_color") == self.widget.cget("bg_color"):
                 if not bg_color:
                     self._top_fg_color = self.frame._apply_appearance_mode(
-                        ctk.ThemeManager.theme["CTkFrame"]["top_fg_color"])
+                        customtkinter.ThemeManager.theme["CTkFrame"]["top_fg_color"])
                     if self._top_fg_color != self.transparent_color:
                         self.frame.configure(fg_color=self._top_fg_color)
 
@@ -174,8 +177,11 @@ class CTkToolTip(Toplevel):
 
         if self.status == "inside" and time.time() - self.last_moved >= self.delay:
             self.status = "visible"
-            self.deiconify()
-
+            try:
+                self.deiconify()
+            except Exception:
+                pass  # sometimes the deiconify() method throws an exception on closing the main window
+            
     def hide(self) -> None:
         """
         Disable the widget from appearing.

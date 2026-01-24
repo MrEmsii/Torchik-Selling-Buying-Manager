@@ -21,8 +21,12 @@ Classes:
 Each class corresponds to a unique widget that can be used in your customtkinter application.
 
 Author: rudymohammadbali (https://github.com/rudymohammadbali)
-Date: 2024/02/26
-Version: 20240226
+Date: 2024/02/28
+Version: 0.4
+
+Date Modified: 2026/01/24
+Modified By: Emsii 
+Added functionality to CTkAlert and CTkBanner to return the button clicked by the user.
 """
 
 import io
@@ -30,12 +34,12 @@ import os
 import sys
 from tkinter import ttk
 
-import customtkinter as ctk
+import addons.customtkinter as ctk
 from PIL import Image, ImageDraw, ImageTk
 
-from addons.src.util.CTkGif import CTkGif
-from addons.src.util.py_win_style import set_opacity
-from addons.src.util.window_position import center_window, place_frame
+from pywinstyles import set_opacity
+from .src.util.CTkGif import CTkGif
+from .src.util.window_position import center_window, place_frame
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 ICON_DIR = os.path.join(CURRENT_PATH, "src", "icons")
@@ -146,11 +150,17 @@ class CTkAlert(ctk.CTkToplevel):
                                    command=lambda: self.button_event(btn2), text_color=("black", "white"))
         self.btn_2.grid(row=2, column=1, padx=(5, 10), pady=20, sticky="e")
 
-        self.bind("<Escape>", lambda e: self.button_event())
+        self.bind("<Escape>", lambda e: self.button_event(btn2))  # Emsii 2026
+
+        self.bind("<Return>", lambda e: self.button_event(btn1)) #Emsii 2026
+        self.bind("<space>", lambda e: self.button_event(btn1)) #Emsii 2026
+
+        self.focus_force() #Emsii 2026
+        self.grab_set() #Emsii 2026
+
 
     def get(self):
-        if self.winfo_exists():
-            self.master.wait_window(self)
+        self.wait_window()
         return self.event
 
     def old_xy_set(self, event):
@@ -163,9 +173,9 @@ class CTkAlert(ctk.CTkToplevel):
         self.geometry(f'+{self.x}+{self.y}')
 
     def button_event(self, event=None):
+        self.event = event
         self.grab_release()
         self.destroy()
-        self.event = event
 
 
 class CTkBanner(ctk.CTkFrame):
@@ -380,12 +390,12 @@ class CTkCarousel(ctk.CTkFrame):
         self.previous_button = ctk.CTkButton(self.image_label, text="", image=self.prev_icon, **ICON_BTN,
                                              command=self.previous_callback, bg_color=self.button_bg)
         self.previous_button.place(relx=0.0, rely=0.5, anchor='w')
-        set_opacity(self.previous_button.winfo_id(), color=self.button_bg[0])
+        set_opacity(self.previous_button.winfo_id(), color=self.button_bg[1])
 
         self.next_button = ctk.CTkButton(self.image_label, text="", image=self.next_icon, **ICON_BTN,
                                          command=self.next_callback, bg_color=self.button_bg)
         self.next_button.place(relx=1.0, rely=0.5, anchor='e')
-        set_opacity(self.next_button.winfo_id(), color=self.button_bg[0])
+        set_opacity(self.next_button.winfo_id(), color=self.button_bg[1])
 
         self.next_callback()
 
@@ -733,3 +743,160 @@ class CTkTreeview(ctk.CTkFrame):
                 self.insert_items(item['children'], id)
             else:
                 self.treeview.insert(parent, 'end', text=item)
+
+
+class Demo(ctk.CTk):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        ctk.set_appearance_mode("dark")
+        self.title("CTk Components - demo")
+        center_window(self, 1280, 720)
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=1)
+
+        options = ["CTkAlert", "CTkBanner", "CTkNotification", "CTkCard",
+                   "CTkCarousel", "CTkInput1", "CTkInput2", "CTkLoader",
+                   "CTkPopupMenu", "CTkProgressPopup", "CTkTreeview"]
+
+        frame = ctk.CTkFrame(self, fg_color="transparent")
+        frame.grid(row=0, column=0, padx=400, pady=20, sticky="ew")
+        frame.grid_columnconfigure(0, weight=1)
+
+        label = ctk.CTkLabel(frame, text="Select Widget")
+        label.grid(row=0, column=0, padx=20, pady=20, sticky="w")
+        option = ctk.CTkOptionMenu(frame, values=options, width=200, command=self.toggle_widgets)
+        option.grid(row=0, column=1, padx=20, pady=20, sticky="ew")
+        option.set("None")
+
+        self.preview_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.preview_frame.grid(row=1, column=0, padx=20, pady=20, sticky="nsew")
+
+        self.widgets = {"CTkAlert": self.alert,
+                        "CTkBanner": self.banner,
+                        "CTkNotification": self.notification,
+                        "CTkCard": self.card,
+                        "CTkCarousel": self.carousel,
+                        "CTkInput1": self.ctk_input_1,
+                        "CTkInput2": self.ctk_input_2,
+                        "CTkLoader": self.loader,
+                        "CTkPopupMenu": self.ctk_popup,
+                        "CTkProgressPopup": self.progress_popup,
+                        "CTkTreeview": self.treeview}
+
+    def alert(self):
+        my_alert = CTkAlert(state="info", title="Title", body_text="body text", btn1="Ok", btn2="Cancel")
+        # answer = my_alert.get()  # get answer
+        # print(answer)
+
+    def banner(self):
+        my_banner = CTkBanner(master=self.preview_frame, state="info", title="Title",
+                              btn1="Action 1", btn2="Action 2", side="right_bottom")
+        # answer = my_banner.get()  # get answer
+        # print(answer)
+
+    def notification(self):
+        CTkNotification(master=self.preview_frame, state="info", message="message", side="right_bottom")
+
+    def card(self):
+        card1 = CTkCard(self.preview_frame, border_width=1, corner_radius=5)
+        card2 = CTkCard(self.preview_frame, border_width=1, corner_radius=5)
+        card3 = CTkCard(self.preview_frame, border_width=1, corner_radius=5)
+
+        # Create multiple cards
+        card1.card_1(width=300, height=380, title="Card title", text=TEXT,
+                     button_text="Go somewhere", command=lambda: print("Hello"))
+        card2.card_2(width=380, height=170, title="Card title", subtitle="Subtitle", text=TEXT, link1_text="Card link1",
+                     link2_text="Card link2", command1=lambda: print("Hello"), command2=lambda: print("Hello"))
+        card3.card_3(width=600, height=180, header="Header", title="Card title", text=TEXT, button_text="Go somewhere",
+                     command=lambda: print("Hello"))
+
+        card1.grid(row=0, column=0, padx=5, pady=20)
+        card2.grid(row=0, column=1, padx=5, pady=20)
+        card3.grid(row=0, column=2, padx=5, pady=20)
+
+    def carousel(self):
+        my_carousel = CTkCarousel(self.preview_frame, img_radius=25)
+        my_carousel.grid(padx=20, pady=20)
+
+    def ctk_input_1(self):
+        my_input = CTkInput(self.preview_frame, width=250, height=35, border_width=1)
+        my_input.pack(padx=20, pady=20)
+        my_input.show_waring()
+
+        reset_btn = ctk.CTkButton(self.preview_frame, text="reset to default", command=my_input.reset_default)
+        reset_btn.pack(padx=20, pady=20)
+
+    def ctk_input_2(self):
+        my_input = CTkInput(self.preview_frame, width=250, height=35, border_width=1)
+        my_input.pack(padx=20, pady=20)
+        my_input.password_input()
+
+        reset_btn = ctk.CTkButton(self.preview_frame, text="reset to default", command=my_input.reset_default)
+        reset_btn.pack(padx=20, pady=20)
+
+    def loader(self):
+        my_loader = CTkLoader(master=self.preview_frame, opacity=0.8, width=40, height=40)
+        self.after(5000, my_loader.stop_loader)  # Stop Loader after 5sec
+
+    def ctk_popup(self):
+        label1 = ctk.CTkLabel(self.preview_frame, text="Right click to open Popup Menu!", font=("", 18))
+        # label1.grid(padx=20, pady=20, sticky="nsew")
+        label1.pack()
+
+        popup_menu = CTkPopupMenu(master=self.preview_frame, width=250, height=270, title="Title", corner_radius=8,
+                                  border_width=0)
+        self.preview_frame.bind("<Button-3>", lambda event: do_popup(event, popup_menu), add="+")
+
+        btn1 = ctk.CTkButton(popup_menu.frame, text="Option 1", command=lambda: print("Hello"), **BTN_OPTION)
+        btn1.pack(expand=True, fill="x", padx=10, pady=0)
+
+        btn2 = ctk.CTkButton(popup_menu.frame, text="Option 2", command=lambda: print("Hello"), **BTN_OPTION)
+        btn2.pack(expand=True, fill="x", padx=10, pady=(1, 0))
+
+        btn3 = ctk.CTkButton(popup_menu.frame, text="Option 3", command=lambda: print("Hello"), **BTN_OPTION)
+        btn3.pack(expand=True, fill="x", padx=10, pady=(1, 0))
+
+        btn4 = ctk.CTkButton(popup_menu.frame, text="Option 4", command=lambda: print("Hello"), **BTN_OPTION)
+        btn4.pack(expand=True, fill="x", padx=10, pady=(1, 0))
+
+        btn5 = ctk.CTkButton(popup_menu.frame, text="Option 5", command=lambda: print("Hello"), **BTN_OPTION)
+        btn5.pack(expand=True, fill="x", padx=10, pady=(1, 10))
+
+    def progress_popup(self):
+        my_progress = CTkProgressPopup(master=self.preview_frame, title="Background Tasks",
+                                       label="Label...", message="Do something...", side="right_bottom")
+        # my_progress.update_label("New Label...") # Updates label
+        # my_progress.update_message("New Message...") # Updates message
+        # my_progress.update_progress(54) # Update progress bar (0-100)
+        # my_progress.cancel_task() # Cancel task and close progress popup
+
+    def treeview(self):
+        data = [
+            {
+                'name': 'Item 1',
+                'children': ['Subitem 1', 'Subitem 2',
+                             {"name": "Subitem 3", "children": ["Sub-subitem 1", "Sub-subitem 2"]}]
+            },
+            'Item 2',
+            {
+                'name': 'Item 3',
+                'children': ['Subitem 3']
+            }
+        ]
+        tree_view = CTkTreeview(master=self.preview_frame, items=data)
+        tree_view.pack(pady=20, padx=20, fill="both", expand=True)
+
+    def toggle_widgets(self, widget):
+        for widgets in self.preview_frame.winfo_children():
+            widgets.destroy()
+
+        var = self.widgets[widget]
+        var()
+
+
+def demo():
+    app = Demo()
+    app.mainloop()
+
+if __name__ == "__main__":
+    demo()

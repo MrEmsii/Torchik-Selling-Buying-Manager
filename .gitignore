@@ -3,3 +3,5 @@
 test*.py
 * — kopia.py
 output/*
+client_secret.json
+*.sqlite3-query

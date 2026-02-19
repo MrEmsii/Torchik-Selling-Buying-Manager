@@ -2,8 +2,8 @@ from tkinter import ttk
 import tkinter as tk
 from tkcalendar import DateEntry
 
-import customtkinter as ct
-from customtkinter import CTkImage
+import addons.customtkinter as ct
+from addons.customtkinter import CTkImage
 from PIL import Image
 
 import datetime
@@ -24,7 +24,7 @@ class ViewStock(BaseView):
             ):
         
         self.stock_master = stock_master
-        self.stock_master.geometry("1280x720+0+0")
+        self.stock_master.geometry("1366x720+0+0")
         self.stock_master.resizable(True, True)
 
         self.leksykon = leksykon
@@ -51,6 +51,8 @@ class ViewStock(BaseView):
         self.stock_master.grid_columnconfigure(1, weight=2000)
         self.stock_master.grid_columnconfigure(2, weight=2000)
         self.stock_master.grid_columnconfigure(3, weight=2000)
+        self.stock_master.grid_columnconfigure(4, weight=2000)
+        self.stock_master.grid_columnconfigure(5, weight=2000)
 
     def setup_frames(self):
         self.button_stock_frame = ct.CTkFrame(self.stock_master)
@@ -104,11 +106,11 @@ class ViewStock(BaseView):
         self.setting_icon = CTkImage(dark_image=Image.open(os.path.join(dsc, "resources", "image", "setting_icon.png")))
         
     def zamowienia_grid_setting(self):
-        self.zamowienia_frame.grid(row=0, column=1, columnspan=3, rowspan=5, sticky="nsew", padx=5, pady=5)
+        self.zamowienia_frame.grid(row=0, column=1, columnspan=5, rowspan=5, sticky="nsew", padx=5, pady=5)
 
     def artukuly_list_grid_setting(self):
         self.stock_frame.grid(row=0, column=1, columnspan=1, rowspan=5, sticky="nsew", padx=5, pady=5)
-        self.secend_frame.grid(row=0, column=2, columnspan=2, rowspan=5, sticky="nsew", padx=5, pady=5)
+        self.secend_frame.grid(row=0, column=2, columnspan=5, rowspan=5, sticky="nsew", padx=5, pady=5)
     
     def start_grid_setting(self):
         self.stock_frame.grid(row=0, column=1, columnspan=5, rowspan=5, sticky="nsew", padx=5, pady=5)
@@ -190,22 +192,22 @@ class ViewStock(BaseView):
 
         tree.pack( expand=True, fill='both')
 
-        tree.column(columns_name[0], width=20, anchor='e')
+        tree.column(columns_name[0], width=10, anchor='e')
         tree.heading(columns_name[0], text=columns_name[0], anchor='center')
 
-        tree.column(columns_name[1], width=50, anchor='w')
+        tree.column(columns_name[1], width=100, anchor='w')
         tree.heading(columns_name[1], text=columns_name[1], anchor='center')
 
         tree.column(columns_name[2], width=50, anchor='w')
         tree.heading(columns_name[2], text=columns_name[2], anchor='center')
 
-        tree.column(columns_name[3], width=100, anchor='w')
+        tree.column(columns_name[3], width=150, anchor='w')
         tree.heading(columns_name[3], text=columns_name[3], anchor='center')        
 
         tree.column(columns_name[4], width=100, anchor='w')
         tree.heading(columns_name[4], text=columns_name[4], anchor='center')
 
-        tree.column(columns_name[5], width=100, anchor='w')
+        tree.column(columns_name[5], width=150, anchor='w')
         tree.heading(columns_name[5], text=columns_name[5], anchor='center')
        
         return tree       
@@ -237,7 +239,7 @@ class ViewStock(BaseView):
         tree.column(columns_name[0], width=10, anchor='e')
         tree.heading(columns_name[0], text=columns_name[0], anchor='center')
 
-        tree.column(columns_name[1], width=100, anchor='w')
+        tree.column(columns_name[1], width=200, anchor='w')
         tree.heading(columns_name[1], text=columns_name[1], anchor='center')
         tree.pack(expand=status, fill='both')
 
@@ -341,9 +343,9 @@ class ViewStock(BaseView):
         kolor_entry.grid(row=2,column=1, sticky='we', padx=5)
         szczegoly_entry.grid(row=3,column=1, sticky='we', padx=5)
 
-        self.stock_frame.grid(row=0, column=1, columnspan=5, rowspan=2, sticky="nsew", padx=5, pady=5)
-        self.secend_frame.grid(row=2, column=1, columnspan=5, rowspan=2, sticky="nsew", padx=5, pady=5)
-        self.third_frame.grid(row=0, column=6, columnspan=1, rowspan=4, sticky="nsew", padx=5, pady=5)
+        self.stock_frame.grid(row=0, column=1, columnspan=3, rowspan=2, sticky="nsew", padx=5, pady=5)
+        self.secend_frame.grid(row=2, column=1, columnspan=3, rowspan=2, sticky="nsew", padx=5, pady=5)
+        self.third_frame.grid(row=0, column=4, columnspan=3, rowspan=4, sticky="nsew", padx=5, pady=5)
         
     def zamowienie_view(self):
         label_name = self.leksykon["labels"]

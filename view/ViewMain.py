@@ -1,8 +1,10 @@
-from tkinter import ttk
-import customtkinter as ct
-from customtkinter import CTkImage
-from PIL import Image
+import addons.customtkinter as ct
+from addons.customtkinter import CTkImage
+
 from view.base_view import BaseView
+
+from tkinter import ttk
+from PIL import Image
 import os
 
 class ViewMain(BaseView):

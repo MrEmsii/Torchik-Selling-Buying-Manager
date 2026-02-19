@@ -1,13 +1,11 @@
 from tkinter import ttk
-
-import os
-
-import customtkinter as ct
-from customtkinter import CTkImage
 from PIL import Image
-
+import os
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+import addons.customtkinter as ct
+from addons.customtkinter import CTkImage
 
 from view.base_view import BaseView
 
@@ -26,15 +24,16 @@ class ViewStatistic(BaseView):
             sound = None
             ):
         
+        self.dsc = dsc
         self.statistic_master = statistic_master
         self.statistic_master.geometry("1280x720+0+0")
         self.statistic_master.resizable(True, True)
 
         self.leksykon = leksykon
 
-        self.button_icon_pack(dsc)
+        self.load_icons()
         self.setup_frames()
-        self.setup_styles(dsc)
+        self.setup_styles(self.dsc)
 
         self.sound = sound
         self.language_code = language_code
@@ -83,15 +82,19 @@ class ViewStatistic(BaseView):
 
         self.button_statistic_frame.grid(row=0, column=0, rowspan=5, sticky="nsew", padx=5, pady=5)
         self.statistic_frame.grid(row=0, column=1, columnspan=2, rowspan=5, sticky="nsew", padx=5, pady=5)
-        self.table_frame.grid(row=0, column=3, columnspan=2, rowspan=5, sticky="nsew", padx=5, pady=5)
+        self.table_frame.grid(row=0, column=3, columnspan=2, rowspan=5, sticky="nsew", padx=5, pady=5)         
 
-    def button_icon_pack(self, dsc):
-        self.category_icon = CTkImage(dark_image=Image.open(os.path.join(dsc, "resources", "image", "lista_kategorie_icon.png")))
-        self.buyers_icon = CTkImage(dark_image=Image.open(os.path.join(dsc, "resources", "image", "lista_kupujacy_icon.png")))
-        self.arts_icon = CTkImage(dark_image=Image.open(os.path.join(dsc, "resources", "image", "lista_artykulow_icon.png")))
-        self.company_icon = CTkImage(dark_image=Image.open(os.path.join(dsc, "resources", "image", "lista_firmy_icon.png")))
-        self.shops_icon = CTkImage(dark_image=Image.open(os.path.join(dsc, "resources", "image", "lista_sklepy_icon.png")))
-            
+    def load_icons(self):
+        """Wczytuje i buforuje wszystkie ikony."""
+        img_dir = os.path.join(self.dsc, "resources", "image")
+        def load_icon(name): return CTkImage(dark_image=Image.open(os.path.join(img_dir, name)))
+
+        self.category_icon = load_icon("lista_kategorie_icon.png")
+        self.buyers_icon = load_icon("lista_kupujacy_icon.png")
+        self.arts_icon = load_icon("lista_kupujacy_icon.png")
+        self.company_icon = load_icon("lista_kupujacy_icon.png")
+        self.shops_icon = load_icon("lista_kupujacy_icon.png")
+
     def update_table(self, headers, data):
         """
         headers = ["Kolumna1", "Kolumna2", ...]

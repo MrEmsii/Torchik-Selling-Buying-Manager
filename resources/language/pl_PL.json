@@ -13,8 +13,8 @@
             "toolTip": "Przejdź do okna zarządzania zamówieniami"
         },
         "button_stan_magazynu": {
-            "text": "Stan\nmagazynu",
-            "toolTip": "Przejdź do okna zarządzania stanem magazynu"
+            "text": "Zakupy",
+            "toolTip": "Przejdź do okna zarządzania zakupionymi towarami"
         },
         "button_statystyki": {
             "text": "Statystyki",
@@ -128,6 +128,10 @@
             "text": "Zatwierdź\nedycję\nartykułu",
             "toolTip": "Zatwierdź edytowany artykuł"
         },
+        "button_zatwierdz_edycje_artykulu_lista_art": {
+            "text": "Zatwierdź\nedycję\nartykułu",
+            "toolTip": "Zatwierdź edytowany artykuł"
+        },
         "button_zniszcz_artykul": {
             "text": "Usuń\nartykuł",
             "toolTip": "Usuń zaznaczony artykuł"
@@ -206,7 +210,7 @@
         }
     },
 
-    "statistic_window":{
+    "statistics_window":{
         "buttons":{
             "button_exit": {
                 "text": "Wyjście",
@@ -243,6 +247,12 @@
     },  
 
     "messagebox_window": {
+        "progress_popup":{
+            "heading": "Proces w tle",
+            "progress_label": "Prowadzone są obliczenia",
+            "progress_message": "Poczekaj chwilkę..."
+
+        },
         "info_messagebox":{
             "heading": "Informacja",
             "text": "Operacja zakończona pomyślnie."
@@ -253,7 +263,8 @@
         },
         "close_messagebox":{
             "heading": "Zamknij",
-            "text": "Czy na pewno chcesz zamknąć aplikację?"
+            "text": "Czy na pewno chcesz zamknąć aplikację?",
+            "buttons": ["Zamknij", "Anuluj"]
         },
         "edit_messagebox":{
             "heading": "Edycja",

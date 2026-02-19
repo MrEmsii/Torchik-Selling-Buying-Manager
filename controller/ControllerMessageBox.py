@@ -27,7 +27,8 @@ class ControllerMessageBox:
         return self.view.messagebox(
             type="close",
             heading=leksykon.get("heading", "Exit"),
-            text=leksykon.get("text", "Do you want to close the application?")
+            text=leksykon.get("text", "Do you want to close the application?"),
+            value=leksykon.get("buttons", ["Exit", "Cancel"])
         )
 
     def show_message_async(self, master):

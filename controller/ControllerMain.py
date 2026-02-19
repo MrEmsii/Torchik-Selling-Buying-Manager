@@ -1,11 +1,13 @@
 import os
 import json
-import customtkinter as ct
 import ttkbootstrap as ttk
 from ttkbootstrap import utility
 
+import addons.customtkinter as ct
+
 from view.ViewSound import ViewSound
 from view.ViewMain import ViewMain
+
 from controller.ControllerMessageBox import ControllerMessageBox
 
 utility.enable_high_dpi_awareness()
@@ -97,10 +99,9 @@ class ControllerMain:
             master=self.master,
             dsc=self.dsc,
             leksykon_programu=self.leksykon_programu[kwargs["window_key"]],
-            leksykon_messagebox=self.leksykon_programu["messagebox_window"],
             konfiguracja_programu=self.konfiguracja_programu,
             sound=self.sound,
-            messagebox_controller=ControllerMessageBox(sound=self.sound),
+            messagebox_controller=ControllerMessageBox(sound=self.sound, leksykon_messagebox=self.leksykon_programu["messagebox_window"]),
             currency=self.leksykon_programu["currency"],
             language_code=self.language_code,
             main_controller=self
@@ -118,7 +119,7 @@ class ControllerMain:
 
     def open_statistics_window(self):
         from controller.ControllerStatistic import ControllerStatistic
-        self.stat_controller = self.open_window(ControllerStatistic, window_key="statistic_window")
+        self.stat_controller = self.open_window(ControllerStatistic, window_key="statistics_window")
 
     def open_settings_window(self):
         """Na razie prosty przykład aktualizacji głośności."""

@@ -1,8 +1,8 @@
-from tkinter import messagebox, simpledialog
-from CustomTkinterMessagebox import CTkMessagebox
-from ctkcomponents import *
+from addons.CustomTkinterMessagebox import CTkMessagebox
+from addons.ctkcomponents import *
+import addons.customtkinter as ct
 
-import customtkinter as ct
+from tkinter import simpledialog
 
 
 class ViewMessageBox:
@@ -14,9 +14,10 @@ class ViewMessageBox:
 
     def show_message_async(self, master, leksykon):
         """Pokazuje asynchroniczny komunikat z paskiem postępu."""
+        leksykon = leksykon.get("progress_popup", {})
         self.my_progress = CTkProgressPopup(
             master=master,
-            title="Background Tasks",
+            title=leksykon.get("heading", "Background operation"),
             label=leksykon.get("progress_label", "Working..."),
             message=leksykon.get("progress_message", "Please wait..."),
             side="left_top"
@@ -56,9 +57,13 @@ class ViewMessageBox:
             return CTkNotification(master=app, state="info", message=text, side="left_top")
 
         elif type == "close":
-            alert = CTkAlert(state="info", title=heading or "Exit", body_text=text or "Do you want to exit?",
-                             btn1="Exit", btn2="Cancel")
-            return alert.get() == "Exit"
+            alert = CTkAlert(
+                title=heading or "Exit",
+                body_text=text or "Do you want to exit?",
+                btn1=value[0],  # Exit
+                btn2=value[1]   # Cancel
+            )
+            return alert.get() == value[0]
 
         elif type == "ask":
             return simpledialog.askstring(heading or "Input", text or "", initialvalue=value)

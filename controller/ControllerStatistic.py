@@ -1,9 +1,11 @@
 import tkinter as tk
+
 from view.ViewStatistic import ViewStatistic
+
 from model.statistics_model import StatisticsStockModel
 from model.stock_db_model import SQLconnect
 
-import customtkinter as ct
+import addons.customtkinter as ct
 
 class ControllerStatistic:
     def __init__(
@@ -12,13 +14,15 @@ class ControllerStatistic:
             messagebox_controller = None, 
             currency = None, 
             language_code = None,
-            main_controller=None
+            main_controller=None,
+            
             ):
         
         self.session = SQLconnect()
         self.stats_model = StatisticsStockModel(self.session)
 
         self.dsc = dsc
+
         self.leksykon_programu = leksykon_programu
         self.konfiguracja_programu = konfiguracja_programu
         self.currency = currency
@@ -56,8 +60,6 @@ class ControllerStatistic:
             self.close()
             if self.statistic_master.winfo_exists():
                 self.statistic_master.destroy()
-            if self.main_controller:
-                self.main_controller.close_statistic_window()
 
     def inicjalizacja_frame(self):
         self.statisic_frame = self.view.statistic_frame

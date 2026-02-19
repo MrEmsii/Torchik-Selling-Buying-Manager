@@ -1,19 +1,19 @@
 from model.stock_db_model import SQLconnect, select, Kupujacy, Kategoria, Sklep, Firma, Zamowienie, Artykul_Lista, artykuly_relacja
+
 from view.ViewStock import ViewStock
 
-import string
+import addons.customtkinter as ct
 
 from tkinterdnd2 import DND_FILES, TkinterDnD
 import tkinter as tk
 
-import customtkinter as ct
-
+import string
 import threading
 import datetime as datetime
 
 class ControllerStock():
     def __init__(
-            self, master, dsc, leksykon_programu, leksykon_messagebox, konfiguracja_programu, 
+            self, master, dsc, leksykon_programu, konfiguracja_programu, 
             sound = None, 
             messagebox_controller = None, 
             currency = None, 
@@ -23,11 +23,12 @@ class ControllerStock():
         
         self.dsc = dsc
         self.leksykon_programu = leksykon_programu
-        self.leksykon_messagebox = leksykon_messagebox
         self.konfiguracja_programu = konfiguracja_programu
         self.currency = currency
         self.main_controller = main_controller
         self.sound = sound
+        self.messagebox_controller = messagebox_controller 
+
 
         self.stock_master = ct.CTkToplevel(master)
         self.db_session = SQLconnect()
@@ -42,11 +43,11 @@ class ControllerStock():
             sound=self.sound
             )
 
-        self.messagebox_controller = messagebox_controller 
         self.inicjalizacja_frame()
         self.list_zamowienia()
 
         self.stock_master.protocol("WM_DELETE_WINDOW", self.on_closing_order_window)
+
 
     def run(self):
         self.stock_master.deiconify()
@@ -69,8 +70,7 @@ class ControllerStock():
 
     def load_sklepy_daemon(self, widok = "ukryj", select_item = None):
         print("load_sklepy_daemon")
-        commend = self.load_sklepy(widok = widok, select_item=select_item)
-        threading.Thread(target=lambda: commend, daemon=True).start()
+        self.load_sklepy(widok = widok, select_item=select_item)
 
     def load_kupujacy_daemon(self, widok = "ukryj", select_item = None):
         print("load_kupujacy_daemon")
@@ -318,7 +318,7 @@ class ControllerStock():
             "button_modyfikuj_artykul": (lambda: self.dodaj_modyfikuj_artykul(commend="modyfikuj"), {"icon": self.view.edit_artykul_icon}),
             "button_dublikuj_artykul": (lambda: self.dodaj_modyfikuj_artykul(commend="duplikuj"), {"icon": self.view.edit_artykul_icon}),
             "button_zatwierdz_artykul": (self.zatwierdz_nowy_modyfikuj_artykul, {"pady": (3, 30), "icon": self.view.add_artykul_icon}),
-            "button_zatwierdz_edycje_artykul": (lambda: self.zatwierdz_nowy_modyfikuj_artykul(commend="modyfikuj"), {"pady": (3, 30), "icon": self.view.edit_artykul_icon}),
+            "button_zatwierdz_edycje_artykulu_lista_art": (lambda: self.zatwierdz_nowy_modyfikuj_artykul(commend="modyfikuj"), {"pady": (3, 30), "icon": self.view.edit_artykul_icon}),
             "button_zniszcz_artykul": (self.zniszcz_artykul, {"icon": self.view.delete_artykul_icon}),
             "button_dodaj_artykul_zamowienie": (self.dodaj_list_artykulow, {"icon": self.view.add_artykul_zamowienie_icon}),
             "button_edytuj_artykul_zamowienie": (self.edytuj_artykul_zamowienie, {"icon": self.view.edit_artykul_zamowienie_icon}),
@@ -362,39 +362,6 @@ class ControllerStock():
             "button_lista_kategorii": (self.list_kategorie, {"icon": self.view.lista_kategorie_icon}),
             "button_refresh_zamowienia": (self.load_zamowienia_daemon, {"side": "bottom", "icon": self.view.refresh_icon}),
         }
-
-
-    def utworz_button_z_listy(self, key, frame=None):
-        """Tworzy przycisk na podstawie definicji z inicjalizuj_buttony"""
-        if not hasattr(self, "button_definicje"):
-            self.inicjalizuj_buttony()
-
-        if key not in self.button_definicje:
-            print(f"[WARN] Nie znaleziono przycisku: {key}")
-            return
-
-        func, opts = self.button_definicje[key]
-        self.utworz_button(key, frame, func, **opts)
-
-    def button_back_pack(self, frame, commend="main"):
-        """Logika przycisku powrotu"""
-        if commend == "main":
-            commend = self.pokaz_stock_frame
-        elif commend == "lista_artykułów":
-            commend = self.powrot_do_lista_artykulow
-        elif commend == "zamówienie":
-            commend = lambda: self.list_inside_zamowienie(self.zamowienie_id)
-
-        leksykon = self.leksykon_programu["button_back_pack"]
-        self.view.utworz_przycisk(
-            frame,
-            commend,
-            side='bottom',
-            padx=5,
-            pady=5,
-            leksykon_programu=leksykon,
-            icon=self.view.backButton_icon
-        )
 
     def button_manager(self, frame, back_target='main', startup=False):
         """Tworzy zestaw przycisków odpowiedni dla danego widoku"""
@@ -462,7 +429,7 @@ class ControllerStock():
                 "button_dodaj_kategoria",
             ],
             "modyfikacja_artykuly": [
-                "button_zatwierdz_edycje_artykul",
+                "button_zatwierdz_edycje_artykulu_lista_art",
                 "button_dodaj_firma",
                 "button_dodaj_kategoria",
             ],
@@ -493,6 +460,39 @@ class ControllerStock():
             self.button_back_pack(self.button_stock_frame, back_target)
 
         ViewStock.start_grid_setting(self)
+
+    def utworz_button_z_listy(self, key, frame=None):
+        """Tworzy przycisk na podstawie definicji z inicjalizuj_buttony"""
+        if not hasattr(self, "button_definicje"):
+            self.inicjalizuj_buttony()
+
+        if key not in self.button_definicje:
+            print(f"[WARN] Nie znaleziono przycisku: {key}")
+            return
+
+        func, opts = self.button_definicje[key]
+        self.utworz_button(key, frame, func, **opts)
+
+    def button_back_pack(self, frame, commend="main"):
+        """Logika przycisku powrotu"""
+        if commend == "main":
+            commend = self.pokaz_stock_frame
+        elif commend == "lista_artykułów":
+            commend = self.powrot_do_lista_artykulow
+        elif commend == "zamówienie":
+            commend = lambda: self.list_inside_zamowienie(self.zamowienie_id)
+
+        leksykon = self.leksykon_programu["button_back_pack"]
+        self.view.utworz_przycisk(
+            frame,
+            commend,
+            side='bottom',
+            padx=5,
+            pady=5,
+            leksykon_programu=leksykon,
+            icon=self.view.backButton_icon
+        )
+
 
     def zaznacz_wiersz_z_wartoscia(self, treeview, kolumna, wartosc):
         for item in treeview.get_children():

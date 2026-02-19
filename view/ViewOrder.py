@@ -1,13 +1,11 @@
-from tkinter import ttk
-
-import customtkinter as ct
-from customtkinter import CTkImage
-from PIL import Image
-
-
-import os
+import addons.customtkinter as ct
+from addons.customtkinter import CTkImage
 
 from view.base_view import BaseView
+
+from tkinter import ttk
+from PIL import Image
+import os
 
 class ViewOrder(BaseView):
     def __init__(
@@ -23,16 +21,17 @@ class ViewOrder(BaseView):
         
         self.order_master = order_master
         self.order_master.geometry("1280x720+0+0")
-        self.order_master.resizable(True, True)
+        self.order_master.minsize(960, 540)
 
         self.leksykon = leksykon
         self.style = style
         self.currency = currency
         self.sound = sound
         self.language_code = language_code
+        self.dsc = dsc
 
-        self.setup_styles(dsc)
-        self.button_icon_pack(dsc)
+        self.setup_styles(self.dsc)
+        self.load_icons()
         self.setup_frames()
 
     def setup_styles(self, dsc):
@@ -59,17 +58,21 @@ class ViewOrder(BaseView):
 
         self.button_orders_frame.grid(row=0, column=0, rowspan=5, sticky="nsew", padx=5, pady=5)
 
-    def button_icon_pack(self, dsc):
-        self.category_icon = CTkImage(dark_image=Image.open(os.path.join(dsc, "resources", "image", "lista_kategorie_icon.png")))
-        self.buyers_icon = CTkImage(dark_image=Image.open(os.path.join(dsc, "resources", "image", "lista_kupujacy_icon.png")))
+    def load_icons(self):
+        """Wczytuje i buforuje wszystkie ikony."""
+        img_dir = os.path.join(self.dsc, "resources", "image")
+        def load_icon(name): return CTkImage(dark_image=Image.open(os.path.join(img_dir, name)))
+
+        self.category_icon = load_icon("lista_kategorie_icon.png")
+        self.buyers_icon = load_icon("lista_kategorie_icon.png")
 
     def order_grid_setting(self):
         self.realizacja_frame.grid(row=0, column=1, columnspan=1, rowspan=5, sticky="nsew", padx=5, pady=5)
         self.order_frame.grid(row=0, column=2, columnspan=5, rowspan=5, sticky="nsew", padx=5, pady=5)
 
     def inside_grid_setting(self):
-        self.order_frame.grid(row=0, column=1, columnspan=5, rowspan=4, sticky="nsew", padx=5, pady=5)
-        self.realizacja_frame.grid(row=4, column=1, columnspan=5, rowspan=1, sticky="nsew", padx=5, pady=5)
+        self.order_frame.grid(row=0, column=1, columnspan=5, rowspan=2, sticky="nsew", padx=5, pady=5)
+        self.realizacja_frame.grid(row=2, column=1, columnspan=5, rowspan=4, sticky="nsew", padx=5, pady=5)
         
     def order_tree(self, parent_frame, label_text):
         columns_name = self.leksykon["columns"]["order_tree_columns"]
@@ -185,18 +188,18 @@ class ViewOrder(BaseView):
         container = ct.CTkFrame(parent_frame)
         container.pack(expand=True, fill='both')
 
-        scrollbar = ct.CTkScrollbar(container, orientation= "vertical")
+        # scrollbar = ct.CTkScrollbar(container, orientation= "vertical")
 
         tree = ttk.Treeview(
             container,
             columns=columns_name,
             show='headings',
-            yscrollcommand=scrollbar.set,
+            # yscrollcommand=scrollbar.set,
             bootstyle="secondary"
         )
         
-        scrollbar.configure(command=tree.yview)
-        scrollbar.pack(side='right', fill='y')
+        # scrollbar.configure(command=tree.yview)
+        # scrollbar.pack(side='right', fill='y')
 
         tree.pack( expand=True, fill='both')
         
@@ -209,35 +212,141 @@ class ViewOrder(BaseView):
 
         return tree 
     
-    def info_tree(self, parent_frame, label_text, status=True):
-        columns_name = self.leksykon["columns"]["more_info_in_order_columns"]
+    # def info_tree(self, parent_frame, label_text, status=True):
+    #     columns_name = self.leksykon["columns"]["more_info_in_order_columns"]
 
+    #     label = ct.CTkLabel(parent_frame, text=label_text, font=("Arial", 12))
+    #     label.pack(pady=5)
+
+    #     container = ct.CTkFrame(parent_frame)
+    #     container.pack(expand=True, fill='both')
+
+    #     scrollbar = ct.CTkScrollbar(container, orientation="vertical")
+
+    #     tree = ttk.Treeview(
+    #         container,
+    #         columns=columns_name,
+    #         show='headings',
+    #         yscrollcommand=scrollbar.set,
+    #         bootstyle="secondary"
+    #     )
+        
+    #     scrollbar.configure(command=tree.yview)
+    #     scrollbar.pack(side='right', fill='y')
+
+    #     tree.pack( expand=True, fill='both')
+        
+    #     tree.heading(columns_name[0], text=columns_name[0]+ 5*" ", anchor='e')
+    #     tree.column(columns_name[0], width=100, anchor='e')
+
+    #     tree.heading(columns_name[1], text=5*" " + columns_name[1], anchor='w')
+    #     tree.column(columns_name[1], width=100, anchor='w')
+    #     tree.pack(expand=status, fill='both')
+
+    #     return tree 
+
+
+    def info_tree(self, parent_frame, label_text, status=True):
         label = ct.CTkLabel(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)
 
         container = ct.CTkFrame(parent_frame)
         container.pack(expand=True, fill='both')
 
-        scrollbar = ct.CTkScrollbar(container, orientation="vertical")
+        table = CanvasTable(container)
+        return table
 
-        tree = ttk.Treeview(
-            container,
-            columns=columns_name,
-            show='headings',
-            yscrollcommand=scrollbar.set,
-            bootstyle="secondary"
+
+class CanvasTable:
+    def __init__(self, parent, row_pad=0):
+        self.canvas = ct.CTkCanvas(parent, highlightthickness=0)
+        self.frame = ct.CTkFrame(self.canvas)
+        self.window = self.canvas.create_window((0, 0), window=self.frame, anchor="nw")
+
+        # proporcje kolumn
+        self.col1_ratio = 0.2
+        self.min_col1 = 100
+        self.min_col2 = 160
+
+        self.value_labels = []
+        self.row_pad = row_pad
+        self.row = 0
+
+        # scrollbar
+        # self.scrollbar = ct.CTkScrollbar(
+        #     parent, orientation="vertical", command=self.canvas.yview
+        # )
+        # self.canvas.configure(yscrollcommand=self.scrollbar.set)
+
+        # self.scrollbar.pack(side="right", fill="y")
+        self.canvas.pack(expand=True, fill="both")
+
+        # resize i scroll
+        self.canvas.bind("<Configure>", self._on_resize)
+        # self.canvas.bind("<Enter>", self._bind_mousewheel)
+        # self.canvas.bind("<Leave>", self._unbind_mousewheel)
+
+        # # aktualizacja scrollregion
+        # self.frame.bind(
+        #     "<Configure>",
+        #     lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        # )
+
+    # ---------- RESIZE ----------
+    def _on_resize(self, event):
+        if event.width <= 1:
+            return
+
+        total_w = event.width
+        self.canvas.itemconfigure(self.window, width=total_w)
+
+        col1 = max(int(total_w * self.col1_ratio), self.min_col1)
+        col2 = max(total_w - col1 - 20, self.min_col2)
+
+        self.frame.grid_columnconfigure(0, minsize=col1)
+        self.frame.grid_columnconfigure(1, minsize=col2)
+
+        for v in self.value_labels:
+            v.configure(wraplength=col2-300)
+
+    # ---------- API ----------
+    def clear(self):
+        for w in self.frame.winfo_children():
+            w.destroy()
+        self.value_labels.clear()
+        self.row = 0
+
+    def insert_row(self, label, value):
+        l = ct.CTkLabel(
+            self.frame,
+            text=label,
+            anchor="e",
+            justify="right"
         )
-        
-        scrollbar.configure(command=tree.yview)
-        scrollbar.pack(side='right', fill='y')
+        l.grid(row=self.row, column=0, sticky="ne", padx=(2, 10), pady=self.row_pad)
 
-        tree.pack( expand=True, fill='both')
-        
-        tree.heading(columns_name[0], text=columns_name[0]+ 5*" ", anchor='e')
-        tree.column(columns_name[0], width=100, anchor='e')
+        v = ct.CTkLabel(
+            self.frame,
+            text=value,
+            anchor="w",
+            justify="left"
+        )
+        v.grid(row=self.row, column=1, sticky="nw", padx=(0, 60), pady=self.row_pad)
 
-        tree.heading(columns_name[1], text=5*" " + columns_name[1], anchor='w')
-        tree.column(columns_name[1], width=100, anchor='w')
-        tree.pack(expand=status, fill='both')
+        self.value_labels.append(v)
+        self.row += 1
 
-        return tree 
+        # wymuszenie poprawnego wraplength po dodaniu
+        self.canvas.after_idle(lambda: self._on_resize(
+            type("E", (), {"width": self.canvas.winfo_width()})
+        ))
+
+    # ---------- SCROLL ----------
+    def _bind_mousewheel(self, event):
+        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
+
+    def _unbind_mousewheel(self, event):
+        self.canvas.unbind_all("<MouseWheel>")
+
+    def _on_mousewheel(self, event):
+        self.canvas.yview_scroll(int(-event.delta / 120), "units")

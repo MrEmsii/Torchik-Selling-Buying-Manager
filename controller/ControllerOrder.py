@@ -1,7 +1,7 @@
 import threading
 import tkinter as tk
 
-import customtkinter as ct
+import addons.customtkinter as ct
 
 from sqlalchemy import select
 
@@ -12,7 +12,7 @@ from sqlalchemy.orm import joinedload
 
 class ControllerOrder:    
     def __init__(
-            self, master, dsc, leksykon_programu, leksykon_messagebox, konfiguracja_programu, 
+            self, master, dsc, leksykon_programu, konfiguracja_programu, 
             sound = None, 
             messagebox_controller = None, 
             currency = None, 
@@ -22,11 +22,11 @@ class ControllerOrder:
         
         self.dsc = dsc
         self.leksykon_programu = leksykon_programu
-        self.leksykon_messagebox = leksykon_messagebox
         self.konfiguracja_programu = konfiguracja_programu
         self.currency = currency
         self.main_controller = main_controller
         self.sound = sound
+        self.messagebox_controller = messagebox_controller 
 
         self.order_master = ct.CTkToplevel(master)
         self.db_session = SQLconnect()
@@ -41,7 +41,6 @@ class ControllerOrder:
             sound=self.sound
             )
 
-        self.messagebox_controller = messagebox_controller 
         self.inicjalizacja_frame()
 
         self.list_zamowienia()
@@ -84,7 +83,6 @@ class ControllerOrder:
             "list_inside_order": lambda: self.button_back(self.button_orders_frame)
         }
         buttons.get(frame, lambda: None)()
-
 
     def button_test(self, frame):
         leksykon = self.leksykon_programu["buttons"]["button_test"]
@@ -143,7 +141,8 @@ class ControllerOrder:
         threading.Thread(target=lambda: self.load_more_info(id_zamowienia), daemon=True).start()
 
     def load_more_info(self, id_zamowienia):
-        self.inside_more_tree.delete(*self.inside_more_tree.get_children())
+        # self.inside_more_tree.delete(*self.inside_more_tree.get_children())
+        self.inside_more_tree.clear() #canvas
 
         zamowienie = self.db_session.query(Zamowienie).filter_by(id=id_zamowienia).first()
         if not zamowienie:
@@ -168,7 +167,8 @@ class ControllerOrder:
         cena_calkowita = format_money(przychod_val)
         cena_po_rabacie = format_money(dochod_val)
         kupujacy = zamowienie.kupujacy.nazwa if zamowienie.kupujacy else " "
-        nazwa_zamowienia = zamowienie.nazwa_zamowienia or " "
+        nazwa_zamowienia = zamowienie.nazwa_zamowienia if zamowienie.nazwa_zamowienia else " "
+        opis = zamowienie.opis_zamowienia if zamowienie.opis_zamowienia else ' '
 
         info_data = [
             ("Data wysyłki:", data_wysylki),
@@ -180,10 +180,14 @@ class ControllerOrder:
             ("Cena po rabacie:", cena_po_rabacie),
             ("Kupujący:", kupujacy),
             ("Nazwa zamówienia:", nazwa_zamowienia),
+            ("Opis zamówienia:", opis)
         ]
 
-        for i, (label, value) in enumerate(info_data, start=1):
-            self.inside_more_tree.insert('', 'end', iid=i, values=(label, value))
+        # for i, (label, value) in enumerate(info_data, start=1):
+        #     self.inside_more_tree.insert('', 'end', iid=i, values=(label, value))
+
+        for label, value in info_data:
+            self.inside_more_tree.insert_row(label, value)
 
 
     def load_inside(self, id_zamowienia):

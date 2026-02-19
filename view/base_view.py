@@ -1,6 +1,6 @@
-import CTkToolTip
+from addons.CTkToolTip import CTkToolTip
 
-import customtkinter as ct
+import addons.customtkinter as ct
 
 
 class BaseView:
@@ -22,7 +22,7 @@ class BaseView:
             przycisk.pack(side=side, padx=padx, pady=pady, fill='x')
         else:
             przycisk.grid(row=row, column=column, padx=padx, pady=pady, sticky="nsew", columnspan=columnspan)
-        CTkToolTip.CTkToolTip(przycisk, message=leksykon_programu["toolTip"])
+        CTkToolTip(przycisk, message=leksykon_programu["toolTip"])
         return przycisk
 
     def _click_sound(self, func):

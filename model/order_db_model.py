@@ -36,6 +36,7 @@ class Zamowienie(Base):
     kupujacy_id = Column(Integer, ForeignKey('kupujacy.id'))
 
     nazwa_zamowienia = Column(String, default="")
+    opis_zamowienia = Column(String, default="")
     rabat_j = Column(Integer, default=0)
     rabat_procent = Column(Integer, default=0)
 

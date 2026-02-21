@@ -1,4 +1,8 @@
-from model.stock_db_model import SQLconnect, select, Kupujacy, Kategoria, Sklep, Firma, Zamowienie, Artykul_Lista, artykuly_relacja
+from model.stock_db_model import SQLconnect, Kupujacy, Kategoria, Sklep, Firma, Zamowienie, Artykul_Lista
+
+from sqlalchemy.orm import selectinload
+from model.stock_db_model import Zamowienie, ZamowienieArtykul, Artykul_Lista
+from decimal import Decimal
 
 from view.ViewStock import ViewStock
 
@@ -110,8 +114,8 @@ class ControllerStock():
                     zamow.sklep.nazwa if zamow.sklep else " ", 
                     f"{zamow.rabat_j:.2f} {self.currency}", 
                     f"{zamow.rabat_procent :.0f} %", 
-                    f"{zamow.oblicz_cene(self.db_session):,.2f} {self.currency}".replace(",", " "),
-                    f"{zamow.oblicz_cene_rabat(self.db_session):,.2f} {self.currency}".replace(",", " "),
+                    f"{zamow.oblicz_cene():,.2f} {self.currency}".replace(",", " "),
+                    f"{zamow.oblicz_cene_rabat():,.2f} {self.currency}".replace(",", " "),
                 ))
                 if i % progress_step == 0:
                     self.messagebox_controller.update_message_async(i / len(zamowienia))
@@ -770,29 +774,48 @@ class ControllerStock():
         selected_item = self.inside_tree.selection()
         if not selected_item:
             return
-        
-        relacja_name = self.inside_tree.item(self.inside_tree.selection()[0], 'values')
+
+        values = self.inside_tree.item(selected_item[0], "values")
+
+        artykul_id = int(values[0])
+        cena = float(
+            values[1]
+            .replace(" " + self.currency, "")
+            .replace(",", ".")
+        )
+        ilosc = int(values[2])
 
         leksykon = self.leksykon_messagebox["delete_messagebox"]
 
-        dialog = self.messagebox_controller.messagebox( 
-                                 type="ask", 
-                                 heading=leksykon["heading"], 
-                                 text=leksykon["text"]["order"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
+        dialog = self.messagebox_controller.messagebox(
+            type="ask",
+            heading=leksykon["heading"],
+            text=leksykon["text"]["order"] +
+                " lub ".join(leksykon["agree"]) +
+                "\t\t\t\t"
+        )
 
-        if dialog and dialog.lower() in [name.lower() for name in leksykon["agree"]]:
-            self.db_session.execute(
-                artykuly_relacja.delete()
-                .where(artykuly_relacja.c.zamowienie_id == self.zamowienie_id,
-                artykuly_relacja.c.artykul_id == relacja_name[0],
-                artykuly_relacja.c.cena_jednostkowa == relacja_name[1].replace(" "+self.currency,"").replace(",","."),
-                artykuly_relacja.c.ilosc_artykulu == relacja_name[2]
+        if dialog and dialog.lower() in [x.lower() for x in leksykon["agree"]]:
+
+            from model.stock_db_model import ZamowienieArtykul
+
+            pozycja = (
+                self.db_session.query(ZamowienieArtykul)
+                .filter(
+                    ZamowienieArtykul.zamowienie_id == self.zamowienie_id,
+                    ZamowienieArtykul.artykul_id == artykul_id,
+                    ZamowienieArtykul.cena_jednostkowa == cena,
+                    ZamowienieArtykul.ilosc_artykulu == ilosc
                 )
+                .first()
             )
-            self.db_session.commit()
-            self.list_inside_zamowienie(self.zamowienie_id)
 
-            self.sound.play_confirm_sound()
+            if pozycja:
+                self.db_session.delete(pozycja)
+                self.db_session.commit()
+
+                self.list_inside_zamowienie(self.zamowienie_id)
+                self.sound.play_confirm_sound()
 
         self.load_zamowienia_daemon()
 
@@ -1137,49 +1160,59 @@ class ControllerStock():
         self.load_inside_zamowienie(zamowienie_id)
 
     def load_inside_zamowienie(self, id_zamowienia):
-        wynik_all = self.db_session.execute(
-            select(
-                artykuly_relacja.c.artykul_id,
-                artykuly_relacja.c.cena_jednostkowa,
-                artykuly_relacja.c.ilosc_artykulu
+        zamowienie = (
+            self.db_session.query(Zamowienie)
+            .options(
+                selectinload(Zamowienie.pozycje)
+                .selectinload(ZamowienieArtykul.artykul)
+                .selectinload(Artykul_Lista.kategoria),
+                selectinload(Zamowienie.pozycje)
+                .selectinload(ZamowienieArtykul.artykul)
+                .selectinload(Artykul_Lista.firma),
             )
-            .where(
-                artykuly_relacja.c.zamowienie_id == id_zamowienia
-                )
-        ).fetchall()
+            .filter(Zamowienie.id == id_zamowienia)
+            .first()
+        )
 
-        existing_iids = set(self.inside_tree.get_children())
+        if not zamowienie:
+            return
+
+        self.inside_tree.delete(*self.inside_tree.get_children())
 
         artykul_data = []
 
-        for wynik in wynik_all:
-            id_art = wynik.artykul_id
-            cena_netto = float(wynik.cena_jednostkowa)
-            ilosc = wynik.ilosc_artykulu if wynik.ilosc_artykulu else 1
-            wartosc_brutto = f"{cena_netto*ilosc if cena_netto*ilosc else 0:.2f} {self.currency}"
+        for pozycja in zamowienie.pozycje:
 
-            cena_netto = f"{cena_netto if cena_netto else 0:.2f} {self.currency}"
+            art = pozycja.artykul
 
-            artykul = self.db_session.query(Artykul_Lista).filter_by(id=id_art).first()
-            kategoria = artykul.kategoria.nazwa if artykul.kategoria else None
-            firma = artykul.firma.nazwa if artykul.firma else None
-            nazwa = artykul.nazwa
-            kolor = artykul.kolor
-            szczegoly = artykul.szczegoly
+            id_art = art.id
+            ilosc = pozycja.ilosc_artykulu or 1
+            cena_netto_val = float(pozycja.cena_jednostkowa or 0)
 
-            unique_id = f"{id_art}-{ilosc}"
-            counter = 1
-            while unique_id in existing_iids:
-                unique_id = f"{id_art}-{ilosc}-{counter}"
-                counter += 1
+            wartosc = cena_netto_val * ilosc
 
-            existing_iids.add(unique_id)
-            artykul_data.append((unique_id, id_art, cena_netto, ilosc, wartosc_brutto, kategoria, firma, nazwa, kolor, szczegoly))
+            cena_netto = f"{cena_netto_val:.2f} {self.currency}"
+            wartosc_brutto = f"{wartosc:.2f} {self.currency}"
 
-        artykul_data.sort(key=lambda x: x[7].lower())
+            kategoria = art.kategoria.nazwa if art.kategoria else None
+            firma = art.firma.nazwa if art.firma else None
+
+            artykul_data.append((
+                id_art,
+                cena_netto,
+                ilosc,
+                wartosc_brutto,
+                kategoria,
+                firma,
+                art.nazwa,
+                art.kolor,
+                art.szczegoly
+            ))
+
+        artykul_data.sort(key=lambda x: (x[6] or "").lower())
 
         for row in artykul_data:
-            self.inside_tree.insert('', 'end', iid=row[0], values=row[1:])
+            self.inside_tree.insert("", "end", values=row)
 
     def edytuj_artykul_zamowienie(self):
         selected_item = self.inside_tree.selection()
@@ -1202,42 +1235,55 @@ class ControllerStock():
 
         self.artykuly_tree.bind("<Double-1>", self.on_double_click_dodawanie_artykulu_do_zamowienia)
     
+
     def cena_ilosc_edycja(self):
         try:
-            cena_artykulu_var = float(self.view.cena_artykulu_var.get().replace(",", "."))
-        except ValueError:
+            cena_artykulu_var = Decimal(
+                self.view.cena_artykulu_var.get().replace(",", ".")
+            )
+        except Exception:
             leksykon = self.leksykon_messagebox["error_messagebox"]
-            self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["price"])
+            self.messagebox_controller.messagebox(
+                app=self.view.stock_frame,
+                type="error",
+                heading=leksykon["heading"],
+                text=leksykon["text"]["price"]
+            )
             return
 
         try:
-            ilosc_artykulu_var =  float(self.view.ilosc_artykulu_var.get().replace(",", "."))
-        except ValueError:
+            ilosc_artykulu_var = int(
+                self.view.ilosc_artykulu_var.get().replace(",", ".")
+            )
+        except Exception:
             leksykon = self.leksykon_messagebox["error_messagebox"]
-            self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["amount"])
+            self.messagebox_controller.messagebox(
+                app=self.view.stock_frame,
+                type="error",
+                heading=leksykon["heading"],
+                text=leksykon["text"]["amount"]
+            )
             return
-        
-        self.db_session.execute(
-            artykuly_relacja.update()
-            .where(
-                artykuly_relacja.c.zamowienie_id == self.zamowienie_id,
-                artykuly_relacja.c.artykul_id == self.view.id_artykulu,
-                artykuly_relacja.c.cena_jednostkowa == self.view.cena_artykulu_var_old,
-                artykuly_relacja.c.ilosc_artykulu == self.view.ilosc_artykulu_var_old
-                )
-            .values(
-                cena_jednostkowa = cena_artykulu_var, 
-                ilosc_artykulu = ilosc_artykulu_var
-                )
+
+        pozycja = (
+            self.db_session.query(ZamowienieArtykul)
+            .filter_by(
+                zamowienie_id=self.zamowienie_id,
+                artykul_id=self.view.id_artykulu
+            )
+            .first()
         )
+
+        if not pozycja:
+            return
+
+        pozycja.cena_jednostkowa = cena_artykulu_var
+        pozycja.ilosc_artykulu = ilosc_artykulu_var
 
         self.db_session.commit()
 
-        zamowienie_id = self.zamowienie_id
-        self.list_inside_zamowienie(zamowienie_id)
+        self.list_inside_zamowienie(self.zamowienie_id)
         self.view.window.destroy()
-
-        return
 
     def anuluj_dodanie_artykulu_zamowienie(self):
         self.view.window.destroy()
@@ -1267,16 +1313,40 @@ class ControllerStock():
         self.list_inside_zamowienie(zamowienie_id)
         self.view.window.destroy()
     
-    def dodaj_artykul_do_zamowienie(self, zamowienie, id_art, cena, ilosc):
-        self.db_session.execute(
-            artykuly_relacja.insert().values(
-                zamowienie_id = zamowienie,
-                artykul_id = id_art,
-                cena_jednostkowa = cena,
-                ilosc_artykulu = ilosc
+
+    def dodaj_artykul_do_zamowienia(
+            self,
+            zamowienie_id,
+            artykul_id,
+            cena,
+            ilosc,
+            commit=False
+    ):
+        cena = Decimal(str(cena))
+
+        istnieje = (
+            self.db_session.query(ZamowienieArtykul)
+            .filter_by(
+                zamowienie_id=zamowienie_id,
+                artykul_id=artykul_id
             )
+            .first()
         )
-        self.db_session.commit()
+
+        if istnieje:
+            istnieje.ilosc_artykulu += ilosc
+            istnieje.cena_jednostkowa = cena
+        else:
+            nowa_pozycja = ZamowienieArtykul(
+                zamowienie_id=zamowienie_id,
+                artykul_id=artykul_id,
+                cena_jednostkowa=cena,
+                ilosc_artykulu=ilosc
+            )
+            self.db_session.add(nowa_pozycja)
+
+        if commit:
+            self.db_session.commit()
 
     def specjalne_znaki(self, text: str) -> bool:
         if text == None:

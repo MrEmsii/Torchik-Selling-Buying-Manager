@@ -6,7 +6,7 @@ import addons.customtkinter as ct
 from sqlalchemy import select
 
 from view.ViewOrder import ViewOrder
-from model.order_db_model import SQLconnect, Kupujacy, Zamowienie, Artykul_Lista, Faktury, artykuly_relacja
+from model.order_db_model import SQLconnect, Kupujacy, Zamowienie, Artykul_Lista, Faktury, ListaDodanie
 
 from sqlalchemy.orm import joinedload
 
@@ -155,9 +155,9 @@ class ControllerOrder:
         def format_percent(value):
             return f"{value} %" if value else "0 %"
 
-        koszta_val = zamowienie.oblicz_koszta(self.db_session) or 0
-        przychod_val = zamowienie.oblicz_przychod(self.db_session) or 0
-        dochod_val = zamowienie.oblicz_dochod(self.db_session) or 0
+        koszta_val = zamowienie.oblicz_koszta() or 0
+        przychod_val = zamowienie.oblicz_przychod() or 0
+        dochod_val = zamowienie.oblicz_dochod() or 0
 
         data_wysylki = zamowienie.data_wysylki or " "
         rabat_j = format_money(zamowienie.rabat_j or 0)
@@ -189,34 +189,14 @@ class ControllerOrder:
         for label, value in info_data:
             self.inside_more_tree.insert_row(label, value)
 
-
     def load_inside(self, id_zamowienia):
-        wynik_all = self.db_session.execute(
-            select(
-                artykuly_relacja.c.artykul_id,
-                artykuly_relacja.c.ilosc_artykulu,
-                artykuly_relacja.c.czas_druku_1_elem,
-                artykuly_relacja.c.waga_1_elem,
-                artykuly_relacja.c.koszt_1kg_materialu,
-                artykuly_relacja.c.cena_1_elem
-            ).where(artykuly_relacja.c.zamowienie_id == id_zamowienia)
-        ).fetchall()
-
-        if not wynik_all:
+        zam = self.db_session.query(Zamowienie).options(joinedload(Zamowienie.pozycje).joinedload(ListaDodanie.artykul)).get(id_zamowienia)
+        if not zam or not zam.pozycje:
             return
 
         existing_iids = set(self.inside_tree.get_children())
 
-        artykul_ids = [w.artykul_id for w in wynik_all]
-        artykuly = (
-            self.db_session.query(Artykul_Lista.id, Artykul_Lista.nazwa)
-            .filter(Artykul_Lista.id.in_(artykul_ids))
-            .all()
-        )
-        nazwy_artykulow = {a.id: a.nazwa for a in artykuly}
-
         def format_czas(godziny: float) -> str:
-            """Konwertuj czas (w godzinach) do formatu 'X h Y min'."""
             if godziny >= 1:
                 h = int(godziny)
                 m = int((godziny - h) * 60)
@@ -224,21 +204,21 @@ class ControllerOrder:
             return f"{int(godziny * 60)} min"
 
         artykul_data = []
-        for wynik in wynik_all:
-            id_art = wynik.artykul_id
-            ilosc = int(wynik.ilosc_artykulu or 1)
-            waga_1_elem = round(wynik.waga_1_elem or 0, 2)
-            koszt_1kg = round(wynik.koszt_1kg_materialu or 0, 2)
+        for p in zam.pozycje:
+            id_art = p.artykul_id
+            ilosc = int(p.ilosc_artykulu or 1)
+            waga_1_elem = round(p.waga_1_elem or 0, 2)
+            koszt_1kg = round(p.koszt_1kg_materialu or 0, 2)
             koszt_1_elem = round(waga_1_elem * koszt_1kg, 2)
-            czas_druku_1_elem = float(wynik.czas_druku_1_elem or 0)
-            cena_1_elem_val = round(wynik.cena_1_elem or 0, 2)
+            czas_druku_1_elem = float(p.czas_druku_1_elem or 0)
+            cena_1_elem_val = round(p.cena_1_elem or 0, 2)
 
             cena_calkowita_val = round(ilosc * cena_1_elem_val, 2)
             waga_calkowita_val = round(ilosc * waga_1_elem, 2)
             czas_calkowity_val = round(ilosc * czas_druku_1_elem, 2)
             koszt_calkowity_val = round(waga_calkowita_val * koszt_1kg, 2)
 
-            nazwa = nazwy_artykulow.get(id_art, "Nieznany")
+            nazwa = p.artykul.nazwa if p.artykul else "Nieznany"
 
             unique_id = f"{id_art}-{ilosc}-{waga_1_elem}"
             counter = 1
@@ -289,8 +269,8 @@ class ControllerOrder:
                     z.data_deadline,
                     z.kupujacy.nazwa if z.kupujacy else " ",
                     z.nazwa_zamowienia,
-                    f"{z.oblicz_przychod(self.db_session):,.2f} {self.currency}".replace(",", " "),
-                    f"{z.oblicz_dochod(self.db_session):,.2f} {self.currency}".replace(",", " "),
+                    f"{z.oblicz_przychod():,.2f} {self.currency}".replace(",", " "),
+                    f"{z.oblicz_dochod():,.2f} {self.currency}".replace(",", " "),
                     z.realizacja_id,
                 ))
 

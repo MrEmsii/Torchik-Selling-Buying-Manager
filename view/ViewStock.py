@@ -4,7 +4,9 @@ from tkcalendar import DateEntry
 
 import addons.customtkinter as ct
 from addons.customtkinter import CTkImage
-from PIL import Image
+from PIL import Image, ImageTk
+
+import platform
 
 import datetime
 import os
@@ -38,21 +40,30 @@ class ViewStock(BaseView):
         self.language_code = language_code
 
     def setup_styles(self, dsc):
-        self.stock_master.title("Torchik - Stock Window")
-        icon_path = os.path.join(dsc, "resources", "image", "icon.ico")
-        self.stock_master.after(1000, lambda: self.stock_master.wm_iconbitmap(icon_path))
+            self.stock_master.title("Torchik - Stock Window")
+            icon_path = os.path.join(dsc, "resources", "image", "icon.ico")
 
-        self.stock_master.grid_rowconfigure(0, weight=4)
-        self.stock_master.grid_rowconfigure(1, weight=4)
-        self.stock_master.grid_rowconfigure(2, weight=4)
-        self.stock_master.grid_rowconfigure(3, weight=4)
+            def set_icon():
+                try:
+                    if platform.system() == "Windows":
+                        self.stock_master.wm_iconbitmap(icon_path)
+                    else:
+                        from PIL import Image, ImageTk
+                        icon_image = Image.open(icon_path)
+                        self.stock_icon_photo = ImageTk.PhotoImage(icon_image)
+                        self.stock_master.wm_iconphoto(True, self.stock_icon_photo)
+                except Exception as e:
+                    print(f"Błąd ikony w StockWindow: {e}")
 
-        self.stock_master.grid_columnconfigure(0, weight=1)
-        self.stock_master.grid_columnconfigure(1, weight=2000)
-        self.stock_master.grid_columnconfigure(2, weight=2000)
-        self.stock_master.grid_columnconfigure(3, weight=2000)
-        self.stock_master.grid_columnconfigure(4, weight=2000)
-        self.stock_master.grid_columnconfigure(5, weight=2000)
+            self.stock_master.after(1000, set_icon)
+
+            for i in range(0, 4):
+                self.stock_master.grid_rowconfigure(i, weight=4)
+
+            self.stock_master.grid_columnconfigure(0, weight=1)
+            for i in range(1, 5):
+                self.stock_master.grid_columnconfigure(i, weight=2000)
+
 
     def setup_frames(self):
         self.button_stock_frame = ct.CTkFrame(self.stock_master)

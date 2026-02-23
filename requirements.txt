@@ -1,0 +1,11 @@
+ttkbootstrap
+sqlalchemy
+pygame
+Pillow
+matplotlib
+tkcalendar
+tkinterdnd2
+darkdetect
+packaging
+customtkinter
+pywinstyles

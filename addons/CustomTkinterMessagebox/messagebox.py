@@ -1,5 +1,9 @@
 import addons.customtkinter as ct
-import winsound
+try:
+    import winsound
+except ImportError:
+    import pygame
+    winsound = None
 from PIL import Image
 
 def center_window(window):
@@ -11,9 +15,14 @@ def center_window(window):
     window.geometry(f"+{x}+{y}")
 
 def open_sound():
-    system_sound_path = "C:\\Windows\\Media\\Windows Notify System Generic.wav"
-    winsound.PlaySound(system_sound_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
-
+    if winsound:
+        system_sound_path = "C:\\Windows\\Media\\Windows Notify System Generic.wav"
+        winsound.PlaySound(system_sound_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
+    else:
+        pygame.mixer.init()
+        system_sound_path = "/resources/sound/info_sound.wav"
+        pygame.mixer.music.load(system_sound_path)
+        pygame.mixer.music.play()
 
 class CTkMessagebox():
     def messagebox(title='CustomTKinterMessagebox!', 

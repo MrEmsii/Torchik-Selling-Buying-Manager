@@ -747,28 +747,27 @@ class ControllerStock():
         zamowienie_id = self.zamowienia_tree.item(selected_item[0], 'values')[0]
         zamowienie = self.db_session.query(Zamowienie).get(zamowienie_id)
 
-        if zamowienie.artykuly:
-            leksykon = self.leksykon_messagebox["error_messagebox"]
+        if zamowienie.pozycje:
             self.messagebox_controller.messagebox(
-                app = self.view.zamowienia_frame,
+                app=self.view.zamowienia_frame,
                 type="error",
-                heading=leksykon["heading"], 
-                text = leksykon["text"]["not_empty"]
+                key="not_empty"
             )
             return
-        
-        leksykon = self.leksykon_messagebox["delete_messagebox"]
-        dialog = self.messagebox_controller.messagebox( 
-                                 type="ask", 
-                                 heading=leksykon["heading"], 
-                                 text=leksykon["text"]["order"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
-        
-        if dialog and dialog.lower() in [name.lower() for name in leksykon["agree"]]:
+
+        dialog = self.messagebox_controller.messagebox(
+            type="delete",
+            app=self.view.zamowienia_frame,
+            key="order"
+        )
+
+        if dialog:
             self.db_session.query(Zamowienie).filter_by(id=zamowienie_id).delete(synchronize_session=False)
             self.db_session.commit()
-            self.load_zamowienia_daemon()  
+            self.load_zamowienia_daemon()
 
-            self.sound.play_confirm_sound()
+            if self.sound:
+                self.sound.play_confirm_sound()
 
     def usun_artykul_zamowienie(self):
         selected_item = self.inside_tree.selection()

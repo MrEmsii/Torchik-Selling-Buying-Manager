@@ -5,3 +5,5 @@ test*.py
 output/*
 client_secret.json
 *.sqlite3-query
+*.sql
+*.md

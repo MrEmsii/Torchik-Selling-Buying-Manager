@@ -4,7 +4,8 @@ from addons.customtkinter import CTkImage
 from view.base_view import BaseView
 
 from tkinter import ttk
-from PIL import Image
+from PIL import Image, ImageTk
+import platform
 import os
 
 class ViewOrder(BaseView):
@@ -49,6 +50,33 @@ class ViewOrder(BaseView):
         self.order_master.grid_columnconfigure(2, weight=1000)
         self.order_master.grid_columnconfigure(3, weight=2000)
         self.order_master.grid_columnconfigure(4, weight=2000)
+
+
+    def setup_styles(self, dsc):
+            self.order_master.title("Torchik - Order Window")
+            icon_path = os.path.join(dsc, "resources", "image", "icon.ico")
+
+            # Bezpieczne ładowanie ikony
+            def set_icon():
+                try:
+                    if platform.system() == "Windows":
+                        self.order_master.wm_iconbitmap(icon_path)
+                    else:
+                        from PIL import Image, ImageTk
+                        icon_image = Image.open(icon_path)
+                        self.order_icon_photo = ImageTk.PhotoImage(icon_image)
+                        self.order_master.wm_iconphoto(True, self.order_icon_photo)
+                except Exception as e:
+                    print(f"Błąd ikony w OrderWindow: {e}")
+
+            self.order_master.after(1000, set_icon)
+
+            for i in range(0, 4):
+                self.order_master.grid_rowconfigure(i, weight=4)
+
+            self.order_master.grid_columnconfigure(0, weight=1)
+            for i in range(1, 5):
+                self.order_master.grid_columnconfigure(i, weight=2000)
 
     def setup_frames(self):
         self.button_orders_frame = ct.CTkFrame(self.order_master)

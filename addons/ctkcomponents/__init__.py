@@ -27,6 +27,7 @@ Version: 0.4
 __version__ = '0.4'
 
 from .ctk_components import CTkAlert
+from .ctk_components import CTkAlert_Emsii_Version
 from .ctk_components import CTkBanner
 from .ctk_components import CTkNotification
 from .ctk_components import CTkCard

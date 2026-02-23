@@ -4,8 +4,10 @@ from addons.customtkinter import CTkImage
 from view.base_view import BaseView
 
 from tkinter import ttk
-from PIL import Image
+from PIL import Image, ImageTk
 import os
+
+import platform
 
 class ViewMain(BaseView):
     def __init__(self, master, dsc=None, sound=None):
@@ -23,10 +25,21 @@ class ViewMain(BaseView):
             self.sound.play_start_sound()
 
     def setup_window(self):
-        self.master.geometry("500x500+300+300")
-        self.master.resizable(True, True)
-        self.master.title("Torchik")
-        self.master.iconbitmap(os.path.join(self.dsc, "resources", "image", "icon.ico"))
+            self.master.geometry("500x500+300+300")
+            self.master.resizable(True, True)
+            self.master.title("Torchik")
+            
+            icon_path = os.path.join(self.dsc, "resources", "image", "icon.ico")
+            
+            try:
+                if platform.system() == "Windows":
+                    self.master.iconbitmap(icon_path)
+                else:
+                    icon_image = Image.open(icon_path)
+                    self.icon_photo = ImageTk.PhotoImage(icon_image)
+                    self.master.wm_iconphoto(True, self.icon_photo)
+            except Exception as e:
+                print(f"Błąd ładowania ikony: {e}")
 
     def setup_background(self):
         bg_path = os.path.join(self.dsc, "resources", "image", "background.png")

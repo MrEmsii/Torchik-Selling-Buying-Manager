@@ -10,8 +10,10 @@ class ViewMessageBox:
 
     def __init__(self):
         self.my_progress = None
-        self.msg_window = None
 
+    # ------------------------
+    # ASYNC / PROGRESS MESSAGE
+    # ------------------------
     def show_message_async(self, master, leksykon):
         """Pokazuje asynchroniczny komunikat z paskiem postępu."""
         leksykon = leksykon.get("progress_popup", {})
@@ -29,11 +31,8 @@ class ViewMessageBox:
             try:
                 self.my_progress.cancel_task()
             except Exception:
-                print("Error closing progress popup")
                 pass
             self.my_progress = None
-        else:
-            print("No progress popup to close")
 
     def update_progress(self, progress: float):
         """Aktualizuje pasek postępu (0.0–1.0)."""
@@ -41,33 +40,60 @@ class ViewMessageBox:
             try:
                 self.my_progress.update_progress(progress)
             except Exception:
-                print("Error updating progress popup")
                 pass
-        else:
-            pass
-        
-    def messagebox(self, type, language_code=None, heading=None, text=None, value=None, app=None):
-        """Obsługuje różne typy komunikatów w wersji CustomTkinter."""
+
+    # ------------------------
+    # GENERAL MESSAGEBOX
+    # ------------------------
+    def messagebox(self, type, language_code=None, heading=None,
+                   text=None, value=None, app=None):
+        """
+        Wyświetla komunikat zależnie od typu:
+        error, info, close (modal), ask (input).
+        """
         type = type.lower().strip()
 
-        if type == "error" or type == "language" and language_code:
-            return CTkNotification(master=app, state="error", message=f"{heading}\n{text}", side="left_top")
-
-        elif type == "info":
-            return CTkNotification(master=app, state="info", message=text, side="left_top")
-
-        elif type == "close":
-            alert = CTkAlert(
-                title=heading or "Exit",
-                body_text=text or "Do you want to exit?",
-                btn1=value[0],  # Exit
-                btn2=value[1]   # Cancel
+        # ---- ERROR / LANGUAGE ----
+        if type == "error" or (type == "language" and language_code):
+            CTkNotification(
+                master=app,
+                state="error",
+                message=f"{heading}\n{text}",
+                side="left_top"
             )
-            return alert.get() == value[0]
+            return
 
-        elif type == "ask":
-            return simpledialog.askstring(heading or "Input", text or "", initialvalue=value)
+        # ---- INFO ----
+        elif type == "info":
+            CTkNotification(
+                master=app,
+                state="info",
+                message=text,
+                side="left_top"
+            )
+            return
+
+        # ---- CLOSE / DELETE (modal dialog) ----
+        elif type in ["close", "ask"]:
+            alert = CTkAlert_Emsii_Version(
+                state="warning",
+                title=heading or "Dialog",
+                body_text=text or "",
+                btn1=value[0] if value else "OK",
+                btn2=value[1] if value and len(value) > 1 else "Cancel"
+            )
+            # dla ask / delete zwracamy wartość przycisku
+            return alert.get() if type == "ask" else alert.get() == (value[0] if value else "OK")
+
+        # ---- ASK STRING ----
+        elif type == "askstring":
+            return simpledialog.askstring(
+                heading or "Input",
+                text or "",
+                initialvalue=value
+            )
 
         else:
             raise ValueError(f"Unknown messagebox type: {type}")
-
+        
+        

@@ -37,7 +37,19 @@ from tkinter import ttk
 import addons.customtkinter as ctk
 from PIL import Image, ImageDraw, ImageTk
 
-from pywinstyles import set_opacity
+import platform
+
+
+#Emsii 2026: Secure imports for Windows sound functionality
+if platform.system() == "Windows":
+    try:
+        from pywinstyles import set_opacity
+    except ImportError:
+        set_opacity = None
+else:
+    set_opacity = None
+
+
 from .src.util.CTkGif import CTkGif
 from .src.util.window_position import center_window, place_frame
 
@@ -84,6 +96,167 @@ btn_icon_only_footer = {**DEFAULT_ICON_ONLY_BTN, "width": 80, "fg_color": ("#EBE
 
 TEXT = "Some quick example text to build on the card title and make up the bulk of the card's content."
 
+#Emsii 2026: Secure imports for Windows sound functionality
+def safe_set_opacity(widget_id, value=None, color=None):
+    if set_opacity:
+        try:
+            if color:
+                set_opacity(widget_id, color=color)
+            else:
+                set_opacity(widget_id, value=value)
+        except Exception:
+            pass 
+
+import sys
+import customtkinter as ctk
+from PIL import Image
+
+
+class CTkAlert_Emsii_Version(ctk.CTkToplevel):
+    def __init__(
+        self,
+        state: str = "info",
+        title: str = "Title",
+        body_text: str = "Body text",
+        btn1: str = "OK",
+        btn2: str = "Cancel"
+    ):
+        super().__init__()
+
+        self.width = 420
+        self.height = 200
+        self.resizable(False, False)
+        self.overrideredirect(True)
+        self.lift()
+        self.grab_set()
+        self.focus_force()
+
+        self._center_window()
+
+        self.bg_color = self._apply_appearance_mode(
+            ctk.ThemeManager.theme["CTkFrame"]["fg_color"]
+        )
+
+        if sys.platform.startswith("win"):
+            transparent_color = self._apply_appearance_mode(self.cget("fg_color"))
+            self.attributes("-transparentcolor", transparent_color)
+
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        self.frame_top = ctk.CTkFrame(
+            self,
+            corner_radius=8,
+            border_width=1,
+            fg_color=self.bg_color
+        )
+        self.frame_top.grid(sticky="nsew")
+        self.frame_top.grid_columnconfigure(0, weight=1)
+        self.frame_top.grid_rowconfigure(1, weight=1)
+
+        # ---- DRAG ----
+        self.frame_top.bind("<ButtonPress-1>", self._start_move)
+        self.frame_top.bind("<B1-Motion>", self._move)
+
+        icon_path = ICON_PATH.get(state) or ICON_PATH["info"]
+        self.icon = ctk.CTkImage(
+            Image.open(icon_path),
+            Image.open(icon_path),
+            size=(30, 30)
+        )
+
+        close_icon = ICON_PATH["close"]
+        self.close_icon = ctk.CTkImage(
+            Image.open(close_icon[0]),
+            Image.open(close_icon[1]),
+            size=(20, 20)
+        )
+
+        self.title_label = ctk.CTkLabel(
+            self.frame_top,
+            text=f"  {title}",
+            font=("", 18),
+            image=self.icon,
+            compound="left"
+        )
+        self.title_label.grid(row=0, column=0, sticky="w", padx=15, pady=20)
+
+        self.close_btn = ctk.CTkButton(
+            self.frame_top,
+            text="",
+            image=self.close_icon,
+            width=20,
+            height=20,
+            hover=False,
+            fg_color="transparent",
+            command=lambda: self._close(btn2)
+        )
+        self.close_btn.grid(row=0, column=1, sticky="ne", padx=10, pady=10)
+
+        self.message = ctk.CTkLabel(
+            self.frame_top,
+            text=body_text,
+            justify="left",
+            anchor="w",
+            wraplength=self.width - 40
+        )
+        self.message.grid(
+            row=1,
+            column=0,
+            columnspan=2,
+            padx=(20, 10),
+            pady=10,
+            sticky="nsew"
+        )
+
+        self.btn_1 = ctk.CTkButton(
+            self.frame_top,
+            text=btn1,
+            width=120,
+            command=lambda: self._close(btn1)
+        )
+        self.btn_1.grid(row=2, column=0, padx=(10, 5), pady=20, sticky="e")
+
+        self.btn_2 = ctk.CTkButton(
+            self.frame_top,
+            text=btn2,
+            width=120,
+            fg_color="transparent",
+            border_width=1,
+            command=lambda: self._close(btn2)
+        )
+        self.btn_2.grid(row=2, column=1, padx=(5, 10), pady=20, sticky="e")
+
+        self.bind("<Escape>", lambda e: self._close(btn2))
+        self.bind("<Return>", lambda e: self._close(btn1))
+        self.bind("<space>", lambda e: self._close(btn1))
+
+        self.result = None
+
+    def get(self):
+        self.wait_window()
+        return self.result
+
+    def _center_window(self):
+        screen_w = self.winfo_screenwidth()
+        screen_h = self.winfo_screenheight()
+        x = int((screen_w / 2) - (self.width / 2))
+        y = int((screen_h / 2) - (self.height / 2))
+        self.geometry(f"{self.width}x{self.height}+{x}+{y}")
+
+    def _start_move(self, event):
+        self._x = event.x
+        self._y = event.y
+
+    def _move(self, event):
+        x = self.winfo_pointerx() - self._x
+        y = self.winfo_pointery() - self._y
+        self.geometry(f"+{x}+{y}")
+
+    def _close(self, value):
+        self.result = value
+        self.grab_release()
+        self.destroy()
 
 class CTkAlert(ctk.CTkToplevel):
     def __init__(self, state: str = "info", title: str = "Title",
@@ -157,7 +330,6 @@ class CTkAlert(ctk.CTkToplevel):
 
         self.focus_force() #Emsii 2026
         self.grab_set() #Emsii 2026
-
 
     def get(self):
         self.wait_window()
@@ -238,7 +410,7 @@ class CTkNotification(ctk.CTkFrame):
     def __init__(self, master, state: str = "info", message: str = "message", side: str = "right_bottom"):
         self.root = master
         self.width = 400
-        self.height = 60
+        self.height = 100
         super().__init__(self.root, width=self.width, height=self.height, corner_radius=5, border_width=1)
         self.grid_propagate(False)
 
@@ -390,12 +562,12 @@ class CTkCarousel(ctk.CTkFrame):
         self.previous_button = ctk.CTkButton(self.image_label, text="", image=self.prev_icon, **ICON_BTN,
                                              command=self.previous_callback, bg_color=self.button_bg)
         self.previous_button.place(relx=0.0, rely=0.5, anchor='w')
-        set_opacity(self.previous_button.winfo_id(), color=self.button_bg[1])
+        safe_set_opacity(self.previous_button.winfo_id(), color=self.button_bg[1])
 
         self.next_button = ctk.CTkButton(self.image_label, text="", image=self.next_icon, **ICON_BTN,
                                          command=self.next_callback, bg_color=self.button_bg)
         self.next_button.place(relx=1.0, rely=0.5, anchor='e')
-        set_opacity(self.next_button.winfo_id(), color=self.button_bg[1])
+        safe_set_opacity(self.next_button.winfo_id(), color=self.button_bg[1])
 
         self.next_callback()
 
@@ -526,7 +698,7 @@ class CTkLoader(ctk.CTkFrame):
         self.master_height = self.master.winfo_height()
         super().__init__(master, width=self.master_width, height=self.master_height, corner_radius=0)
 
-        set_opacity(self.winfo_id(), value=opacity)
+        safe_set_opacity(self.winfo_id(), value=opacity)
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 

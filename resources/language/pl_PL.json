@@ -294,7 +294,7 @@
                 "company": "Napewno chcesz usunąć firmę z listy?\nCzynność NIE odwracalna!\nWpisz ",
                 "article": "Napewno chcesz usunąć artykuł z listy?\nCzynność NIE odwracalna!\nWpisz "
             },
-            "agree": ["TAK", "YES"]
+            "buttons": ["TAK", "YES"]
         },
         "error_messagebox":{
             "heading": "Błąd",

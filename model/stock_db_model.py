@@ -123,10 +123,9 @@ class Zamowienie(Base):
     # METODY BIZNESOWE (wydajne)
     # =================================================
 
-
     def oblicz_cene(self):
         return sum(
-            p.cena_jednostkowa * Decimal(str(p.ilosc_artykulu))
+            p.cena_jednostkowa * p.ilosc_artykulu
             for p in self.pozycje
         )
 

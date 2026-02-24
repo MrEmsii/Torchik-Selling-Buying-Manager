@@ -5,6 +5,9 @@ test*.py
 output/*
 client_secret.json
 *.sqlite3-query
+<<<<<<< HEAD
 *.sql
 *.md
 .venv/*
+=======
+>>>>>>> parent of 09fae19 (0.0.320a)

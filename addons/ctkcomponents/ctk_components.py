@@ -111,138 +111,102 @@ import sys
 import customtkinter as ctk
 from PIL import Image
 
-
 class CTkAlert_Emsii_Version(ctk.CTkToplevel):
-    def __init__(
-        self,
-        state: str = "info",
-        title: str = "Title",
-        body_text: str = "Body text",
-        btn1: str = "OK",
-        btn2: str = "Cancel"
-    ):
+    def __init__(self, state="info", title="Title", body_text="Body text", btn1="OK", btn2="Cancel"):
         super().__init__()
 
+        # 1. Definicja sztywnej geometrii
         self.width = 420
         self.height = 200
-
+        
+        # Ukrywamy okno na czas budowania, aby uniknąć artefaktów wizualnych
+        self.withdraw() 
+        self.overrideredirect(True)
         self.resizable(False, False)
-        self.transient(self.master)
-        self.grab_set()
-        self.focus_force()
-
-        self.geometry(f"{self.width}x{self.height}")
+        
+        # Wyśrodkowanie okna przed pokazaniem
         self._center_window()
 
-        # ❗ USUNIĘTE overrideredirect i transparentcolor (psuły Windows)
+        self.bg_color = self._apply_appearance_mode(ctk.ThemeManager.theme["CTkFrame"]["fg_color"])
 
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(0, weight=1)
+        # Obsługa przezroczystości dla zaokrąglonych rogów na Windows
+        if sys.platform.startswith("win"):
+            self.transparent_color = "#000001"
+            self.attributes("-transparentcolor", self.transparent_color)
+            self.configure(fg_color=self.transparent_color)
+        else:
+            self.transparent_color = self.bg_color
 
+        # 2. Główny kontener z WYŁĄCZONĄ propagacją (Klucz do naprawy)
         self.frame_top = ctk.CTkFrame(
             self,
-            corner_radius=8,
-            border_width=1
+            corner_radius=10,
+            border_width=1,
+            fg_color=self.bg_color,
+            bg_color=self.transparent_color,
+            width=self.width,
+            height=self.height
         )
-        self.frame_top.grid(sticky="nsew")
+        self.frame_top.pack(expand=True, fill="both")
+        
+        # Zmusza ramkę do zachowania rozmiaru 420x200, zapobiegając pionowaniu tekstu
+        self.frame_top.pack_propagate(False) 
 
+        # 3. Konfiguracja siatki wewnętrznej
         self.frame_top.grid_columnconfigure(0, weight=1)
-        self.frame_top.grid_columnconfigure(1, weight=0)
+        self.frame_top.grid_columnconfigure(1, weight=1)
         self.frame_top.grid_rowconfigure(1, weight=1)
 
-        icon_path = ICON_PATH.get(state, ICON_PATH["info"])
+        # Ikona i Nagłówek
+        icon_path = ICON_PATH.get(state) or ICON_PATH["info"]
+        self.icon = ctk.CTkImage(Image.open(icon_path), size=(30, 30))
+        
+        self.title_label = ctk.CTkLabel(self.frame_top, text=f"  {title}", font=("", 18, "bold"), 
+                                        image=self.icon, compound="left")
+        self.title_label.grid(row=0, column=0, sticky="w", padx=15, pady=20)
 
-        self.icon = ctk.CTkImage(
-            Image.open(icon_path),
-            size=(30, 30)
-        )
-
-        self.close_icon = ctk.CTkImage(
-            Image.open(ICON_PATH["close"][0]),
-            size=(20, 20)
-        )
-
-        # TITLE
-        self.title_label = ctk.CTkLabel(
-            self.frame_top,
-            text=f"  {title}",
-            font=ctk.CTkFont(size=18, weight="bold"),
-            image=self.icon,
-            compound="left",
-            anchor="w"
-        )
-        self.title_label.grid(row=0, column=0, sticky="w", padx=20, pady=(20, 10))
-
-        self.close_btn = ctk.CTkButton(
-            self.frame_top,
-            text="",
-            image=self.close_icon,
-            width=24,
-            height=24,
-            hover=False,
-            fg_color="transparent",
-            command=lambda: self._close(btn2)
-        )
-        self.close_btn.grid(row=0, column=1, sticky="ne", padx=10, pady=10)
-
-        # MESSAGE
+        # Treść wiadomości - sztywny wraplength gwarantuje czytelność
         self.message = ctk.CTkLabel(
             self.frame_top,
             text=body_text,
             justify="left",
             anchor="nw",
-            wraplength=self.width - 80
+            wraplength=380 # Piksele, nie znaki
         )
-        self.message.grid(
-            row=1,
-            column=0,
-            columnspan=2,
-            padx=20,
-            pady=10,
-            sticky="nsew"
-        )
+        self.message.grid(row=1, column=0, columnspan=2, padx=20, pady=(0, 10), sticky="nsew")
 
-        # BUTTONS
-        self.btn_1 = ctk.CTkButton(
-            self.frame_top,
-            text=btn1,
-            width=120,
-            command=lambda: self._close(btn1)
-        )
-        self.btn_1.grid(row=2, column=0, padx=(0, 10), pady=20, sticky="e")
+        # Przyciski akcji
+        self.btn_1 = ctk.CTkButton(self.frame_top, text=btn1, width=120, command=lambda: self._close(btn1))
+        self.btn_1.grid(row=2, column=0, padx=(20, 5), pady=(0, 20), sticky="e")
 
-        self.btn_2 = ctk.CTkButton(
-            self.frame_top,
-            text=btn2,
-            width=120,
-            fg_color="transparent",
-            border_width=1,
-            command=lambda: self._close(btn2)
-        )
-        self.btn_2.grid(row=2, column=1, padx=(0, 20), pady=20, sticky="e")
+        self.btn_2 = ctk.CTkButton(self.frame_top, text=btn2, width=120, fg_color="transparent", 
+                                   border_width=1, command=lambda: self._close(btn2))
+        self.btn_2.grid(row=2, column=1, padx=(5, 20), pady=(0, 20), sticky="w")
 
-        self.bind("<Escape>", lambda e: self._close(btn2))
-        self.bind("<Return>", lambda e: self._close(btn1))
-
-        self.result = None
-
-    def _center_window(self):
-        self.update_idletasks()
-        screen_w = self.winfo_screenwidth()
-        screen_h = self.winfo_screenheight()
-        x = int((screen_w - self.width) / 2)
-        y = int((screen_h - self.height) / 2)
-        self.geometry(f"+{x}+{y}")
+        # 4. Finalizacja mapowania
+        self.deiconify() 
+        self.update_idletasks() # Wymuszenie przeliczenia geometrii przez Windows
+        self.lift()
+        self.grab_set()
+        self.focus_force()
 
     def get(self):
+        # Oczekiwanie na interakcję użytkownika
         self.wait_window()
         return self.result
+
+    def _center_window(self):
+        screen_w = self.winfo_screenwidth()
+        screen_h = self.winfo_screenheight()
+        x = int((screen_w / 2) - (self.width / 2))
+        y = int((screen_h / 2) - (self.height / 2))
+        self.geometry(f"{self.width}x{self.height}+{x}+{y}")
 
     def _close(self, value):
         self.result = value
         self.grab_release()
         self.destroy()
-
+        
 class CTkAlert_old(ctk.CTkToplevel):
     def __init__(self, state: str = "info", title: str = "Title",
                  body_text: str = "Body text", btn1: str = "OK", btn2: str = "Cancel"):
@@ -941,7 +905,7 @@ class Demo(ctk.CTk):
                         "CTkTreeview": self.treeview}
 
     def alert(self):
-        my_alert = CTkAlert(state="info", title="Title", body_text="body text", btn1="Ok", btn2="Cancel")
+        my_alert = CTkAlert_Emsii_Version(state="info", title="Title", body_text="body text", btn1="Ok", btn2="Cancel")
         # answer = my_alert.get()  # get answer
         # print(answer)
 

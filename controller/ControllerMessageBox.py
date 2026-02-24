@@ -84,7 +84,6 @@ class ControllerMessageBox:
             value=value_buttons,
             app=app
         )
-        print(self.leksykon_messagebox.get("delete_messagebox", {}).get("buttons", []))
         if dialog in self.leksykon_messagebox.get("delete_messagebox", {}).get("buttons", []):
             return True
         else:

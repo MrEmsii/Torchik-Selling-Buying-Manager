@@ -82,7 +82,6 @@ class ViewMessageBox:
                 btn1=value[0] if value else "OK",
                 btn2=value[1] if value and len(value) > 1 else "Cancel"
             )
-            # dla ask / delete zwracamy wartość przycisku
             return alert.get() if type == "ask" else alert.get() == (value[0] if value else "OK")
 
         # ---- ASK STRING ----

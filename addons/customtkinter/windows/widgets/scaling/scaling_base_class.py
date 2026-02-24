@@ -57,9 +57,9 @@ class CTkScalingBaseClass:
     def _get_window_scaling(self) -> float:
         return self.__window_scaling
 
-    def _apply_widget_scaling(self, value: Union[int, float]) -> Union[float]:
+    def _apply_widget_scaling(self, value: Union[int, float]) -> int:
         assert self.__scaling_type == "widget"
-        return value * self.__widget_scaling
+        return round(value * self.__widget_scaling)
 
     def _reverse_widget_scaling(self, value: Union[int, float]) -> Union[float]:
         assert self.__scaling_type == "widget"
@@ -97,26 +97,25 @@ class CTkScalingBaseClass:
 
         scaled_kwargs = copy.copy(kwargs)
 
-        # scale padding values
-        if "pady" in scaled_kwargs:
-            if isinstance(scaled_kwargs["pady"], (int, float)):
-                scaled_kwargs["pady"] = self._apply_widget_scaling(scaled_kwargs["pady"])
-            elif isinstance(scaled_kwargs["pady"], tuple):
-                scaled_kwargs["pady"] = tuple([self._apply_widget_scaling(v) for v in scaled_kwargs["pady"]])
-        if "padx" in kwargs:
-            if isinstance(scaled_kwargs["padx"], (int, float)):
-                scaled_kwargs["padx"] = self._apply_widget_scaling(scaled_kwargs["padx"])
-            elif isinstance(scaled_kwargs["padx"], tuple):
-                scaled_kwargs["padx"] = tuple([self._apply_widget_scaling(v) for v in scaled_kwargs["padx"]])
+        def scale_value(v):
+            return max(1, int(round(self._apply_widget_scaling(v))))
 
-        # scaled x, y values for place geometry manager
-        if "x" in scaled_kwargs:
-            scaled_kwargs["x"] = self._apply_widget_scaling(scaled_kwargs["x"])
-        if "y" in scaled_kwargs:
-            scaled_kwargs["y"] = self._apply_widget_scaling(scaled_kwargs["y"])
+        for pad_key in ["padx", "pady", "ipadx", "ipady"]:
+            if pad_key in scaled_kwargs:
+                if isinstance(scaled_kwargs[pad_key], (int, float)):
+                    scaled_kwargs[pad_key] = scale_value(scaled_kwargs[pad_key])
+                elif isinstance(scaled_kwargs[pad_key], tuple):
+                    scaled_kwargs[pad_key] = tuple(scale_value(v) for v in scaled_kwargs[pad_key])
+
+        for geom_key in ["x", "y", "width", "height", "border_width", "corner_radius"]:
+            if geom_key in scaled_kwargs:
+                if isinstance(scaled_kwargs[geom_key], (int, float)):
+                    scaled_kwargs[geom_key] = scale_value(scaled_kwargs[geom_key])
+                elif isinstance(scaled_kwargs[geom_key], tuple):
+                    scaled_kwargs[geom_key] = tuple(scale_value(v) for v in scaled_kwargs[geom_key])
 
         return scaled_kwargs
-
+    
     @staticmethod
     def _parse_geometry_string(geometry_string: str) -> tuple:
         #                 index:   1                   2           3          4             5       6

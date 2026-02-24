@@ -694,8 +694,8 @@ class CTkLoader(ctk.CTkFrame):
     def __init__(self, master: any, opacity: float = 0.8, width: int = 40, height: int = 40):
         self.master = master
         self.master.update()
-        self.master_width = self.master.winfo_width()
-        self.master_height = self.master.winfo_height()
+        self.master_width = max(1, int(self.master.winfo_width()))
+        self.master_height = max(1, int(self.master.winfo_height()))
         super().__init__(master, width=self.master_width, height=self.master_height, corner_radius=0)
 
         safe_set_opacity(self.winfo_id(), value=opacity)

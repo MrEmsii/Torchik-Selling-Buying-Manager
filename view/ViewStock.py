@@ -40,30 +40,57 @@ class ViewStock(BaseView):
         self.language_code = language_code
 
     def setup_styles(self, dsc):
-            self.stock_master.title("Torchik - Stock Window")
-            icon_path = os.path.join(dsc, "resources", "image", "icon.ico")
+        self.stock_master.title("Torchik - Stock Window")
+        icon_path = os.path.join(dsc, "resources", "image", "icon.ico")
 
-            def set_icon():
-                try:
-                    if platform.system() == "Windows":
-                        self.stock_master.wm_iconbitmap(icon_path)
-                    else:
-                        from PIL import Image, ImageTk
-                        icon_image = Image.open(icon_path)
-                        self.stock_icon_photo = ImageTk.PhotoImage(icon_image)
-                        self.stock_master.wm_iconphoto(True, self.stock_icon_photo)
-                except Exception as e:
-                    print(f"Błąd ikony w StockWindow: {e}")
+        def set_icon():
+            try:
+                if platform.system() == "Windows":
+                    self.stock_master.wm_iconbitmap(icon_path)
+                else:
+                    from PIL import Image, ImageTk
+                    icon_image = Image.open(icon_path)
+                    self.stock_icon_photo = ImageTk.PhotoImage(icon_image)
+                    self.stock_master.wm_iconphoto(True, self.stock_icon_photo)
+            except Exception as e:
+                print(f"Błąd ikony w StockWindow: {e}")
 
-            self.stock_master.after(1000, set_icon)
+        self.stock_master.after(1000, set_icon)
 
-            for i in range(0, 4):
-                self.stock_master.grid_rowconfigure(i, weight=4)
+        for i in range(0, 4):
+            self.stock_master.grid_rowconfigure(i, weight=4)
 
-            self.stock_master.grid_columnconfigure(0, weight=1)
-            for i in range(1, 5):
-                self.stock_master.grid_columnconfigure(i, weight=2000)
+        self.stock_master.grid_columnconfigure(0, weight=1)
+        for i in range(1, 5):
+            self.stock_master.grid_columnconfigure(i, weight=2000)
 
+        style = ttk.Style()
+        # Używamy motywu 'default' lub 'clam' jako bazy, bo są najbardziej elastyczne
+        style.theme_use("clam") 
+
+        # Konfiguracja kolorów pasujących do CustomTkinter (Dark Mode)
+        style.configure("Treeview",
+            background="#2b2b2b",      # Tło wierszy
+            foreground="white",        # Kolor tekstu
+            fieldbackground="#2b2b2b", # Tło całego pola
+            rowheight=30,              # Wyższe wiersze wyglądają nowocześniej
+            borderwidth=0,
+            font=("Arial", 10)
+        )
+
+        # Styl nagłówków
+        style.configure("Treeview.Heading",
+            background="#333333", 
+            foreground="white", 
+            relief="flat",
+            font=("Arial", 10, "bold")
+        )
+
+        # Zmiana koloru zaznaczenia (Selection)
+        style.map("Treeview",
+            background=[('selected', '#1f538d')], # Kolor niebieski z CTK
+            foreground=[('selected', 'white')]
+        )
 
     def setup_frames(self):
         self.button_stock_frame = ct.CTkFrame(self.stock_master)
@@ -239,7 +266,7 @@ class ViewStock(BaseView):
             columns=columns_name,
             show='headings',
             yscrollcommand=scrollbar.set,
-            bootstyle="secondary"
+            #bootstyle="secondary"
         )
         
         scrollbar.configure(command=tree.yview)
@@ -271,7 +298,7 @@ class ViewStock(BaseView):
             columns=columns_name,
             show='headings',
             yscrollcommand=scrollbar.set,
-            bootstyle="secondary"
+            #bootstyle="secondary"
         )
 
         scrollbar.configure(command=tree.yview)

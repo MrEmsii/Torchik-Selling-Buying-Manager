@@ -66,7 +66,7 @@ class ViewStock(BaseView):
 
         style = ttk.Style()
         # Używamy motywu 'default' lub 'clam' jako bazy, bo są najbardziej elastyczne
-        style.theme_use("clam") 
+        style.theme_use("classic") 
 
         # Konfiguracja kolorów pasujących do CustomTkinter (Dark Mode)
         style.configure("Treeview",
@@ -288,7 +288,7 @@ class ViewStock(BaseView):
         label = ct.CTkLabel(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)
 
-        container = ct.CTkFrame(parent_frame)
+        container = ct.CTkFrame(parent_frame, border_width=0, fg_color="transparent") 
         container.pack(expand=True, fill='both')
 
         scrollbar = ct.CTkScrollbar(container, orientation="vertical")

@@ -1,7 +1,7 @@
 import os
 import json
-import ttkbootstrap as ttk
-from ttkbootstrap import utility
+# import ttkbootstrap as ttk
+# from ttkbootstrap import utility
 
 import addons.customtkinter as ct
 
@@ -10,7 +10,7 @@ from view.ViewMain import ViewMain
 
 from controller.ControllerMessageBox import ControllerMessageBox
 
-utility.enable_high_dpi_awareness()
+# utility.enable_high_dpi_awareness()
 ct.set_appearance_mode("dark")
 ct.set_default_color_theme("dark-blue")
 
@@ -22,8 +22,8 @@ class ControllerMain:
         self.dsc = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
         self.master = ct.CTk()
-        self.style = ttk.Style()
-        self.style.theme_use("darkly")
+        # self.style = ttk.Style()
+        # self.style.theme_use("darkly")
 
         self.konfiguracja_programu = self.ensure_settings_file()
         self.language_code = self.konfiguracja_programu.get("language_code", "pl_PL")
@@ -151,4 +151,4 @@ class ControllerMain:
                 columnspan=2 if "statystyki" in key or "ustawienia" in key or "wyjscie" in key else 1
             )
 
-        self.main_view.separator(frame)
+        # self.main_view.separator(frame)

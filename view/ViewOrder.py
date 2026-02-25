@@ -116,8 +116,8 @@ class ViewOrder(BaseView):
             container,
             columns=columns_name,
             show='headings',
-            yscrollcommand=scrollbar.set,
-            bootstyle="secondary"
+            yscrollcommand=scrollbar.set
+            # bootstyle="secondary"
         )
 
         scrollbar.configure(command=tree.yview)
@@ -166,7 +166,7 @@ class ViewOrder(BaseView):
             columns=columns_name,
             show='headings',
             yscrollcommand=scrollbar.set,
-            bootstyle="secondary"
+            #bootstyle="secondary"
         )
         
         scrollbar.configure(command=tree.yview)
@@ -223,7 +223,7 @@ class ViewOrder(BaseView):
             columns=columns_name,
             show='headings',
             # yscrollcommand=scrollbar.set,
-            bootstyle="secondary"
+            #bootstyle="secondary"
         )
         
         # scrollbar.configure(command=tree.yview)

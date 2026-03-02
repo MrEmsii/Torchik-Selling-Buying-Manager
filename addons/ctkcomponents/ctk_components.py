@@ -187,14 +187,28 @@ class CTkAlert_Emsii_Version(ctk.CTkToplevel):
         self.deiconify() 
         self.update_idletasks() # Wymuszenie przeliczenia geometrii przez Windows
         self.lift()
-        self.grab_set()
-        self.focus_force()
+
+        self.bind("<Escape>", lambda e: self.button_event(btn2))  # Emsii 2026
+
+        self.bind("<Return>", lambda e: self.button_event(btn1)) #Emsii 2026
+        self.bind("<space>", lambda e: self.button_event(btn1)) #Emsii 2026
+
+        self.focus_force() #Emsii 2026
+        self.grab_set() #Emsii 2026
+
+    def button_event(self, event=None):
+        self.event = event
+        self.grab_release()
+        self.destroy()
 
     def get(self):
         # Oczekiwanie na interakcję użytkownika
         self.wait_window()
-        return self.result
-
+        try:
+            return self.event
+        except AttributeError:
+            return self.result
+        
     def _center_window(self):
         screen_w = self.winfo_screenwidth()
         screen_h = self.winfo_screenheight()

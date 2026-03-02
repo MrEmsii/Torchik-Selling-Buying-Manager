@@ -1,10 +1,12 @@
+main.py
 *.pyc
 *.db
-test*.py
+test_DB_alfa.py
 * — kopia.py
-output/*
-client_secret.json
-*.sqlite3-query
+stats.py
+test_DB_full_alfa.py
+test*.py
 *.sql
-*.md
+*.sqlite3-query
+client_secret.json
 .venv/*

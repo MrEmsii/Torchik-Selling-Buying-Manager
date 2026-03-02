@@ -22,7 +22,7 @@ class ViewOrder(BaseView):
         
         self.order_master = order_master
         self.order_master.geometry("1280x720+0+0")
-        self.order_master.minsize(960, 540)
+        self.order_master.minsize(1280, 720)
 
         self.leksykon = leksykon
         self.style = style
@@ -38,46 +38,55 @@ class ViewOrder(BaseView):
     def setup_styles(self, dsc):
         self.order_master.title("Torchik - Order Window")
         icon_path = os.path.join(dsc, "resources", "image", "icon.ico")
-        self.order_master.after(1000, lambda: self.order_master.wm_iconbitmap(icon_path))
 
-        self.order_master.grid_rowconfigure(0, weight=4)
-        self.order_master.grid_rowconfigure(1, weight=4)
-        self.order_master.grid_rowconfigure(2, weight=4)
-        self.order_master.grid_rowconfigure(3, weight=4)
+        def set_icon():
+            try:
+                if platform.system() == "Windows":
+                    self.order_master.wm_iconbitmap(icon_path)
+                else:
+                    from PIL import Image, ImageTk
+                    icon_image = Image.open(icon_path)
+                    self.order_icon_photo = ImageTk.PhotoImage(icon_image)
+                    self.order_master.wm_iconphoto(True, self.order_icon_photo)
+            except Exception as e:
+                print(f"Błąd ikony w OrderWindow: {e}")
+
+        self.order_master.after(1000, set_icon)
+
+        for i in range(0, 4):
+            self.order_master.grid_rowconfigure(i, weight=4)
 
         self.order_master.grid_columnconfigure(0, weight=1)
-        self.order_master.grid_columnconfigure(1, weight=2000)
-        self.order_master.grid_columnconfigure(2, weight=1000)
-        self.order_master.grid_columnconfigure(3, weight=2000)
-        self.order_master.grid_columnconfigure(4, weight=2000)
+        for i in range(1, 5):
+            self.order_master.grid_columnconfigure(i, weight=2000)
 
+        style = ttk.Style()
+        # Używamy motywu 'default' lub 'clam' jako bazy, bo są najbardziej elastyczne
+        style.theme_use("classic") 
 
-    def setup_styles(self, dsc):
-            self.order_master.title("Torchik - Order Window")
-            icon_path = os.path.join(dsc, "resources", "image", "icon.ico")
+        # Konfiguracja kolorów pasujących do CustomTkinter (Dark Mode)
+        style.configure("Treeview",
+            background="#2b2b2b",      # Tło wierszy
+            foreground="white",        # Kolor tekstu
+            fieldbackground="#2b2b2b", # Tło całego pola
+            rowheight=30,              # Wyższe wiersze wyglądają nowocześniej
+            borderwidth=0,
+            font=("Arial", 10)
+        )
 
-            # Bezpieczne ładowanie ikony
-            def set_icon():
-                try:
-                    if platform.system() == "Windows":
-                        self.order_master.wm_iconbitmap(icon_path)
-                    else:
-                        from PIL import Image, ImageTk
-                        icon_image = Image.open(icon_path)
-                        self.order_icon_photo = ImageTk.PhotoImage(icon_image)
-                        self.order_master.wm_iconphoto(True, self.order_icon_photo)
-                except Exception as e:
-                    print(f"Błąd ikony w OrderWindow: {e}")
+        # Styl nagłówków
+        style.configure("Treeview.Heading",
+            background="#333333", 
+            foreground="white", 
+            relief="flat",
+            font=("Arial", 10, "bold")
+        )
 
-            self.order_master.after(1000, set_icon)
-
-            for i in range(0, 4):
-                self.order_master.grid_rowconfigure(i, weight=4)
-
-            self.order_master.grid_columnconfigure(0, weight=1)
-            for i in range(1, 5):
-                self.order_master.grid_columnconfigure(i, weight=2000)
-
+        # Zmiana koloru zaznaczenia (Selection)
+        style.map("Treeview",
+            background=[('selected', '#1f538d')], # Kolor niebieski z CTK
+            foreground=[('selected', 'white')]
+        )
     def setup_frames(self):
         self.button_orders_frame = ct.CTkFrame(self.order_master)
 

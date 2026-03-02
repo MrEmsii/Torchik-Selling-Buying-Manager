@@ -9,6 +9,8 @@ from addons.customtkinter import CTkImage
 
 from view.base_view import BaseView
 
+import platform
+
 DARK_BG = "#2B2B2B"
 LIGHT_FG = "white"
 
@@ -58,21 +60,59 @@ class ViewStatistic(BaseView):
         canvas.draw()
         canvas.get_tk_widget().pack(fill="both", expand=True)
 
-    def setup_styles(self, dsc):
-        self.statistic_master.title("Torchik - Statistic Window")
-        icon_path = os.path.join(dsc, "resources", "image", "icon.ico")
-        self.statistic_master.after(1000, lambda: self.statistic_master.wm_iconbitmap(icon_path))
 
-        self.statistic_master.grid_rowconfigure(0, weight=4)
-        self.statistic_master.grid_rowconfigure(1, weight=4)
-        self.statistic_master.grid_rowconfigure(2, weight=4)
-        self.statistic_master.grid_rowconfigure(3, weight=4)
+    def setup_styles(self, dsc):
+        self.statistic_master.title("Torchik - Statistics Window")
+        icon_path = os.path.join(dsc, "resources", "image", "icon.ico")
+
+        def set_icon():
+            try:
+                if platform.system() == "Windows":
+                    self.statistic_master.wm_iconbitmap(icon_path)
+                else:
+                    from PIL import Image, ImageTk
+                    icon_image = Image.open(icon_path)
+                    self.statistic_icon_photo = ImageTk.PhotoImage(icon_image)
+                    self.statistic_master.wm_iconphoto(True, self.statistic_icon_photo)
+            except Exception as e:
+                print(f"Błąd ikony w StatisticsWindow: {e}")
+
+        self.statistic_master.after(1000, set_icon)
+
+        for i in range(0, 4):
+            self.statistic_master.grid_rowconfigure(i, weight=4)
 
         self.statistic_master.grid_columnconfigure(0, weight=1)
-        self.statistic_master.grid_columnconfigure(1, weight=2000)
-        self.statistic_master.grid_columnconfigure(2, weight=500)
-        self.statistic_master.grid_columnconfigure(3, weight=500)
-        self.statistic_master.grid_columnconfigure(4, weight=500)
+        for i in range(1, 5):
+            self.statistic_master.grid_columnconfigure(i, weight=2000)
+
+        style = ttk.Style()
+        # Używamy motywu 'default' lub 'clam' jako bazy, bo są najbardziej elastyczne
+        style.theme_use("classic") 
+
+        # Konfiguracja kolorów pasujących do CustomTkinter (Dark Mode)
+        style.configure("Treeview",
+            background="#2b2b2b",      # Tło wierszy
+            foreground="white",        # Kolor tekstu
+            fieldbackground="#2b2b2b", # Tło całego pola
+            rowheight=30,              # Wyższe wiersze wyglądają nowocześniej
+            borderwidth=0,
+            font=("Arial", 10)
+        )
+
+        # Styl nagłówków
+        style.configure("Treeview.Heading",
+            background="#333333", 
+            foreground="white", 
+            relief="flat",
+            font=("Arial", 10, "bold")
+        )
+
+        # Zmiana koloru zaznaczenia (Selection)
+        style.map("Treeview",
+            background=[('selected', '#1f538d')], # Kolor niebieski z CTK
+            foreground=[('selected', 'white')]
+        )
 
     def setup_frames(self):
         self.button_statistic_frame = ct.CTkFrame(self.statistic_master)

@@ -26,7 +26,8 @@ class ViewStock(BaseView):
             ):
         
         self.stock_master = stock_master
-        self.stock_master.geometry("1366x720+0+0")
+        self.stock_master.geometry("1280x720+0+0")
+        self.stock_master.minsize(1280, 720)
         self.stock_master.resizable(True, True)
 
         self.leksykon = leksykon

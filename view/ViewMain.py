@@ -25,7 +25,7 @@ class ViewMain(BaseView):
             self.sound.play_start_sound()
 
     def setup_window(self):
-            self.master.geometry("500x500+300+300")
+            self.master.geometry("600x400+300+300")
             self.master.resizable(True, True)
             self.master.title("Torchik")
             
@@ -45,7 +45,7 @@ class ViewMain(BaseView):
         bg_path = os.path.join(self.dsc, "resources", "image", "background.png")
         self.background_image = CTkImage(
             dark_image=Image.open(bg_path),
-            size=(4096, 2048)
+            size=(600, 400)
         )
         self.background_label = ct.CTkLabel(self.master, image=self.background_image)
         self.background_label.place(x=0, y=0, relwidth=1, relheight=1)
@@ -67,7 +67,3 @@ class ViewMain(BaseView):
         self.exit_button_icon = load_icon("setting_icon.png")
         self.statistics_button_icon = load_icon("setting_icon.png")
 
-    def separator(self, frame):
-        """Wstawia separator poziomy."""
-        sep = ttk.Separator(frame, orient='horizontal', bootstyle="secondary")
-        sep.grid(row=2, column=0, columnspan=20, sticky='ew', pady=20, padx=10)

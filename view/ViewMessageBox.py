@@ -44,16 +44,16 @@ class ViewMessageBox:
 
     # ------------------------
     # GENERAL MESSAGEBOX
-    # ------------------------
+        # ------------------------
     def messagebox(self, type, language_code=None, heading=None,
-                   text=None, value=None, app=None):
-        """
-        Wyświetla komunikat zależnie od typu:
-        error, info, close (modal), ask (input).
-        """
+                text=None, value=None, app=None):
+
         type = type.lower().strip()
 
-        # ---- ERROR / LANGUAGE ----
+        if type in ["add", "edit"]:
+            type = "askstring"
+
+        # ERROR
         if type == "error" or (type == "language" and language_code):
             CTkNotification(
                 master=app,
@@ -63,7 +63,7 @@ class ViewMessageBox:
             )
             return
 
-        # ---- INFO ----
+        # INFO
         elif type == "info":
             CTkNotification(
                 master=app,
@@ -73,7 +73,7 @@ class ViewMessageBox:
             )
             return
 
-        # ---- CLOSE / DELETE (modal dialog) ----
+        # CLOSE / ASK
         elif type in ["close", "ask"]:
             alert = CTkAlert_Emsii_Version(
                 state="warning",
@@ -84,9 +84,9 @@ class ViewMessageBox:
             )
             return alert.get() if type == "ask" else alert.get() == (value[0] if value else "OK")
 
-        # ---- ASK STRING ----
+        # ASKSTRING
         elif type == "askstring":
-            return simpledialog.askstring(
+            return CTkInput(
                 heading or "Input",
                 text or "",
                 initialvalue=value
@@ -94,5 +94,4 @@ class ViewMessageBox:
 
         else:
             raise ValueError(f"Unknown messagebox type: {type}")
-        
-        
+            

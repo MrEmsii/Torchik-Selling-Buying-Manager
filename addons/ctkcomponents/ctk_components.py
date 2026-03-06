@@ -210,10 +210,26 @@ class CTkAlert_Emsii_Version(ctk.CTkToplevel):
             return self.result
         
     def _center_window(self):
-        screen_w = self.winfo_screenwidth()
-        screen_h = self.winfo_screenheight()
-        x = int((screen_w / 2) - (self.width / 2))
-        y = int((screen_h / 2) - (self.height / 2))
+        self.update_idletasks()
+
+        master = self.master
+
+        if master:
+            x_master = master.winfo_rootx()
+            y_master = master.winfo_rooty()
+            w_master = master.winfo_width()
+            h_master = master.winfo_height()
+
+            x = x_master + (w_master // 2) - (self.width // 2)
+            y = y_master + (h_master // 2) - (self.height // 2)
+
+        else:
+            screen_w = self.winfo_screenwidth()
+            screen_h = self.winfo_screenheight()
+
+            x = (screen_w // 2) - (self.width // 2)
+            y = (screen_h // 2) - (self.height // 2)
+
         self.geometry(f"{self.width}x{self.height}+{x}+{y}")
 
     def _close(self, value):
@@ -229,7 +245,7 @@ class CTkAlert_old(ctk.CTkToplevel):
         self.old_x = None
         self.width = 420
         self.height = 200
-        center_window(self, self.width, self.height)
+        # center_window(self, self.width, self.height)
         self.resizable(False, False)
         self.overrideredirect(True)
         self.lift()
@@ -1000,10 +1016,6 @@ class Demo(ctk.CTk):
     def progress_popup(self):
         my_progress = CTkProgressPopup(master=self.preview_frame, title="Background Tasks",
                                        label="Label...", message="Do something...", side="right_bottom")
-        # my_progress.update_label("New Label...") # Updates label
-        # my_progress.update_message("New Message...") # Updates message
-        # my_progress.update_progress(54) # Update progress bar (0-100)
-        # my_progress.cancel_task() # Cancel task and close progress popup
 
     def treeview(self):
         data = [

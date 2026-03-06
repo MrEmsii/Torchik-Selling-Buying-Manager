@@ -564,7 +564,16 @@ class ControllerStock():
         self.load_kategorie_daemon()
 
     def stworz_sklep(self, value=None):
-        leksykon = self.leksykon_messagebox["add_messagebox"]
+        name = self.messagebox_controller.messagebox(
+            type="delete",
+            app=self.view.stock_frame,
+            key="shop"
+        )
+        
+        print(f"Utworz sklep: {name}")
+
+        return
+
         name = self.messagebox_controller.messagebox(type="ask", heading=leksykon["heading"], text=leksykon["text"]["shop"]+"\t\t\t\t", value=value)
         if name == "" or self.specjalne_znaki(name) :
             leksykon = self.leksykon_messagebox["error_messagebox"]
@@ -579,21 +588,34 @@ class ControllerStock():
 
             self.sound.play_confirm_sound()
 
-    def stworz_kupujacy(self, value=None):
-        leksykon = self.leksykon_messagebox["add_messagebox"]
-        name = self.messagebox_controller.messagebox(type="ask", heading=leksykon["heading"], text=leksykon["text"]["buyer"]+"\t\t\t\t", value=value)
-        if name == "" or self.specjalne_znaki(name) :
-            leksykon = self.leksykon_messagebox["error_messagebox"]
-            self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
-            self.stworz_kupujacy(value=name)
+    def stworz_kupujacy(self):
+        name = self.messagebox_controller.messagebox(
+            type="add",
+            app=self.view.stock_frame,
+            key="buyer"
+        )
+
+        if name == "" or self.specjalne_znaki(name):
+
+            self.messagebox_controller.messagebox(
+                type="error",
+                app=self.view.stock_frame,
+                key="name"
+            )
+
+            self.stworz_kupujacy()
 
         elif name is not None:
+
             obiekt = Kupujacy(nazwa=name)
+
             self.db_session.add(obiekt)
             self.db_session.commit()
-            self.load_kupujacy_daemon(widok="pokaz")  
 
-            self.sound.play_confirm_sound()
+            self.load_kupujacy_daemon(widok="pokaz")
+
+            if self.sound:
+                self.sound.play_confirm_sound()
 
     def stworz_kategoria(self, value=None):
         leksykon = self.leksykon_messagebox["add_messagebox"]

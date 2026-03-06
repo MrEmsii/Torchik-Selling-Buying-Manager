@@ -69,7 +69,6 @@ class Kategoria(Base):
         back_populates="kategoria"
     )
 
-
 class Sklep(Base):
     __tablename__ = "sklep"
 

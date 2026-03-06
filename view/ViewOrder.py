@@ -51,7 +51,6 @@ class ViewOrder(BaseView):
             except Exception as e:
                 print(f"Błąd ikony w OrderWindow: {e}")
 
-        self.order_master.after(1000, set_icon)
 
         for i in range(0, 4):
             self.order_master.grid_rowconfigure(i, weight=4)
@@ -112,7 +111,7 @@ class ViewOrder(BaseView):
         self.realizacja_frame.grid(row=2, column=1, columnspan=5, rowspan=4, sticky="nsew", padx=5, pady=5)
         
     def order_tree(self, parent_frame, label_text):
-        columns_name = self.leksykon["columns"]["order_tree_columns"]
+        columns_name = self.leksykon.get("columns", {}).get("order_tree_columns")  # bezpieczne pobranie z leksykonu
         label = ct.CTkLabel(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)
 

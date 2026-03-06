@@ -44,7 +44,7 @@ class ControllerMessageBox:
     # ------------------------
     # GENERIC MESSAGEBOX
     # ------------------------
-    def messagebox(self, type: str, app=None, key: str = None) -> any:
+    def messagebox(self, type: str, app=None, key: str = None, value: str = None) -> any:
         """
         Ogólny interfejs do wywoływania messageboxa.
         Typy obsługiwane: error, info, close, ask, delete
@@ -57,7 +57,6 @@ class ControllerMessageBox:
         text_data = leksykon.get("text", "")
         value_buttons = leksykon.get("buttons", ["OK"])
 
-        # Pobranie tekstu z leksykonu
         if key and isinstance(text_data, dict):
             text = text_data.get(key, next(iter(text_data.values())))
         elif isinstance(text_data, str):
@@ -65,29 +64,21 @@ class ControllerMessageBox:
         else:
             text = next(iter(text_data.values())) if isinstance(text_data, dict) else str(text_data)
 
-        # Dźwięki
         if self.sound:
             if type in ["error", "delete"]:
                 self.sound.play_error_sound()
             elif type in ["info", "close"]:
                 self.sound.play_info_sound()
 
-        # Mapowanie delete -> ask w widoku
-        view_type = "askstring" if type == "delete" else type
-
-        # view_type = "ask" if type == "delete" else type
-
         dialog = self.view.messagebox(
-            type=view_type,
+            type=type,
             heading=heading,
             text=text,
-            value=value_buttons,
+            value_buttons = value_buttons,
+            value=value,
             app=app
         )
-        if dialog in self.leksykon_messagebox.get("delete_messagebox", {}).get("buttons", []):
-            return True
-        else:
-            return None
+        return dialog
     # ------------------------
     # ASYNC MESSAGE
     # ------------------------

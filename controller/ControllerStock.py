@@ -86,13 +86,13 @@ class ControllerStock():
         commend = self.load_kategorie(widok = widok, select_item=select_item)
         threading.Thread(target=lambda: commend, daemon=True).start()
 
-    def load_firmy_deaemon(self, widok = "ukryj", select_item = None):
-        print("load_firmy_deaemon")
+    def load_firmy_daemon(self, widok = "ukryj", select_item = None):
+        print("load_firmy_daemon")
         commend = self.load_firmy(widok = widok, select_item=select_item)
         threading.Thread(target=lambda: commend, daemon=True).start()
 
-    def load_artykuly_deaemon(self, widok = "ukryj"):
-        print("load_artykuly_deaemon")
+    def load_artykuly_daemon(self, widok = "ukryj"):
+        print("load_artykuly_daemon")
         commend = self.load_artykuly(widok = widok)
         threading.Thread(target=lambda: commend, daemon=True).start()
 
@@ -189,7 +189,7 @@ class ControllerStock():
                 if i % progress_step == 0:
                     self.messagebox_controller.update_message_async(i / len(artykuly))
 
-            artykuly_data.sort(key=lambda x: (x[3].lower(), x[4].lower()))
+            artykuly_data.sort(key=lambda x: (x[3].lower(), x[5].lower(), x[4].lower()))
 
             def update_gui():
                 self.artykuly_tree.delete(*self.artykuly_tree.get_children())
@@ -518,7 +518,7 @@ class ControllerStock():
         self.artykuly_tree = self.view.artykuly_tree(parent_frame = self.view.secend_frame, label_text = name["select_art"])
         self.kategorie_tree = self.view.name_tree(self.view.stock_frame, name["category"], True)
         
-        self.load_artykuly_deaemon()
+        self.load_artykuly_daemon()
         self.load_kategorie_daemon("ukryj")
 
         self.kategorie_tree.bind("<Double-1>", self.on_double_click_filtrowanie_kategoria)
@@ -547,7 +547,7 @@ class ControllerStock():
         self.button_manager(frame="firmy")
         name = self.leksykon_programu["names_list"]["company"]
         self.firma_tree = self.view.name_tree(self.stock_frame, name, True)
-        self.load_firmy_deaemon()
+        self.load_firmy_daemon()
 
     def list_sklepy(self):
         self.zamowienia_frame.grid_remove()
@@ -565,28 +565,30 @@ class ControllerStock():
 
     def stworz_sklep(self, value=None):
         name = self.messagebox_controller.messagebox(
-            type="delete",
+            type="add",
             app=self.view.stock_frame,
             key="shop"
         )
-        
-        print(f"Utworz sklep: {name}")
 
-        return
+        if name == "" or self.specjalne_znaki(name):
+            self.messagebox_controller.messagebox(
+                type="error",
+                app=self.view.stock_frame,
+                key="name"
+            )
 
-        name = self.messagebox_controller.messagebox(type="ask", heading=leksykon["heading"], text=leksykon["text"]["shop"]+"\t\t\t\t", value=value)
-        if name == "" or self.specjalne_znaki(name) :
-            leksykon = self.leksykon_messagebox["error_messagebox"]
-            self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
-            self.stworz_sklep(value=name)
+            self.stworz_sklep()
 
         elif name is not None:
             obiekt = Sklep(nazwa=name)
+
             self.db_session.add(obiekt)
             self.db_session.commit()
-            self.load_sklepy_daemon(widok="pokaz")    
 
-            self.sound.play_confirm_sound()
+            self.load_sklepy_daemon(widok="pokaz")
+
+            if self.sound:
+                self.sound.play_confirm_sound()
 
     def stworz_kupujacy(self):
         name = self.messagebox_controller.messagebox(
@@ -596,7 +598,6 @@ class ControllerStock():
         )
 
         if name == "" or self.specjalne_znaki(name):
-
             self.messagebox_controller.messagebox(
                 type="error",
                 app=self.view.stock_frame,
@@ -606,7 +607,6 @@ class ControllerStock():
             self.stworz_kupujacy()
 
         elif name is not None:
-
             obiekt = Kupujacy(nazwa=name)
 
             self.db_session.add(obiekt)
@@ -618,36 +618,56 @@ class ControllerStock():
                 self.sound.play_confirm_sound()
 
     def stworz_kategoria(self, value=None):
-        leksykon = self.leksykon_messagebox["add_messagebox"]
-        name = self.messagebox_controller.messagebox(type="ask", heading=leksykon["heading"], text=leksykon["text"]["category"]+"\t\t\t\t", value=value)
+        name = self.messagebox_controller.messagebox(
+            type="add",
+            app=self.view.stock_frame,
+            key="category"
+        )
+
         if name == "" or self.specjalne_znaki(name):
-            leksykon = self.leksykon_messagebox["error_messagebox"]
-            self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
-            self.stworz_kategoria(value=name)
+            self.messagebox_controller.messagebox(
+                type="error",
+                app=self.view.stock_frame,
+                key="name"
+            )
+            self.stworz_kategoria()
 
         elif name is not None:
             obiekt = Kategoria(nazwa=name)
+
             self.db_session.add(obiekt)
             self.db_session.commit()
-            self.load_kategorie_daemon(widok="pokaz")    
 
-            self.sound.play_confirm_sound()
+            self.load_kategorie_daemon(widok="pokaz")
+
+            if self.sound:
+                self.sound.play_confirm_sound()
 
     def stworz_firma(self, value=None):
-        leksykon = self.leksykon_messagebox["add_messagebox"]
-        name = self.messagebox_controller.messagebox(type="ask", heading=leksykon["heading"], text=leksykon["text"]["company"]+"\t\t\t\t", value=value)
-        if name == "" or self.specjalne_znaki(name) :
-            leksykon = self.leksykon_messagebox["error_messagebox"]
-            self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
-            self.stworz_firma(value=name)
+        name = self.messagebox_controller.messagebox(
+            type="add",
+            app=self.view.stock_frame,
+            key="company"
+        )
+
+        if name == "" or self.specjalne_znaki(name):
+            self.messagebox_controller.messagebox(
+                type="error",
+                app=self.view.stock_frame,
+                key="name"
+            )
+            self.stworz_firma()
 
         elif name is not None:
             obiekt = Firma(nazwa=name)
+
             self.db_session.add(obiekt)
             self.db_session.commit()
-            self.load_firmy_deaemon(widok="pokaz") 
 
-            self.sound.play_confirm_sound()
+            self.load_firmy_daemon(widok="pokaz")
+
+            if self.sound:
+                self.sound.play_confirm_sound()
 
     def zmien_nazwa_kupujacy(self):
         selected_item = self.kupujacy_tree.selection()
@@ -658,8 +678,12 @@ class ControllerStock():
         kupujacy_id = element_value[0]
         stara_nazwa = element_value[1]
 
-        leksykon = self.leksykon_messagebox["edit_messagebox"]
-        new_value = self.messagebox_controller.messagebox(type="ask", heading=leksykon["heading"], text=leksykon["text"]["buyer"]+"\t\t\t\t", value=stara_nazwa)
+        new_value = self.messagebox_controller.messagebox(
+            type="edit",
+            app=self.view.stock_frame,
+            key="buyer",
+            value=stara_nazwa
+        )
 
         if new_value and new_value.strip() and not self.specjalne_znaki(new_value):
             kupujacy = self.db_session.query(Kupujacy).filter_by(id=kupujacy_id).first()
@@ -673,8 +697,11 @@ class ControllerStock():
                 self.sound.play_confirm_sound()
 
         elif self.specjalne_znaki(new_value):
-            leksykon = self.leksykon_messagebox["error_messagebox"]
-            self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            self.messagebox_controller.messagebox(
+                type="error",
+                app=self.view.stock_frame,
+                key="name"
+            )
             self.zmien_nazwa_kupujacy()
 
     def zmien_nazwa_sklep(self):
@@ -686,8 +713,12 @@ class ControllerStock():
         sklep_id = element_value[0]
         stara_nazwa = element_value[1]
 
-        leksykon = self.leksykon_messagebox["edit_messagebox"]
-        new_value = self.messagebox_controller.messagebox(type="ask", heading=leksykon["heading"], text=leksykon["text"]["shop"]+"\t\t\t\t", value=stara_nazwa)
+        new_value = self.messagebox_controller.messagebox(
+            type="edit",
+            app=self.view.stock_frame,
+            key="shop",
+            value=stara_nazwa
+        )
 
         if new_value and new_value.strip() and not self.specjalne_znaki(new_value):
             sklep = self.db_session.query(Sklep).filter_by(id=sklep_id).first()
@@ -701,8 +732,11 @@ class ControllerStock():
                 self.sound.play_confirm_sound()
 
         elif self.specjalne_znaki(new_value):
-            leksykon = self.leksykon_messagebox["error_messagebox"]
-            self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            self.messagebox_controller.messagebox(
+                type="error",
+                app=self.view.stock_frame,
+                key="name"
+            )
             self.zmien_nazwa_sklep()
 
     def zmien_nazwa_firma(self):
@@ -714,8 +748,12 @@ class ControllerStock():
         firma_id = element_value[0]
         stara_nazwa = element_value[1]
 
-        leksykon = self.leksykon_messagebox["edit_messagebox"]
-        new_value = self.messagebox_controller.messagebox(type="ask", heading=leksykon["heading"], text=leksykon["text"]["company"]+"\t\t\t\t", value=stara_nazwa)
+        new_value = self.messagebox_controller.messagebox(
+            type="edit",
+            app=self.view.stock_frame,
+            key="company",
+            value=stara_nazwa
+        )
 
         if new_value and new_value.strip():
             firma = self.db_session.query(Firma).filter_by(id=firma_id).first()
@@ -724,13 +762,16 @@ class ControllerStock():
                 firma.nazwa = new_value 
                 self.db_session.commit()
                 self.load_zamowienia_daemon()
-                self.load_firmy_deaemon(widok = "ukryj") 
+                self.load_firmy_daemon(widok = "ukryj") 
 
                 self.sound.play_confirm_sound()
 
         elif self.specjalne_znaki(new_value):
-            leksykon = self.leksykon_messagebox["error_messagebox"]
-            self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            self.messagebox_controller.messagebox(
+                type="error",
+                app=self.view.stock_frame,
+                key="name"
+            )
             self.zmien_nazwa_firma()
 
     def zmien_nazwa_kategoria(self):
@@ -742,9 +783,13 @@ class ControllerStock():
         kategoria_id = element_value[0]
         stara_nazwa = element_value[1]
 
-        leksykon = self.leksykon_messagebox["edit_messagebox"]
-        new_value = self.messagebox_controller.messagebox(type="ask", heading=leksykon["heading"], text=leksykon["text"]["category"]+"\t\t\t\t", value=stara_nazwa)
-
+        new_value = self.messagebox_controller.messagebox(
+            type="edit",
+            app=self.view.stock_frame,
+            key="category",
+            value=stara_nazwa
+        )
+        
         if new_value and new_value.strip():
             kategoria = self.db_session.query(Kategoria).filter_by(id=kategoria_id).first()
 
@@ -757,8 +802,11 @@ class ControllerStock():
                 self.sound.play_confirm_sound()
 
         elif self.specjalne_znaki(new_value):
-            leksykon = self.leksykon_messagebox["error_messagebox"]
-            self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            self.messagebox_controller.messagebox(
+                type="error",
+                app=self.view.stock_frame,
+                key="name"
+            )
             self.zmien_nazwa_kategoria()
 
     def usun_zamowienie(self):
@@ -806,17 +854,13 @@ class ControllerStock():
         )
         ilosc = int(values[2])
 
-        leksykon = self.leksykon_messagebox["delete_messagebox"]
-
         dialog = self.messagebox_controller.messagebox(
-            type="ask",
-            heading=leksykon["heading"],
-            text=leksykon["text"]["order"] +
-                " lub ".join(leksykon["agree"]) +
-                "\t\t\t\t"
+            type="delete",
+            app=self.view.zamowienia_frame,
+            key="article"
         )
 
-        if dialog and dialog.lower() in [x.lower() for x in leksykon["agree"]]:
+        if dialog:
 
             from model.stock_db_model import ZamowienieArtykul
 
@@ -845,14 +889,13 @@ class ControllerStock():
         if not selected_item:
             return
         
-        leksykon = self.leksykon_messagebox["delete_messagebox"]
-
         dialog = self.messagebox_controller.messagebox(
-                                 type="ask", 
-                                 heading=leksykon["heading"], 
-                                 text=leksykon["text"]["buyer"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
+            type="delete",
+            app=self.view.zamowienia_frame,
+            key="buyer"
+        )
 
-        if dialog and dialog.lower() in [name.lower() for name in leksykon["agree"]]:
+        if dialog:
             kupujacy_id = self.kupujacy_tree.item(self.kupujacy_tree.selection()[0], 'values')[0]
             obj = self.db_session.query(Kupujacy).filter_by(id=kupujacy_id).first()
             self.db_session.delete(obj)
@@ -867,14 +910,13 @@ class ControllerStock():
         if not selected_item:
             return
         
-        leksykon = self.leksykon_messagebox["delete_messagebox"]
+        dialog = self.messagebox_controller.messagebox(
+            type="delete",
+            app=self.view.zamowienia_frame,
+            key="shop"
+        )
 
-        dialog = self.messagebox_controller.messagebox( 
-                                 type="ask", 
-                                 heading=leksykon["heading"], 
-                                 text=leksykon["text"]["shop"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
-
-        if dialog and dialog.lower() in [name.lower() for name in leksykon["agree"]]:
+        if dialog:
             sklep_id = self.sklepy_tree.item(self.sklepy_tree.selection()[0], 'values')[0]
             obj = self.db_session.query(Sklep).filter_by(id=sklep_id).first()
             self.db_session.delete(obj)
@@ -888,19 +930,18 @@ class ControllerStock():
         if not selected_item:
             return
         
-        leksykon = self.leksykon_messagebox["delete_messagebox"]
+        dialog = self.messagebox_controller.messagebox(
+            type="delete",
+            app=self.view.zamowienia_frame,
+            key="company"
+        )
 
-        dialog = self.messagebox_controller.messagebox( 
-                                 type="ask", 
-                                 heading=leksykon["heading"], 
-                                 text=leksykon["text"]["company"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
-
-        if dialog and dialog.lower() in [name.lower() for name in leksykon["agree"]]:
+        if dialog:
             firma_id = self.firma_tree.item(self.firma_tree.selection()[0], 'values')[0]
             obj = self.db_session.query(Firma).filter_by(id=firma_id).first()
             self.db_session.delete(obj)
             self.db_session.commit()
-            self.load_firmy_deaemon(widok = "ukryj")    
+            self.load_firmy_daemon(widok = "ukryj")    
 
             self.sound.play_confirm_sound()
 
@@ -909,14 +950,13 @@ class ControllerStock():
         if not selected_item:
             return
         
-        leksykon = self.leksykon_messagebox["delete_messagebox"]
+        dialog = self.messagebox_controller.messagebox(
+            type="delete",
+            app=self.view.zamowienia_frame,
+            key="category"
+        )
 
-        dialog = self.messagebox_controller.messagebox( 
-                                 type="ask", 
-                                 heading=leksykon["heading"], 
-                                 text=leksykon["text"]["category"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
-
-        if dialog and dialog.lower() in [name.lower() for name in leksykon["agree"]]:
+        if dialog:
             kategoria_id = self.kategorie_tree.item(self.kategorie_tree.selection()[0], 'values')[0]
             obj = self.db_session.query(Kategoria).filter_by(id=kategoria_id).first()
             self.db_session.delete(obj)
@@ -930,14 +970,13 @@ class ControllerStock():
         if not selected_item:
             return
 
-        leksykon = self.leksykon_messagebox["delete_messagebox"]
+        dialog = self.messagebox_controller.messagebox(
+            type="delete",
+            app=self.view.zamowienia_frame,
+            key="article"
+        )
 
-        dialog = self.messagebox_controller.messagebox( 
-                                 type="ask", 
-                                 heading=leksykon["heading"], 
-                                 text=leksykon["text"]["article"] + " lub ".join(leksykon["agree"]) + "\t\t\t\t")
-
-        if dialog and dialog.lower() in [name.lower() for name in leksykon["agree"]]:
+        if dialog:
             artykul_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
             self.db_session.query(Artykul_Lista).filter_by(id=artykul_id).delete(synchronize_session=False)
             self.db_session.commit()
@@ -959,8 +998,11 @@ class ControllerStock():
         elif commend == "modyfikuj":
             selected_item = self.artykuly_tree.selection()
             if not selected_item:
-                leksykon = self.leksykon_messagebox["error_messagebox"]
-                self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["select_art"])
+                self.messagebox_controller.messagebox(
+                    type="error",
+                    app=self.view.stock_frame,
+                    key="select_art"
+                )
                 return
                     
             self.artykul_modyfikacja_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
@@ -977,12 +1019,10 @@ class ControllerStock():
         elif commend == "duplikuj":
             selected_item = self.artykuly_tree.selection()
             if not selected_item:
-                leksykon = self.leksykon_messagebox["error_messagebox"]
                 self.messagebox_controller.messagebox(
-                    app = self.view.stock_frame,
                     type="error",
-                    heading=leksykon["heading"],
-                    text=leksykon["text"]["select_art"]
+                    app=self.view.stock_frame,
+                    key="select_art"
                 )
                 return
             self.artykul_modyfikacja_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
@@ -1003,7 +1043,7 @@ class ControllerStock():
         self.kategorie_tree = self.view.name_tree(self.view.secend_frame, "Kategorie Lista", True)
 
         self.load_kategorie_daemon(widok = "ukryj", select_item = kategoria_id_artykulu)
-        self.load_firmy_deaemon(select_item = firma_id_artykulu)
+        self.load_firmy_daemon(select_item = firma_id_artykulu)
 
     def wczytaj_informacje_artykul(self, artykul_id):
         artykul = self.db_session.query(Artykul_Lista).filter_by(id=artykul_id).first()
@@ -1038,8 +1078,11 @@ class ControllerStock():
         elif commend == "modyfikuj":
             selected_item = self.zamowienia_tree.selection()
             if not selected_item:
-                leksykon = self.leksykon_messagebox["error_messagebox"]
-                self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["order"])
+                self.messagebox_controller.messagebox(
+                    type="error",
+                    app=self.view.stock_frame,
+                    key="order"
+                )
                 return
 
             self.zamowienie_id = self.zamowienia_tree.item(selected_item[0], 'values')[0]
@@ -1063,14 +1106,20 @@ class ControllerStock():
     def zatwierdz_nowy_modyfikuj_zamowienie(self, commend = "stworz"):
         selected_item = self.kupujacy_tree.selection()
         if not selected_item:
-            leksykon = self.leksykon_messagebox["error_messagebox"]
-            self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["buyer"])
+            self.messagebox_controller.messagebox(
+                type="error",
+                app=self.view.stock_frame,
+                key="buyer"
+            )
             return
         
         selected_item = self.sklepy_tree.selection()
         if not selected_item:
-            leksykon = self.leksykon_messagebox["error_messagebox"]
-            self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["shop"])
+            self.messagebox_controller.messagebox(
+                type="error",
+                app=self.view.stock_frame,
+                key="shop"
+            )
             return
 
         try:
@@ -1079,13 +1128,20 @@ class ControllerStock():
             else:
                 rabat_j = float(self.view.rabat_j_var.get().replace(',', '.'))
         except tk.TclError:
-            leksykon = self.leksykon_messagebox["error_messagebox"]
-            self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["unit_discount"])
+            self.messagebox_controller.messagebox(
+                type="error",
+                app=self.view.stock_frame,
+                key="unit_discount"
+            )
             return
+
         except ValueError:
-            leksykon = self.leksykon_messagebox["error_messagebox"]
-            self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["unit_discount"])
-            return
+            self.messagebox_controller.messagebox(
+                type="error",
+                app=self.view.stock_frame,
+                key="unit_discount"
+            )
+            return   
 
         try:
             if self.view.rabat_p_var.get() == "0.00" or self.view.rabat_p_var.get() == "":
@@ -1093,19 +1149,28 @@ class ControllerStock():
             else:
                 rabat_procentowy = float(self.view.rabat_p_var.get().replace(',', '.'))
         except tk.TclError:
-            leksykon = self.leksykon_messagebox["error_messagebox"]
-            self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["proc_discount"])
-            return
+            self.messagebox_controller.messagebox(
+                type="error",
+                app=self.view.stock_frame,
+                key="percent_discount"
+            )
+            return        
         except ValueError:
-            leksykon = self.leksykon_messagebox["error_messagebox"]
-            self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["proc_discount"])
+            self.messagebox_controller.messagebox(
+                type="error",
+                app=self.view.stock_frame,
+                key="percent_discount"
+            )
             return
 
         try:
             data = self.konwersja_string_do_data(self.view.date_entry.get_date())
         except ValueError:
-            leksykon = self.leksykon_messagebox["error_messagebox"]
-            self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["date"])
+            self.messagebox_controller.messagebox(
+                type="error",
+                app=self.view.stock_frame,
+                key="date"
+            )
             return
         
         kupujacy_id = int(self.kupujacy_tree.item(self.kupujacy_tree.selection()[0], 'values')[0])
@@ -1135,20 +1200,29 @@ class ControllerStock():
     def zatwierdz_nowy_modyfikuj_artykul(self, commend = "stworz"):
         selected_item = self.firma_tree.selection()
         if not selected_item:
-            leksykon = self.leksykon_messagebox["error_messagebox"]
-            self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["company"])
+            self.messagebox_controller.messagebox(
+                type="error",
+                app=self.view.stock_frame,
+                key="company"
+            )
             return
         
         selected_item = self.kategorie_tree.selection()
         if not selected_item:
-            leksykon = self.leksykon_messagebox["error_messagebox"]
-            self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["category"])
+            self.messagebox_controller.messagebox(
+                type="error",
+                app=self.view.stock_frame,
+                key="category"
+            )
             return
 
         nazwa = self.view.nazwa_artykulu_string.get()
         if not nazwa:
-            leksykon = self.leksykon_messagebox["error_messagebox"]
-            self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["name"])
+            self.messagebox_controller.messagebox(
+                type="error",
+                app=self.view.stock_frame,
+                key="name"
+            )
             return
        
         firma_id = int(self.firma_tree.item(self.firma_tree.selection()[0], 'values')[0])
@@ -1243,8 +1317,9 @@ class ControllerStock():
         relacja_name = self.inside_tree.item(self.inside_tree.selection()[0], 'values')
         cena = float(relacja_name[1].replace(" "+self.currency,"").replace(",","."))
 
-        leksykon = self.leksykon_messagebox["edit_messagebox"]
-        self.view.cena_ilosc_window(dsc = self.dsc, title=leksykon["heading"], id = relacja_name[0], relacja=relacja_name[2], cena = cena)
+        leksykon = self.leksykon_programu.get("edit_messagebox", {})
+
+        self.view.cena_ilosc_window(dsc = self.dsc, title=leksykon.get("heading", "Edit"), id = relacja_name[0], relacja=relacja_name[2], cena = cena)
         self.button_manager("wyjdź_z_cena_ilosc_edycja", back_target = 'lista_artykułów')
         
         zamowienie_id = self.zamowienie_id
@@ -1263,12 +1338,10 @@ class ControllerStock():
                 self.view.cena_artykulu_var.get().replace(",", ".")
             )
         except Exception:
-            leksykon = self.leksykon_messagebox["error_messagebox"]
             self.messagebox_controller.messagebox(
-                app=self.view.stock_frame,
                 type="error",
-                heading=leksykon["heading"],
-                text=leksykon["text"]["price"]
+                app=self.view.stock_frame,
+                key="price"
             )
             return
 
@@ -1277,12 +1350,10 @@ class ControllerStock():
                 self.view.ilosc_artykulu_var.get().replace(",", ".")
             )
         except Exception:
-            leksykon = self.leksykon_messagebox["error_messagebox"]
             self.messagebox_controller.messagebox(
-                app=self.view.stock_frame,
                 type="error",
-                heading=leksykon["heading"],
-                text=leksykon["text"]["amount"]
+                app=self.view.stock_frame,
+                key="amount"
             )
             return
 
@@ -1316,19 +1387,26 @@ class ControllerStock():
         try:
             cena_artykulu_var = float(self.view.cena_artykulu_var.get().replace(",", "."))
         except ValueError:
-            leksykon = self.leksykon_messagebox["error_messagebox"]
-            self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["price"])
+            self.messagebox_controller.messagebox(
+                type="error",
+                app=self.view.stock_frame,
+                key="price"
+            )
             return
 
         try:
             ilosc_artykulu_var =  float(self.view.ilosc_artykulu_var.get().replace(",", "."))
         except ValueError:
-            leksykon = self.leksykon_messagebox["error_messagebox"]
-            self.messagebox_controller.messagebox(app = self.view.stock_frame, type="error", heading=leksykon["heading"], text=leksykon["text"]["amount"])
+            self.messagebox_controller.messagebox(
+                type="error",
+                app=self.view.stock_frame,
+                key="amount"
+            )
             return
+        
 
         zamowienie_id = self.zamowienie_dodawanie_artykulu_id
-        self.dodaj_artykul_do_zamowienie(zamowienie_id, self.cena_ilosc_select_item, cena_artykulu_var, ilosc_artykulu_var)
+        self.dodaj_artykul_do_zamowienia(zamowienie_id, self.cena_ilosc_select_item, cena_artykulu_var, ilosc_artykulu_var)
         
         self.load_zamowienia_daemon()
         self.list_inside_zamowienie(zamowienie_id)
@@ -1341,7 +1419,7 @@ class ControllerStock():
             artykul_id,
             cena,
             ilosc,
-            commit=False
+            commit=True
     ):
         cena = Decimal(str(cena))
 
@@ -1427,8 +1505,9 @@ class ControllerStock():
             artykul_id = self.artykuly_tree.item(selected_item[0], 'values')[0]
             self.cena_ilosc_select_item = artykul_id
 
-            leksykon = self.leksykon_messagebox["add_messagebox"]
-            self.view.cena_ilosc_window(dsc = self.dsc, title=leksykon["heading"])
+            leksykon = self.leksykon_programu.get("add_messagebox", {})
+
+            self.view.cena_ilosc_window(dsc = self.dsc, title=leksykon.get("heading", "Add Item"))
 
             self.button_manager(frame="wyjdź_z_cena_ilosc_dodawanie", back_target="wyjdź_z_cena_ilosc_dodawanie")
             

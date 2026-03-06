@@ -257,7 +257,7 @@
             "heading": "Informacja",
             "text": "Operacja zakończona pomyślnie."
         },
-        "info_initializing": {
+        "info_initializing_messagebox": {
             "heading": "Inicjalizacja operacji",
             "text": "Inicjalizacja operacji, proszę poczekaj"
         },
@@ -287,14 +287,14 @@
         "delete_messagebox":{
             "heading": "Usuń",
             "text": {
-                "shop": "Napewno chcesz usunąć sklep z listy?\nCzynność NIE odwracalna!\nWpisz ",
-                "buyer": "Napewno chcesz usunąć kupującego z listy?\nCzynność NIE odwracalna!\nWpisz ",
-                "order": "Napewno chcesz usunąć zamówienie z listy?\nCzynność NIE odwracalna!\nWpisz ",
-                "category": "Napewno chcesz usunąć kategorię z listy?\nCzynność NIE odwracalna!\nWpisz ",
-                "company": "Napewno chcesz usunąć firmę z listy?\nCzynność NIE odwracalna!\nWpisz ",
-                "article": "Napewno chcesz usunąć artykuł z listy?\nCzynność NIE odwracalna!\nWpisz "
+                "shop": "Napewno chcesz usunąć sklep z listy?\nCzynność NIE odwracalna!",
+                "buyer": "Napewno chcesz usunąć kupującego z listy?\nCzynność NIE odwracalna!",
+                "order": "Napewno chcesz usunąć zamówienie z listy?\nCzynność NIE odwracalna!",
+                "category": "Napewno chcesz usunąć kategorię z listy?\nCzynność NIE odwracalna!",
+                "company": "Napewno chcesz usunąć firmę z listy?\nCzynność NIE odwracalna!",
+                "article": "Napewno chcesz usunąć artykuł z listy?\nCzynność NIE odwracalna!"
             },
-            "buttons": ["TAK", "YES"]
+            "buttons": ["TAK", "NIE"]
         },
         "error_messagebox":{
             "heading": "Błąd",
@@ -303,7 +303,7 @@
                 "buyer": "Brak wybranego kupującego! Wybierz kupującego.",
                 "order": "Brak wybranego zamówienia! Wybierz zamówienie.",
                 "unit_discount": "Nieprawidłowa wartość rabatu! Wpisz liczbę.",
-                "proc_discount": "Nieprawidłowa wartość rabatu! Wpisz liczbę.",
+                "percent_discount": "Nieprawidłowa wartość rabatu! Wpisz liczbę.",
                 "date": "Nieprawidłowa data! Wpisz poprawną datę.",
                 "category": "Brak wybranego kategorii! Wybierz kategorii.",
                 "company": "Brak wybranej firmy! Wybierz firmy.",

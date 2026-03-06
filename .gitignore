@@ -10,3 +10,4 @@ test*.py
 *.sqlite3-query
 client_secret.json
 .venv/*
+*.code-workspace

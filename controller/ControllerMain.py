@@ -101,8 +101,8 @@ class ControllerMain:
             leksykon_programu=self.leksykon_programu[kwargs["window_key"]],
             konfiguracja_programu=self.konfiguracja_programu,
             sound=self.sound,
-            messagebox_controller=ControllerMessageBox(sound=self.sound, leksykon_messagebox=self.leksykon_programu["messagebox_window"]),
-            currency=self.leksykon_programu["currency"],
+            messagebox_controller=ControllerMessageBox(sound=self.sound, leksykon_messagebox=self.leksykon_programu.get("messagebox_window", {})),
+            currency=self.leksykon_programu.get("currency", "None"),
             language_code=self.language_code,
             main_controller=self
         )
@@ -139,7 +139,7 @@ class ControllerMain:
         ]
 
         for key, command, row, col in buttons:
-            leksykon = self.leksykon_programu["main_window"][key]
+            leksykon = self.leksykon_programu.get("main_window", {}).get(key, {"text": key})
             self.main_view.utworz_przycisk(
                 frame,
                 command,

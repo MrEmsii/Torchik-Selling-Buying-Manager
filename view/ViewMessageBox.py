@@ -1,4 +1,4 @@
-from addons.CustomTkinterMessagebox import CTkMessagebox
+# from addons.CustomTkinterMessagebox import CTkMessagebox
 from addons.ctkcomponents import *
 import addons.customtkinter as ct
 
@@ -45,13 +45,8 @@ class ViewMessageBox:
     # ------------------------
     # GENERAL MESSAGEBOX
         # ------------------------
-    def messagebox(self, type, language_code=None, heading=None,
-                text=None, value=None, app=None):
-
+    def messagebox(self, type, heading=None, text=None, value=None, app=None, language_code=None, value_buttons=None):
         type = type.lower().strip()
-
-        if type in ["add", "edit"]:
-            type = "askstring"
 
         # ERROR
         if type == "error" or (type == "language" and language_code):
@@ -74,7 +69,7 @@ class ViewMessageBox:
             return
 
         # CLOSE / ASK
-        elif type in ["close", "ask"]:
+        elif type == "close":
             alert = CTkAlert_Emsii_Version(
                 state="warning",
                 title=heading or "Dialog",
@@ -84,13 +79,28 @@ class ViewMessageBox:
             )
             return alert.get() if type == "ask" else alert.get() == (value[0] if value else "OK")
 
-        # ASKSTRING
-        elif type == "askstring":
-            return CTkInput(
-                heading or "Input",
-                text or "",
-                initialvalue=value
+        elif type == "delete":
+            alert = CTkAlert_Emsii_Version(
+                state="error",
+                title=heading or "Delete",
+                body_text=text or "",
+                btn1=value_buttons[0] if value_buttons else "Delete",
+                btn2=value_buttons[1] if value_buttons and len(value_buttons) > 1 else "Cancel"
             )
+            return alert.get() == (value_buttons[0] if value_buttons else "Delete")
+
+        # ASKSTRING
+        elif type in ["add", "edit"]:
+            if value is None:
+                text= f'{text}'
+            else:
+                text= f'{text} \n {value}'
+                
+            return ct.CTkInputDialog(
+                title=heading or "Input",
+                text= text or "",
+                initial_value=value if type == "edit" else ""
+            ).get_input()
 
         else:
             raise ValueError(f"Unknown messagebox type: {type}")

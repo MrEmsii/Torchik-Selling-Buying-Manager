@@ -42,15 +42,15 @@ class ViewStock(BaseView):
 
     def setup_styles(self, dsc):
         self.stock_master.title("Torchik - Stock Window")
-        icon_path = os.path.join(dsc, "resources", "image", "icon.ico")
+        self.icon_path = os.path.join(dsc, "resources", "image", "icon.ico")
 
         def set_icon():
             try:
                 if platform.system() == "Windows":
-                    self.stock_master.wm_iconbitmap(icon_path)
+                    self.stock_master.wm_iconbitmap(self.icon_path)
                 else:
                     from PIL import Image, ImageTk
-                    icon_image = Image.open(icon_path)
+                    icon_image = Image.open(self.icon_path)
                     self.stock_icon_photo = ImageTk.PhotoImage(icon_image)
                     self.stock_master.wm_iconphoto(True, self.stock_icon_photo)
             except Exception as e:
@@ -209,7 +209,7 @@ class ViewStock(BaseView):
         return tree  
 
     def artykuly_tree(self, parent_frame, label_text):
-        columns_name = self.leksykon["columns"]["artykuly_tree_columns"]
+        columns_name = self.leksykon.get("columns", {}).get("artykuly_tree_columns", [])
 
         label = ct.CTkLabel(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)
@@ -285,7 +285,7 @@ class ViewStock(BaseView):
         return tree  
 
     def zamowienie_tree(self, parent_frame, label_text):
-        columns_name = self.leksykon["columns"]["zamowienia_tree_columns"]
+        columns_name = self.leksykon.get("columns", {}).get("zamowienia_tree_columns", [])
         label = ct.CTkLabel(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)
 
@@ -352,7 +352,9 @@ class ViewStock(BaseView):
         self.secend_frame = ct.CTkFrame(self.stock_master)
         
     def artykul_view(self):
-        label_name = self.leksykon["labels"]
+        label_name = self.leksykon.get("labels", {})
+
+        print(label_name)
 
         self.secend_frame = ct.CTkFrame(self.stock_master)
         self.third_frame = ct.CTkFrame(self.stock_master)
@@ -387,7 +389,7 @@ class ViewStock(BaseView):
         self.third_frame.grid(row=0, column=4, columnspan=3, rowspan=4, sticky="nsew", padx=5, pady=5)
         
     def zamowienie_view(self):
-        label_name = self.leksykon["labels"]
+        label_name = self.leksykon.get("labels", {})
         
         self.secend_frame = ct.CTkFrame(self.stock_master)
         self.third_frame = ct.CTkFrame(self.stock_master)
@@ -436,7 +438,7 @@ class ViewStock(BaseView):
         self.third_frame.grid(row=0, column=4, columnspan=2, rowspan=4, sticky="nsew", padx=5, pady=5)
         
     def cena_ilosc_view(self, cena_artykulu_var = 0, ilosc_artykulu_var = 1):
-        label_name = self.leksykon["labels"]
+        label_name = self.leksykon.get("labels", {})
 
         self.cena_artykulu_var_old = cena_artykulu_var
         self.ilosc_artykulu_var_old = ilosc_artykulu_var
@@ -480,7 +482,16 @@ class ViewStock(BaseView):
         self.window.geometry("400x180+500+300")
         self.window.title(title)
 
-        self.window.iconbitmap(os.path.join(dsc, "resources", "image", "icon.ico"))
+        try:
+            if platform.system() == "Windows":
+                self.stock_master.wm_iconbitmap(self.icon_path)
+            else:
+                from PIL import Image, ImageTk
+                icon_image = Image.open(self.icon_path)
+                self.stock_icon_photo = ImageTk.PhotoImage(icon_image)
+                self.stock_master.wm_iconphoto(True, self.stock_icon_photo)
+        except Exception as e:
+            print(f"Błąd ikony w StockWindow: {e}")
 
         self.id_artykulu = id
 

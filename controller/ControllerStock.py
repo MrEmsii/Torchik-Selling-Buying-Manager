@@ -5,6 +5,7 @@ from model.stock_db_model import Zamowienie, ZamowienieArtykul, Artykul_Lista
 from decimal import Decimal
 
 from view.ViewStock import ViewStock
+from controller.base_controller import BaseController
 
 import addons.customtkinter as ct
 
@@ -15,20 +16,20 @@ import string
 import threading
 import datetime as datetime
 
-class ControllerStock():
+class ControllerStock(BaseController):
     def __init__(
             self, master, dsc, leksykon_programu, konfiguracja_programu, 
             sound = None, 
             messagebox_controller = None, 
-            currency = None, 
+            all_currency = None,
             language_code = None, 
             main_controller=None
             ):
         
+        super().__init__(konfiguracja_programu, all_currency)
+
         self.dsc = dsc
         self.leksykon_programu = leksykon_programu
-        self.konfiguracja_programu = konfiguracja_programu
-        self.currency = currency
         self.main_controller = main_controller
         self.sound = sound
         self.messagebox_controller = messagebox_controller 
@@ -37,12 +38,12 @@ class ControllerStock():
         self.stock_master = ct.CTkToplevel(master)
         self.db_session = SQLconnect()
 
+        
         self.view = ViewStock(
             self.stock_master, 
             dsc=self.dsc, 
             leksykon=self.leksykon_programu, 
-            currency=self.currency,
-            konfiguracja_programu=konfiguracja_programu, 
+            konfiguracja_programu=self.konfiguracja_programu, 
             language_code=language_code,
             sound=self.sound
             )
@@ -68,31 +69,31 @@ class ControllerStock():
                 self.stock_master.destroy()
 
     def load_zamowienia_daemon(self, widok = "pokaz"):
-        print("load_zamowienia_daemon")
+        print("Wczytywanie zamówień... (ControllerStock)")
         commend = self.load_zamowienia(widok = widok)
         threading.Thread(target=lambda: commend, daemon=True).start()
 
     def load_sklepy_daemon(self, widok = "ukryj", select_item = None):
-        print("load_sklepy_daemon")
+        print("Wczytywanie sklepów... (ControllerStock)")
         self.load_sklepy(widok = widok, select_item=select_item)
 
     def load_kupujacy_daemon(self, widok = "ukryj", select_item = None):
-        print("load_kupujacy_daemon")
+        print("Wczytywanie kupujących... (ControllerStock)")
         commend = self.load_kupujacy(widok = widok, select_item=select_item)
         threading.Thread(target=lambda: commend, daemon=True).start()
 
     def load_kategorie_daemon(self, widok = "ukryj", select_item = None):
-        print("load_kategorie_daemon")
+        print("Wczytywanie kategorii... (ControllerStock)")
         commend = self.load_kategorie(widok = widok, select_item=select_item)
         threading.Thread(target=lambda: commend, daemon=True).start()
 
     def load_firmy_daemon(self, widok = "ukryj", select_item = None):
-        print("load_firmy_daemon")
+        print("Wczytywanie firm... (ControllerStock)")
         commend = self.load_firmy(widok = widok, select_item=select_item)
         threading.Thread(target=lambda: commend, daemon=True).start()
 
     def load_artykuly_daemon(self, widok = "ukryj"):
-        print("load_artykuly_daemon")
+        print("Wczytywanie artykułów... (ControllerStock)")
         commend = self.load_artykuly(widok = widok)
         threading.Thread(target=lambda: commend, daemon=True).start()
 
@@ -112,17 +113,16 @@ class ControllerStock():
                     zamow.faktura_id, 
                     zamow.kupujacy.nazwa if zamow.kupujacy else " ", 
                     zamow.sklep.nazwa if zamow.sklep else " ", 
-                    f"{zamow.rabat_j:.2f} {self.currency}", 
+                    self.currency_format(zamow.rabat_j),
                     f"{zamow.rabat_procent :.0f} %", 
-                    f"{zamow.oblicz_cene():,.2f} {self.currency}".replace(",", " "),
-                    f"{zamow.oblicz_cene_rabat():,.2f} {self.currency}".replace(",", " "),
+                    self.currency_format(zamow.oblicz_cene()),
+                    self.currency_format(zamow.oblicz_cene_rabat())
                 ))
                 if i % progress_step == 0:
                     self.messagebox_controller.update_message_async(i / len(zamowienia))
 
             zamowienia_data.sort(key=lambda x: x[0], reverse=True)
             zamowienia_data.sort(key=lambda x: x[1], reverse=True)
-
 
             def update_gui():
                 self.zamowienia_tree.delete(*self.zamowienia_tree.get_children())
@@ -306,7 +306,7 @@ class ControllerStock():
         kwargs: dodatkowe opcje (icon, side, pady, padx, itp.)
         """
         frame = frame or self.button_stock_frame
-        leksykon = self.leksykon_programu.get(key, {"heading": key})
+        leksykon = self.leksykon_programu.get("buttons", {}).get(key, key)
         icon = kwargs.pop("icon", getattr(self.view, f"{key}_icon", None))
         self.view.utworz_przycisk(frame, command, leksykon_programu=leksykon, icon=icon, **kwargs)
 
@@ -486,7 +486,7 @@ class ControllerStock():
         elif commend == "zamówienie":
             commend = lambda: self.list_inside_zamowienie(self.zamowienie_id)
 
-        leksykon = self.leksykon_programu["button_back_pack"]
+        leksykon = self.leksykon_programu.get("buttons", {}).get("button_back", "Back")
         self.view.utworz_przycisk(
             frame,
             commend,
@@ -847,11 +847,7 @@ class ControllerStock():
         values = self.inside_tree.item(selected_item[0], "values")
 
         artykul_id = int(values[0])
-        cena = float(
-            values[1]
-            .replace(" " + self.currency, "")
-            .replace(",", ".")
-        )
+        cena = self.currency_format(values[1])
         ilosc = int(values[2])
 
         dialog = self.messagebox_controller.messagebox(
@@ -1123,7 +1119,7 @@ class ControllerStock():
             return
 
         try:
-            if self.view.rabat_j_var.get() == "00.00 zł" or self.view.rabat_j_var.get() == "":
+            if self.view.rabat_j_var.get() == self.currency_format(0.0) or self.view.rabat_j_var.get() == "":
                 rabat_j = 0.0
             else:
                 rabat_j = float(self.view.rabat_j_var.get().replace(',', '.'))
@@ -1286,8 +1282,8 @@ class ControllerStock():
 
             wartosc = cena_netto_val * ilosc
 
-            cena_netto = f"{cena_netto_val:.2f} {self.currency}"
-            wartosc_brutto = f"{wartosc:.2f} {self.currency}"
+            cena_netto = self.currency_format(cena_netto_val)
+            wartosc_brutto = self.currency_format(wartosc)
 
             kategoria = art.kategoria.nazwa if art.kategoria else None
             firma = art.firma.nazwa if art.firma else None
@@ -1315,7 +1311,7 @@ class ControllerStock():
             return 
         
         relacja_name = self.inside_tree.item(self.inside_tree.selection()[0], 'values')
-        cena = float(relacja_name[1].replace(" "+self.currency,"").replace(",","."))
+        cena = float(self.currency_format_no_symbol(relacja_name[1]))
 
         leksykon = self.leksykon_programu.get("edit_messagebox", {})
 

@@ -1,4 +1,3 @@
-# from addons.CustomTkinterMessagebox import CTkMessagebox
 from addons.ctkcomponents import *
 import addons.customtkinter as ct
 
@@ -16,7 +15,6 @@ class ViewMessageBox:
     # ------------------------
     def show_message_async(self, master, leksykon):
         """Pokazuje asynchroniczny komunikat z paskiem postępu."""
-        leksykon = leksykon.get("progress_popup", {})
         self.my_progress = CTkProgressPopup(
             master=master,
             title=leksykon.get("heading", "Background operation"),

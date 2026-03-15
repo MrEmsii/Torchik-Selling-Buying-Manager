@@ -59,157 +59,157 @@
             "select_art": "Lista artykułów",
             "select_art_to_order": "Lista artykułów w zamówieniu"
         },
-
-        "button_back_pack": {
-            "text": "Wróć",
-            "toolTip": "Wróć do poprzedniego okna (głównego, listy artykułów lub zamówienia)"
-        },
-        "button_ustawienia": {
-            "text": "Ustawienia",
-            "toolTip": "Przycisk do otwarcia ustawień programu"
-        },
-        "button_dodaj_zamowienie": {
-            "text": "Dodaj\nzamówienie",
-            "toolTip": "Dodaj nowe zamówienie"
-        },
-        "button_modyfikuj_zamowienie": {
-            "text": "Edytuj\nzamówienie",
-            "toolTip": "Edytuj wybrane zamówienie"
-        },
-        "button_usun_zamowienie": {
-            "text": "Usuń\nzamówienie",
-            "toolTip": "Usuń wybrane zamówienie"
-        },
-        "buttons_zatwierdz_zamowienia": {
-            "text": "Zatwierdź\nzamówienie",
-            "toolTip": "Zatwierdź tworzone zamówienie"
-        },
-        "button_zatwierdz_edycje_zamowienie": {
-            "text": "Zatwierdź\nedycje\nzamówienia",
-            "toolTip": "Zatwierdź edytowane zamówienie"
-        },
-        "button_lista_artykulow": {
-            "text": "Lista\nartykułów",
-            "toolTip": "Przejdź do listy artykułów"
-        },
-        "button_lista_sklepow": {
-            "text": "Lista\nsklepów",
-            "toolTip": "Przejdź do listy sklepów"
-        },
-        "button_lista_firm": {
-            "text": "Lista\nfirm",
-            "toolTip": "Przejdź do listy firm"
-        },
-        "button_lista_kupujacych": {
-            "text": "Lista\nkupujących",
-            "toolTip": "Przejdź do listy kupujących"
-        },
-        "button_lista_kategorii": {
-            "text": "Lista\nkategorii",
-            "toolTip": "Przejdź do listy kategorii"
-        },
-        "button_stworz_artykul": {
-            "text": "Stwórz\nartykuł",
-            "toolTip": "Stwórz nowy artykuł"
-        },
-        "button_modyfikuj_artykul": {
-            "text": "Modyfikuj\nartykułu",
-            "toolTip": "Edytuj istniejący artykuł"
-        },
-        "button_dublikuj_artykul": {
-            "text": "Dublikuj\nartykuł",
-            "toolTip": "Dublikuj zaznaczony artykuł"
-        },
-        "button_zatwierdz_artykul": {
-            "text": "Zatwierdź\nartykuł",
-            "toolTip": "Zatwierdź dodawany artykuł"
-        },
-        "button_zatwierdz_edycje_artykulu": {
-            "text": "Zatwierdź\nedycję\nartykułu",
-            "toolTip": "Zatwierdź edytowany artykuł"
-        },
-        "button_zatwierdz_edycje_artykulu_lista_art": {
-            "text": "Zatwierdź\nedycję\nartykułu",
-            "toolTip": "Zatwierdź edytowany artykuł"
-        },
-        "button_zniszcz_artykul": {
-            "text": "Usuń\nartykuł",
-            "toolTip": "Usuń zaznaczony artykuł"
-        },
-        "button_dodaj_artykul_zamowienie": {
-            "text": "Dodaj\nartykuł do\nzamowienia",
-            "toolTip": "Dodaj artykuł do zamówienia"
-        },
-        "button_edytuj_artykul_zamowienie": {
-            "text": "Modyfikuj\nartykuł",
-            "toolTip": "Modyfikuj artykuł w zamówieniu"
-        },
-        "button_zatwierdz_dodanie_artykulu": {
-            "text": "Dodaj\nartykuł do\nzamowienia",
-            "toolTip": "Zatwierdź dodanie artykułu do zamówienia"
-        },
-        "button_anuluj_dodanie_artykulu": {
-            "text": "Anuluj\ndodawanie\nartykułu do\nzamówienia",
-            "toolTip": "Anuluj dodawanie artykułu do zamówienia"
-        },
-        "button_usun_artykul_zamowienie": {
-            "text": "Usuń\nartykuł z\nzamówienia",
-            "toolTip": "Usuń artykuł z bieżącego zamówienia"
-        },
-        "button_dodaj_kupujacy": {
-            "text": "Dodaj\nkupującego",
-            "toolTip": "Dodaj nowego kupującego"
-        },
-        "button_zmiana_nazwa_kupujacy": {
-            "text": "Zmień\nnazwę\nkupującego",
-            "toolTip": "Zmień nazwę wybranego kupującego"
-        },
-        "button_usun_kupujacy": {
-            "text": "Usuń\nkupującego",
-            "toolTip": "Usuń zaznaczonego kupującego"
-        },
-        "button_dodaj_sklep": {
-            "text": "Dodaj\nsklep",
-            "toolTip": "Dodaj nowy sklep"
-        },
-        "button_zmiana_nazwa_sklep": {
-            "text": "Zmień\nnazwę\nsklepu",
-            "toolTip": "Zmień nazwę wybranego sklepu"
-        },
-        "button_usun_sklep": {
-            "text": "Usuń\nsklep",
-            "toolTip": "Usuń zaznaczony sklep"
-        },
-        "button_dodaj_firma": {
-            "text": "Dodaj\nfirma",
-            "toolTip": "Dodaj nową firmę"
-        },
-        "button_zmiana_nazwa_firma": {
-            "text": "Zmień\nnazwę\nfirmy",
-            "toolTip": "Zmień nazwę wybranej firmy"
-        },
-        "button_usun_firma": {
-            "text": "Usuń\nfirma",
-            "toolTip": "Przycisk służy do usuwania zaznaczonej firmy. Działa tylko z zaznaczoną firmą!"
-        },
-        "button_dodaj_kategoria": {
-            "text": "Dodaj\nkategoria",
-            "toolTip": "Dodaj nową kategorię"
-        },
-        "button_zmiana_nazwa_kategoria": {
-            "text": "Zmień\nnazwę\nkategorii",
-            "toolTip": "Zmień nazwę wybranej kategorii"
-        },
-        "button_usun_kategorie": {
-            "text": "Usuń\nkategorie",
-            "toolTip": "Usuń zaznaczoną kategorię"
-        },
-        "button_refresh_zamowienia": {
-            "text": "Odśwież",
-            "toolTip": "Odśwież listę zamówień"
+        "buttons": {
+            "button_back": {
+                "text": "Wróć",
+                "toolTip": "Wróć do poprzedniego okna (głównego, listy artykułów lub zamówienia)"
+            },
+            "button_ustawienia": {
+                "text": "Ustawienia",
+                "toolTip": "Przycisk do otwarcia ustawień programu"
+            },
+            "button_dodaj_zamowienie": {
+                "text": "Dodaj\nzamówienie",
+                "toolTip": "Dodaj nowe zamówienie"
+            },
+            "button_modyfikuj_zamowienie": {
+                "text": "Edytuj\nzamówienie",
+                "toolTip": "Edytuj wybrane zamówienie"
+            },
+            "button_usun_zamowienie": {
+                "text": "Usuń\nzamówienie",
+                "toolTip": "Usuń wybrane zamówienie"
+            },
+            "buttons_zatwierdz_zamowienia": {
+                "text": "Zatwierdź\nzamówienie",
+                "toolTip": "Zatwierdź tworzone zamówienie"
+            },
+            "button_zatwierdz_edycje_zamowienie": {
+                "text": "Zatwierdź\nedycje\nzamówienia",
+                "toolTip": "Zatwierdź edytowane zamówienie"
+            },
+            "button_lista_artykulow": {
+                "text": "Lista\nartykułów",
+                "toolTip": "Przejdź do listy artykułów"
+            },
+            "button_lista_sklepow": {
+                "text": "Lista\nsklepów",
+                "toolTip": "Przejdź do listy sklepów"
+            },
+            "button_lista_firm": {
+                "text": "Lista\nfirm",
+                "toolTip": "Przejdź do listy firm"
+            },
+            "button_lista_kupujacych": {
+                "text": "Lista\nkupujących",
+                "toolTip": "Przejdź do listy kupujących"
+            },
+            "button_lista_kategorii": {
+                "text": "Lista\nkategorii",
+                "toolTip": "Przejdź do listy kategorii"
+            },
+            "button_stworz_artykul": {
+                "text": "Stwórz\nartykuł",
+                "toolTip": "Stwórz nowy artykuł"
+            },
+            "button_modyfikuj_artykul": {
+                "text": "Modyfikuj\nartykułu",
+                "toolTip": "Edytuj istniejący artykuł"
+            },
+            "button_dublikuj_artykul": {
+                "text": "Dublikuj\nartykuł",
+                "toolTip": "Dublikuj zaznaczony artykuł"
+            },
+            "button_zatwierdz_artykul": {
+                "text": "Zatwierdź\nartykuł",
+                "toolTip": "Zatwierdź dodawany artykuł"
+            },
+            "button_zatwierdz_edycje_artykulu": {
+                "text": "Zatwierdź\nedycję\nartykułu",
+                "toolTip": "Zatwierdź edytowany artykuł"
+            },
+            "button_zatwierdz_edycje_artykulu_lista_art": {
+                "text": "Zatwierdź\nedycję\nartykułu",
+                "toolTip": "Zatwierdź edytowany artykuł"
+            },
+            "button_zniszcz_artykul": {
+                "text": "Usuń\nartykuł",
+                "toolTip": "Usuń zaznaczony artykuł"
+            },
+            "button_dodaj_artykul_zamowienie": {
+                "text": "Dodaj\nartykuł do\nzamowienia",
+                "toolTip": "Dodaj artykuł do zamówienia"
+            },
+            "button_edytuj_artykul_zamowienie": {
+                "text": "Modyfikuj\nartykuł",
+                "toolTip": "Modyfikuj artykuł w zamówieniu"
+            },
+            "button_zatwierdz_dodanie_artykulu": {
+                "text": "Dodaj\nartykuł do\nzamowienia",
+                "toolTip": "Zatwierdź dodanie artykułu do zamówienia"
+            },
+            "button_anuluj_dodanie_artykulu": {
+                "text": "Anuluj\ndodawanie\nartykułu do\nzamówienia",
+                "toolTip": "Anuluj dodawanie artykułu do zamówienia"
+            },
+            "button_usun_artykul_zamowienie": {
+                "text": "Usuń\nartykuł z\nzamówienia",
+                "toolTip": "Usuń artykuł z bieżącego zamówienia"
+            },
+            "button_dodaj_kupujacy": {
+                "text": "Dodaj\nkupującego",
+                "toolTip": "Dodaj nowego kupującego"
+            },
+            "button_zmiana_nazwa_kupujacy": {
+                "text": "Zmień\nnazwę\nkupującego",
+                "toolTip": "Zmień nazwę wybranego kupującego"
+            },
+            "button_usun_kupujacy": {
+                "text": "Usuń\nkupującego",
+                "toolTip": "Usuń zaznaczonego kupującego"
+            },
+            "button_dodaj_sklep": {
+                "text": "Dodaj\nsklep",
+                "toolTip": "Dodaj nowy sklep"
+            },
+            "button_zmiana_nazwa_sklep": {
+                "text": "Zmień\nnazwę\nsklepu",
+                "toolTip": "Zmień nazwę wybranego sklepu"
+            },
+            "button_usun_sklep": {
+                "text": "Usuń\nsklep",
+                "toolTip": "Usuń zaznaczony sklep"
+            },
+            "button_dodaj_firma": {
+                "text": "Dodaj\nfirma",
+                "toolTip": "Dodaj nową firmę"
+            },
+            "button_zmiana_nazwa_firma": {
+                "text": "Zmień\nnazwę\nfirmy",
+                "toolTip": "Zmień nazwę wybranej firmy"
+            },
+            "button_usun_firma": {
+                "text": "Usuń\nfirma",
+                "toolTip": "Przycisk służy do usuwania zaznaczonej firmy. Działa tylko z zaznaczoną firmą!"
+            },
+            "button_dodaj_kategoria": {
+                "text": "Dodaj\nkategoria",
+                "toolTip": "Dodaj nową kategorię"
+            },
+            "button_zmiana_nazwa_kategoria": {
+                "text": "Zmień\nnazwę\nkategorii",
+                "toolTip": "Zmień nazwę wybranej kategorii"
+            },
+            "button_usun_kategorie": {
+                "text": "Usuń\nkategorie",
+                "toolTip": "Usuń zaznaczoną kategorię"
+            },
+            "button_refresh_zamowienia": {
+                "text": "Odśwież",
+                "toolTip": "Odśwież listę zamówień"
+            }
         }
     },
-
     "statistics_window":{
         "buttons":{
             "button_exit": {

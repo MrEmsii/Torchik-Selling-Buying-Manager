@@ -83,7 +83,7 @@ class ControllerMessageBox:
     # ASYNC MESSAGE
     # ------------------------
     def show_message_async(self, master):
-        leksykon = self.leksykon_messagebox.get("async_messagebox", {})
+        leksykon = self.leksykon_messagebox.get("progress_popup", {})
         self.view.show_message_async(master=master, leksykon=leksykon)
 
     def hide_message_async(self, master=None):

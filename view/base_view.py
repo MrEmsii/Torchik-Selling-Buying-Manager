@@ -8,9 +8,19 @@ class BaseView:
         self.sound = sound
 
     def utworz_przycisk(self, frame, command, leksykon_programu, side='top', padx=5, pady=5, columnspan=1, icon=None, pack = True, column=0, row=0):
+        try:
+            text=leksykon_programu.get("text", "Button")
+            toolTip=leksykon_programu.get("toolTip", "")
+        except KeyError:
+            text="Button"
+            toolTip=""
+        except AttributeError:
+            text="Button"
+            toolTip=""
+
         przycisk = ct.CTkButton(
             frame,
-            text=leksykon_programu["text"],
+            text=text,
             command=self._click_sound(command),
             width=100,
             image=icon,
@@ -22,7 +32,7 @@ class BaseView:
             przycisk.pack(side=side, padx=padx, pady=pady, fill='x')
         else:
             przycisk.grid(row=row, column=column, padx=padx, pady=pady, sticky="nsew", columnspan=columnspan)
-        CTkToolTip(przycisk, message=leksykon_programu["toolTip"])
+        CTkToolTip(przycisk, message=toolTip)
         return przycisk
 
     def _click_sound(self, func):

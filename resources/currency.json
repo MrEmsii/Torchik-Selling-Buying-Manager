@@ -1,0 +1,29 @@
+{
+    "PLN": {
+        "symbol": "zł",
+        "name": "Polski Złoty",
+        "code": "PLN",
+        "symbol_first": 0,
+        "decimal_mark": ",",
+        "thousands_separator": ".",
+        "decimal_places": 2
+    },
+    "USD": {
+        "symbol": "$",
+        "name": "Dolar Amerykański",
+        "code": "USD",
+        "symbol_first": 1,
+        "decimal_mark": ".",
+        "thousands_separator": ",",
+        "decimal_places": 2
+    },
+    "EUR": {
+        "symbol": "€",
+        "name": "Euro",
+        "code": "EUR",
+        "symbol_first": 1,
+        "decimal_mark": ",",
+        "thousands_separator": ".",
+        "decimal_places": 2
+    }
+}

@@ -3,7 +3,6 @@ from addons.customtkinter import CTkImage
 
 from view.base_view import BaseView
 
-from tkinter import ttk
 from PIL import Image, ImageTk
 import os
 

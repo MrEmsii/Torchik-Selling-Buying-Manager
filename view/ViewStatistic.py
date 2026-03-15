@@ -23,10 +23,12 @@ class ViewStatistic(BaseView):
             leksykon = None, 
             language_code = None, 
             konfiguracja_programu = None,
-            sound = None
+            sound = None,
+            currency = None
             ):
         
         self.dsc = dsc
+        self.currency = currency
         self.statistic_master = statistic_master
         self.statistic_master.geometry("1280x720+0+0")
         self.statistic_master.resizable(True, True)

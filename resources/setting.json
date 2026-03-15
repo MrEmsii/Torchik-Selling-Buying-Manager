@@ -1,9 +1,0 @@
-{
-    "volume": 0.1,
-    "language_code": "pl_PL",
-    "start_sound": "start_sound.wav",
-    "info_sound": "info_sound.wav",
-    "error_sound": "error_sound.wav",
-    "confirm_sound": "confirm_sound.wav",
-    "theme": "dark"
-}

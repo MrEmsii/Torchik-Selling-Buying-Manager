@@ -1,5 +1,4 @@
 import threading
-import tkinter as tk
 
 import addons.customtkinter as ct
 
@@ -10,39 +9,48 @@ from model.order_db_model import SQLconnect, Kupujacy, Zamowienie, Artykul_Lista
 
 from sqlalchemy.orm import joinedload
 
-class ControllerOrder:    
+from controller.base_controller import BaseController
+
+class ControllerOrder(BaseController):    
     def __init__(
-            self, master, dsc, leksykon_programu, konfiguracja_programu, 
-            sound = None, 
-            messagebox_controller = None, 
-            currency = None, 
-            language_code = None, 
-            main_controller=None
-            ):
-        
+        self, master, dsc, leksykon_programu, konfiguracja_programu, 
+        sound=None, 
+        messagebox_controller=None, 
+        language_code=None, 
+        main_controller=None,
+        all_currency=None
+    ):
+        # BASE NAJPIERW
+        super().__init__(konfiguracja_programu, all_currency)
+
+        # REFERENCJE
+        self.master = master
         self.dsc = dsc
         self.leksykon_programu = leksykon_programu
-        self.konfiguracja_programu = konfiguracja_programu
-        self.currency = currency
         self.main_controller = main_controller
         self.sound = sound
-        self.messagebox_controller = messagebox_controller 
+        self.messagebox_controller = messagebox_controller
+        self.language_code = language_code
 
-        self.order_master = ct.CTkToplevel(master)
+        # WINDOW
+        self.order_master = ct.CTkToplevel(self.master)
+        self.order_master.title("Order")
+
+        # DB
         self.db_session = SQLconnect()
 
+        # VIEW
         self.view = ViewOrder(
             self.order_master, 
             dsc=self.dsc, 
             leksykon=self.leksykon_programu, 
-            currency=self.currency,
-            konfiguracja_programu=konfiguracja_programu, 
-            language_code=language_code,
+            konfiguracja_programu=self.konfiguracja_programu, 
+            language_code=self.language_code,
             sound=self.sound
-            )
+        )
 
+        # INIT
         self.inicjalizacja_frame()
-
         self.list_zamowienia()
 
         self.order_master.protocol("WM_DELETE_WINDOW", self.on_closing_order_window)
@@ -85,11 +93,11 @@ class ControllerOrder:
         buttons.get(frame, lambda: None)()
 
     def button_test(self, frame):
-        leksykon = self.leksykon_programu["buttons"]["button_test"]
+        leksykon = self.leksykon_programu.get("buttons", {}).get("button_test", "Test")
         self.view.utworz_przycisk(frame, lambda: print("nic"), icon=self.view.buyers_icon, leksykon_programu=leksykon)
 
     def button_back(self, frame):
-        leksykon = self.leksykon_programu["buttons"]["button_back"]
+        leksykon = self.leksykon_programu.get("buttons", {}).get("button_back", "Powrót")
         self.view.utworz_przycisk(frame, self.list_zamowienia, icon=self.view.buyers_icon, leksykon_programu=leksykon)
 
     def list_zamowienia(self):
@@ -99,7 +107,7 @@ class ControllerOrder:
         order_heading = self.leksykon_programu["names_list"]["order"]
         status_heading = self.leksykon_programu["names_list"]["rezalizacja_status"]
         self.zamowienia_tree = self.view.order_tree(parent_frame=self.order_frame, label_text=order_heading) 
-        self.realiacja_tree = self.view.name_tree(parent_frame=self.realizacja_frame, label_text=status_heading) 
+        self.realiacja_tree = self.view.realizacja_tree(parent_frame=self.realizacja_frame, label_text=status_heading) 
         self.load_realizacja_daemon()
         self.load_order_daemon(widok="pokaz")
         
@@ -141,53 +149,30 @@ class ControllerOrder:
         threading.Thread(target=lambda: self.load_more_info(id_zamowienia), daemon=True).start()
 
     def load_more_info(self, id_zamowienia):
-        # self.inside_more_tree.delete(*self.inside_more_tree.get_children())
-        self.inside_more_tree.clear() #canvas
+        self.inside_more_tree.clear()
 
         zamowienie = self.db_session.query(Zamowienie).filter_by(id=id_zamowienia).first()
         if not zamowienie:
-            print(f"Nie znaleziono zamówienia o ID {id_zamowienia}")
             return
-
-        def format_money(value):
-            return f"{value:,.2f} {self.currency}".replace(",", " ") if value else "0"
-
-        def format_percent(value):
-            return f"{value} %" if value else "0 %"
 
         koszta_val = zamowienie.oblicz_koszta() or 0
         przychod_val = zamowienie.oblicz_przychod() or 0
         dochod_val = zamowienie.oblicz_dochod() or 0
 
-        data_wysylki = zamowienie.data_wysylki or " "
-        rabat_j = format_money(zamowienie.rabat_j or 0)
-        rabat_proc = format_percent(zamowienie.rabat_procent or 0)
-        koszta = format_money(koszta_val)
-        faktura_nr = zamowienie.faktura.faktura_nr if zamowienie.faktura else " "
-        cena_calkowita = format_money(przychod_val)
-        cena_po_rabacie = format_money(dochod_val)
-        kupujacy = zamowienie.kupujacy.nazwa if zamowienie.kupujacy else " "
-        nazwa_zamowienia = zamowienie.nazwa_zamowienia if zamowienie.nazwa_zamowienia else " "
-        opis = zamowienie.opis_zamowienia if zamowienie.opis_zamowienia else ' '
-
         info_data = [
-            ("Data wysyłki:", data_wysylki),
-            ("Rabat j:", rabat_j),
-            ("Rabat %:", rabat_proc),
-            ("Koszta:", koszta),
-            ("Faktura nr:", faktura_nr),
-            ("Cena całkowita:", cena_calkowita),
-            ("Cena po rabacie:", cena_po_rabacie),
-            ("Kupujący:", kupujacy),
-            ("Nazwa zamówienia:", nazwa_zamowienia),
-            ("Opis zamówienia:", opis)
+            ("Data wysyłki:", zamowienie.data_wysylki or "-"),
+            ("Rabat j:", self.currency_format(zamowienie.rabat_j)),
+            ("Rabat %:", f"{zamowienie.rabat_procent or 0} %"),
+            ("Koszta:", self.currency_format(koszta_val)),
+            ("Faktura nr:", zamowienie.faktura.faktura_nr if zamowienie.faktura else "-"),
+            ("Cena całkowita:", self.currency_format(przychod_val)),
+            ("Cena po rabacie:", self.currency_format(dochod_val)),
+            ("Kupujący:", zamowienie.kupujacy.nazwa if zamowienie.kupujacy else "-"),
+            ("Nazwa:", zamowienie.nazwa_zamowienia or "-"),
+            ("Opis:", zamowienie.opis_zamowienia or "-")
         ]
 
-        # for i, (label, value) in enumerate(info_data, start=1):
-        #     self.inside_more_tree.insert('', 'end', iid=i, values=(label, value))
-
-        for label, value in info_data:
-            self.inside_more_tree.insert_row(label, value)
+        self.inside_more_tree.insert_rows_bulk(info_data)
 
     def load_inside(self, id_zamowienia):
         zam = self.db_session.query(Zamowienie).options(joinedload(Zamowienie.pozycje).joinedload(ListaDodanie.artykul)).get(id_zamowienia)
@@ -232,13 +217,13 @@ class ControllerOrder:
                 nazwa,
                 format_czas(czas_druku_1_elem),
                 f"{waga_1_elem:.2f} kg",
-                f"{koszt_1_elem:,.2f} {self.currency}".replace(",", " "),
-                f"{cena_1_elem_val:,.2f} {self.currency}".replace(",", " "),
+                self.currency_format(koszt_1_elem),
+                self.currency_format(cena_1_elem_val),
                 ilosc,
                 f"{waga_calkowita_val:.2f} kg",
                 format_czas(czas_calkowity_val),
-                f"{koszt_calkowity_val:,.2f} {self.currency}".replace(",", " "),
-                f"{cena_calkowita_val:,.2f} {self.currency}".replace(",", " ")
+                self.currency_format(koszt_calkowity_val),
+                self.currency_format(cena_calkowita_val)
             ))
 
         artykul_data.sort(key=lambda x: x[2])
@@ -269,8 +254,8 @@ class ControllerOrder:
                     z.data_deadline,
                     z.kupujacy.nazwa if z.kupujacy else " ",
                     z.nazwa_zamowienia,
-                    f"{z.oblicz_przychod():,.2f} {self.currency}".replace(",", " "),
-                    f"{z.oblicz_dochod():,.2f} {self.currency}".replace(",", " "),
+                    self.currency_format(z.oblicz_koszta()),
+                    self.currency_format(z.oblicz_dochod()),
                     z.realizacja_id,
                 ))
 

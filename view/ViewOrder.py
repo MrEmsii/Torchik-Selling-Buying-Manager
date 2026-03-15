@@ -21,8 +21,8 @@ class ViewOrder(BaseView):
             ):
         
         self.order_master = order_master
-        self.order_master.geometry("1280x720+0+0")
-        self.order_master.minsize(1280, 720)
+        self.order_master.geometry("1280x800+0+0")
+        self.order_master.minsize(1280, 800)
 
         self.leksykon = leksykon
         self.style = style
@@ -51,13 +51,12 @@ class ViewOrder(BaseView):
             except Exception as e:
                 print(f"Błąd ikony w OrderWindow: {e}")
 
-
-        for i in range(0, 4):
-            self.order_master.grid_rowconfigure(i, weight=4)
+        for i in range(5):
+            self.order_master.grid_rowconfigure(i, weight=1)
 
         self.order_master.grid_columnconfigure(0, weight=1)
-        for i in range(1, 5):
-            self.order_master.grid_columnconfigure(i, weight=2000)
+        self.order_master.grid_columnconfigure(1, weight=5)
+        self.order_master.grid_columnconfigure(2, weight=30)
 
         style = ttk.Style()
         # Używamy motywu 'default' lub 'clam' jako bazy, bo są najbardziej elastyczne
@@ -83,7 +82,14 @@ class ViewOrder(BaseView):
 
         # Zmiana koloru zaznaczenia (Selection)
         style.map("Treeview",
-            background=[('selected', '#1f538d')], # Kolor niebieski z CTK
+            background=[('selected', '#1f538d')], # Kolor niebieski z CTK        # self.canvas.bind("<Enter>", self._bind_mousewheel)
+        # self.canvas.bind("<Leave>", self._unbind_mousewheel)
+
+        # # aktualizacja scrollregion
+        # self.frame.bind(
+        #     "<Configure>",
+        #     lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        # )
             foreground=[('selected', 'white')]
         )
     def setup_frames(self):
@@ -125,7 +131,6 @@ class ViewOrder(BaseView):
             columns=columns_name,
             show='headings',
             yscrollcommand=scrollbar.set
-            # bootstyle="secondary"
         )
 
         scrollbar.configure(command=tree.yview)
@@ -159,7 +164,7 @@ class ViewOrder(BaseView):
         return tree 
     
     def inside_tree(self, parent_frame, label_text, status=True):
-        columns_name = self.leksykon["columns"]["list_added_to_order_columns"]
+        columns_name = self.leksykon.get("columns", {}).get("list_added_to_order_columns", [])  # bezpieczne pobranie z leksykonu
 
         label = ct.CTkLabel(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)
@@ -174,7 +179,6 @@ class ViewOrder(BaseView):
             columns=columns_name,
             show='headings',
             yscrollcommand=scrollbar.set,
-            #bootstyle="secondary"
         )
         
         scrollbar.configure(command=tree.yview)
@@ -215,8 +219,8 @@ class ViewOrder(BaseView):
         tree.pack(expand=status, fill='both')
         return tree         
 
-    def name_tree(self, parent_frame, label_text, status=True):
-        columns_name = self.leksykon["columns"]["realizacja_tree_columns"]
+    def realizacja_tree(self, parent_frame, label_text, status=True):
+        columns_name = self.leksykon.get("columns", {}).get("realizacja_tree_columns", [])
 
         label = ct.CTkLabel(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)
@@ -224,18 +228,11 @@ class ViewOrder(BaseView):
         container = ct.CTkFrame(parent_frame)
         container.pack(expand=True, fill='both')
 
-        # scrollbar = ct.CTkScrollbar(container, orientation= "vertical")
-
         tree = ttk.Treeview(
             container,
             columns=columns_name,
-            show='headings',
-            # yscrollcommand=scrollbar.set,
-            #bootstyle="secondary"
+            show='headings'
         )
-        
-        # scrollbar.configure(command=tree.yview)
-        # scrollbar.pack(side='right', fill='y')
 
         tree.pack( expand=True, fill='both')
         
@@ -243,45 +240,11 @@ class ViewOrder(BaseView):
         tree.column(columns_name[0], width=20, anchor='e')
 
         tree.heading(columns_name[1], text=columns_name[1], anchor='center')
-        tree.column(columns_name[1], width=100, anchor='w')
+        tree.column(columns_name[1], width=200, anchor='w')
         tree.pack(expand=status, fill='both')
 
         return tree 
     
-    # def info_tree(self, parent_frame, label_text, status=True):
-    #     columns_name = self.leksykon["columns"]["more_info_in_order_columns"]
-
-    #     label = ct.CTkLabel(parent_frame, text=label_text, font=("Arial", 12))
-    #     label.pack(pady=5)
-
-    #     container = ct.CTkFrame(parent_frame)
-    #     container.pack(expand=True, fill='both')
-
-    #     scrollbar = ct.CTkScrollbar(container, orientation="vertical")
-
-    #     tree = ttk.Treeview(
-    #         container,
-    #         columns=columns_name,
-    #         show='headings',
-    #         yscrollcommand=scrollbar.set,
-    #         bootstyle="secondary"
-    #     )
-        
-    #     scrollbar.configure(command=tree.yview)
-    #     scrollbar.pack(side='right', fill='y')
-
-    #     tree.pack( expand=True, fill='both')
-        
-    #     tree.heading(columns_name[0], text=columns_name[0]+ 5*" ", anchor='e')
-    #     tree.column(columns_name[0], width=100, anchor='e')
-
-    #     tree.heading(columns_name[1], text=5*" " + columns_name[1], anchor='w')
-    #     tree.column(columns_name[1], width=100, anchor='w')
-    #     tree.pack(expand=status, fill='both')
-
-    #     return tree 
-
-
     def info_tree(self, parent_frame, label_text, status=True):
         label = ct.CTkLabel(parent_frame, text=label_text, font=("Arial", 12))
         label.pack(pady=5)
@@ -295,8 +258,14 @@ class ViewOrder(BaseView):
 
 class CanvasTable:
     def __init__(self, parent, row_pad=0):
-        self.canvas = ct.CTkCanvas(parent, highlightthickness=0)
-        self.frame = ct.CTkFrame(self.canvas)
+        # Ustawienie tła na sztywne #2b2b2b lub pobranie z motywu
+        self.canvas = ct.CTkCanvas(
+            parent, 
+            bg="#2b2b2b",           # Tło dopasowane do Dark Mode
+            highlightthickness=0,    # Brak ramki fokusu
+            borderwidth=0            # Brak standardowej ramki
+        )
+        self.frame = ct.CTkFrame(self.canvas, fg_color="#2b2b2b")
         self.window = self.canvas.create_window((0, 0), window=self.frame, anchor="nw")
 
         # proporcje kolumn
@@ -308,14 +277,10 @@ class CanvasTable:
         self.row_pad = row_pad
         self.row = 0
 
-        # scrollbar
-        # self.scrollbar = ct.CTkScrollbar(
-        #     parent, orientation="vertical", command=self.canvas.yview
-        # )
-        # self.canvas.configure(yscrollcommand=self.scrollbar.set)
-
-        # self.scrollbar.pack(side="right", fill="y")
+        self.canvas.configure(bg="#2b2b2b")
+        self.canvas.configure(highlightthickness=0)  # usuwa ramkę wokół canvas
         self.canvas.pack(expand=True, fill="both")
+
 
         # resize i scroll
         self.canvas.bind("<Configure>", self._on_resize)
@@ -330,20 +295,24 @@ class CanvasTable:
 
     # ---------- RESIZE ----------
     def _on_resize(self, event):
-        if event.width <= 1:
-            return
+            if event.width <= 1:
+                return
 
-        total_w = event.width
-        self.canvas.itemconfigure(self.window, width=total_w)
+            total_w = event.width
+            # Pozostawiamy margines na scrollbar (ok. 20-30px)
+            self.canvas.itemconfigure(self.window, width=total_w)
 
-        col1 = max(int(total_w * self.col1_ratio), self.min_col1)
-        col2 = max(total_w - col1 - 20, self.min_col2)
+            col1 = max(int(total_w * self.col1_ratio), self.min_col1)
+            # col2 zajmuje resztę miejsca, odejmujemy margines na scrollbar
+            col2 = max(total_w - col1 - 40, self.min_col2)
 
-        self.frame.grid_columnconfigure(0, minsize=col1)
-        self.frame.grid_columnconfigure(1, minsize=col2)
+            self.frame.grid_columnconfigure(0, minsize=col1)
+            self.frame.grid_columnconfigure(1, weight=1, minsize=col2)
 
-        for v in self.value_labels:
-            v.configure(wraplength=col2-300)
+            # Kluczowe: Aktualizacja wraplength dla wszystkich etykiet wartości
+            # Dzięki temu tekst "pęknie" na najbliższej spacji przed granicą col2
+            for v in self.value_labels:
+                v.configure(wraplength=col2)
 
     # ---------- API ----------
     def clear(self):
@@ -352,30 +321,24 @@ class CanvasTable:
         self.value_labels.clear()
         self.row = 0
 
-    def insert_row(self, label, value):
-        l = ct.CTkLabel(
-            self.frame,
-            text=label,
-            anchor="e",
-            justify="right"
-        )
-        l.grid(row=self.row, column=0, sticky="ne", padx=(2, 10), pady=self.row_pad)
+    def insert_rows_bulk(self, data_list):
+        """Wstawia wiele wierszy i odświeża layout tylko raz."""
+        for label, value in data_list:
+            l = ct.CTkLabel(self.frame, text=label, anchor="ne", justify="right", font=("Arial", 13, "bold"))
+            l.grid(row=self.row, column=0, sticky="ne", padx=(5, 10), pady=self.row_pad+1)
 
-        v = ct.CTkLabel(
-            self.frame,
-            text=value,
-            anchor="w",
-            justify="left"
-        )
-        v.grid(row=self.row, column=1, sticky="nw", padx=(0, 60), pady=self.row_pad)
+            v = ct.CTkLabel(self.frame, text=value, anchor="nw", justify="left", font=("Arial", 13, "bold"))
+            v.grid(row=self.row, column=1, sticky="nsew", padx=(0, 30), pady=self.row_pad)
+            
+            self.value_labels.append(v)
+            self.row += 1
 
-        self.value_labels.append(v)
-        self.row += 1
+        self.canvas.after_idle(self._force_update_wrap)
 
-        # wymuszenie poprawnego wraplength po dodaniu
-        self.canvas.after_idle(lambda: self._on_resize(
-            type("E", (), {"width": self.canvas.winfo_width()})
-        ))
+    def _force_update_wrap(self):
+        w = self.canvas.winfo_width()
+        if w > 1:
+            self._on_resize(type("E", (), {"width": w}))
 
     # ---------- SCROLL ----------
     def _bind_mousewheel(self, event):
@@ -386,3 +349,4 @@ class CanvasTable:
 
     def _on_mousewheel(self, event):
         self.canvas.yview_scroll(int(-event.delta / 120), "units")
+

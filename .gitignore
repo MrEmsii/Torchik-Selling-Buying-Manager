@@ -11,3 +11,4 @@ test*.py
 client_secret.json
 .venv/*
 *.code-workspace
+resources/setting.json

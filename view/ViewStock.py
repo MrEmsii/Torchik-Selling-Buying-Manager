@@ -66,7 +66,7 @@ class ViewStock(BaseView):
             self.stock_master.grid_columnconfigure(i, weight=2000)
 
         style = ttk.Style()
-        # Używamy motywu 'default' lub 'clam' jako bazy, bo są najbardziej elastyczne
+
         style.theme_use("classic") 
 
         # Konfiguracja kolorów pasujących do CustomTkinter (Dark Mode)
@@ -266,8 +266,7 @@ class ViewStock(BaseView):
             container,
             columns=columns_name,
             show='headings',
-            yscrollcommand=scrollbar.set,
-            #bootstyle="secondary"
+            yscrollcommand=scrollbar.set
         )
         
         scrollbar.configure(command=tree.yview)
@@ -298,8 +297,7 @@ class ViewStock(BaseView):
             container,
             columns=columns_name,
             show='headings',
-            yscrollcommand=scrollbar.set,
-            #bootstyle="secondary"
+            yscrollcommand=scrollbar.set
         )
 
         scrollbar.configure(command=tree.yview)
@@ -354,8 +352,6 @@ class ViewStock(BaseView):
     def artykul_view(self):
         label_name = self.leksykon.get("labels", {})
 
-        print(label_name)
-
         self.secend_frame = ct.CTkFrame(self.stock_master)
         self.third_frame = ct.CTkFrame(self.stock_master)
 
@@ -402,7 +398,7 @@ class ViewStock(BaseView):
         rabat_p_entry = self.create_entry_with_placeholder(self.third_frame, self.rabat_p_var, "0.00", font=('calibre',10,'normal'), width=20)
         if not self.rabat_p_var.get(): rabat_p_entry.configure(placeholder_text="0%")
         
-        rabat_j_entry = self.create_entry_with_placeholder(self.third_frame, self.rabat_j_var, "00.00 zł", font=('calibre',10,'normal'), width=20)
+        rabat_j_entry = self.create_entry_with_placeholder(self.third_frame, self.rabat_j_var, f"00.00 {self.currency}", font=('calibre',10,'normal'), width=20)
         if not self.rabat_j_var.get(): rabat_j_entry.configure(placeholder_text="0%")        
         
         faktura_id_entry = self.create_entry_with_placeholder(self.third_frame, self.faktura_id, "FV_0000_00_00/00", font=('calibre',10,'normal'), width=20)

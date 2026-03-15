@@ -34,7 +34,7 @@ import os
 import sys
 from tkinter import ttk
 
-import addons.customtkinter as ctk
+import customtkinter as ctk
 from PIL import Image, ImageDraw, ImageTk
 
 import platform
@@ -106,10 +106,6 @@ def safe_set_opacity(widget_id, value=None, color=None):
                 set_opacity(widget_id, value=value)
         except Exception:
             pass 
-
-import sys
-import customtkinter as ctk
-from PIL import Image
 
 class CTkAlert_Emsii_Version(ctk.CTkToplevel):
     def __init__(self, state="info", title="Title", body_text="Body text", btn1="OK", btn2="Cancel"):
@@ -202,7 +198,6 @@ class CTkAlert_Emsii_Version(ctk.CTkToplevel):
         self.destroy()
 
     def get(self):
-        # Oczekiwanie na interakcję użytkownika
         self.wait_window()
         try:
             return self.event
@@ -245,7 +240,6 @@ class CTkAlert_old(ctk.CTkToplevel):
         self.old_x = None
         self.width = 420
         self.height = 200
-        # center_window(self, self.width, self.height)
         self.resizable(False, False)
         self.overrideredirect(True)
         self.lift()

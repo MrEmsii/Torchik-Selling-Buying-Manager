@@ -1,52 +1,57 @@
-import tkinter as tk
-
 from view.ViewStatistic import ViewStatistic
 
 from model.statistics_model import StatisticsStockModel
 from model.stock_db_model import SQLconnect
 
-import addons.customtkinter as ct
+from controller.base_controller import BaseController
 
-class ControllerStatistic:
+import addons.customtkinter as ct
+class ControllerStatistic(BaseController):
     def __init__(
-            self, master, dsc, leksykon_programu, konfiguracja_programu, 
-            sound = None, 
-            messagebox_controller = None, 
-            currency = None, 
-            language_code = None,
-            main_controller=None,
-            
-            ):
-        
+        self, master, dsc, leksykon_programu, konfiguracja_programu, 
+        sound=None, 
+        messagebox_controller=None, 
+        language_code=None,
+        main_controller=None,
+        all_currency=None
+    ):
+        # BASE
+        super().__init__(konfiguracja_programu, all_currency)
+
+        # DB / MODEL
         self.session = SQLconnect()
         self.stats_model = StatisticsStockModel(self.session)
 
+        # REFERENCJE
+        self.master = master
         self.dsc = dsc
-
         self.leksykon_programu = leksykon_programu
-        self.konfiguracja_programu = konfiguracja_programu
-        self.currency = currency
         self.main_controller = main_controller
         self.sound = sound
-        self.messagebox_controller = messagebox_controller 
+        self.messagebox_controller = messagebox_controller
+        self.language_code = language_code
 
-        self.statistic_master = ct.CTkToplevel(master)
+        # WINDOW
+        self.statistic_master = ct.CTkToplevel(self.master)
+        self.statistic_master.title("Statistics")
 
+        # VIEW (bez currency!)
         self.view = ViewStatistic(
             self.statistic_master, 
             dsc=self.dsc, 
             leksykon=self.leksykon_programu, 
-            konfiguracja_programu=konfiguracja_programu, 
-            language_code=language_code,
+            konfiguracja_programu=self.konfiguracja_programu, 
+            language_code=self.language_code,
             sound=self.sound
-            )
+        )
 
+        # INIT
         self.inicjalizacja_frame()
-
         self.button_manager()
 
         self.statistic_master.protocol("WM_DELETE_WINDOW", self.on_closing_order_window)
 
+        
     def run(self):
         self.statistic_master.deiconify()
 
@@ -74,23 +79,23 @@ class ControllerStatistic:
         self.button_artykuly_stats(self.button_statistic_frame)
 
     def button_category_stats(self, frame):
-        leksykon = self.leksykon_programu["buttons"]["button_category"]
+        leksykon = self.leksykon_programu.get("buttons", {}).get("button_category", {"text": "Category Stats", "toolTip": ""})
         self.view.utworz_przycisk(frame, self.open_statistic_category, leksykon_programu=leksykon, icon=self.view.category_icon)
 
     def button_company_stats(self, frame):
-        leksykon = self.leksykon_programu["buttons"]["button_company"]
+        leksykon = self.leksykon_programu.get("buttons", {}).get("button_company", {"text": "Company Stats", "toolTip": ""})
         self.view.utworz_przycisk(frame, self.open_statistic_company, leksykon_programu=leksykon, icon=self.view.company_icon)
 
     def button_buyers_stats(self, frame):
-        leksykon = self.leksykon_programu["buttons"]["button_buyers"]
+        leksykon = self.leksykon_programu.get("buttons", {}).get("button_buyers", {"text": "Buyers Stats", "toolTip": ""})
         self.view.utworz_przycisk(frame, self.open_statistic_buyers, leksykon_programu=leksykon, icon=self.view.buyers_icon)
 
     def button_shops_stats(self, frame):
-        leksykon = self.leksykon_programu["buttons"]["button_shops"]
+        leksykon = self.leksykon_programu.get("buttons", {}).get("button_shops", {"text": "Shops Stats", "toolTip": ""})
         self.view.utworz_przycisk(frame, self.open_statistic_shops, leksykon_programu=leksykon, icon=self.view.shops_icon)
 
     def button_artykuly_stats(self, frame):
-        leksykon = self.leksykon_programu["buttons"]["button_artykuly"]
+        leksykon = self.leksykon_programu.get("buttons", {}).get("button_artykuly", {"text": "Arts Stats", "toolTip": ""})
         self.view.utworz_przycisk(frame, self.open_statistic_arts, leksykon_programu=leksykon, icon=self.view.arts_icon)
 
     def open_statistic_arts(self):

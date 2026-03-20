@@ -45,7 +45,9 @@ class ControllerStock(BaseController):
             leksykon=self.leksykon_programu, 
             konfiguracja_programu=self.konfiguracja_programu, 
             language_code=language_code,
-            sound=self.sound
+            sound=self.sound,
+            currency=self.symbol,
+            symbol_first=self.symbol_first
             )
 
         self.inicjalizacja_frame()
@@ -321,8 +323,8 @@ class ControllerStock(BaseController):
             "button_stworz_artykul": (self.dodaj_modyfikuj_artykul, {"icon": self.view.add_artykul_icon}),
             "button_modyfikuj_artykul": (lambda: self.dodaj_modyfikuj_artykul(commend="modyfikuj"), {"icon": self.view.edit_artykul_icon}),
             "button_dublikuj_artykul": (lambda: self.dodaj_modyfikuj_artykul(commend="duplikuj"), {"icon": self.view.edit_artykul_icon}),
-            "button_zatwierdz_artykul": (self.zatwierdz_nowy_modyfikuj_artykul, {"pady": (3, 30), "icon": self.view.add_artykul_icon}),
-            "button_zatwierdz_edycje_artykulu_lista_art": (lambda: self.zatwierdz_nowy_modyfikuj_artykul(commend="modyfikuj"), {"pady": (3, 30), "icon": self.view.edit_artykul_icon}),
+            "button_zatwierdz_artykul": (self.zatwierdz_nowy_modyfikuj_artykul, {"icon": self.view.add_artykul_icon}),
+            "button_zatwierdz_edycje_artykulu_lista_art": (lambda: self.zatwierdz_nowy_modyfikuj_artykul(commend="modyfikuj"), {"icon": self.view.edit_artykul_icon}),
             "button_zniszcz_artykul": (self.zniszcz_artykul, {"icon": self.view.delete_artykul_icon}),
             "button_dodaj_artykul_zamowienie": (self.dodaj_list_artykulow, {"icon": self.view.add_artykul_zamowienie_icon}),
             "button_edytuj_artykul_zamowienie": (self.edytuj_artykul_zamowienie, {"icon": self.view.edit_artykul_zamowienie_icon}),
@@ -334,9 +336,9 @@ class ControllerStock(BaseController):
             # --- ZAMÓWIENIA ---
             "button_dodaj_zamowienie": (self.dodaj_modyfikuj_zamowienie, {"icon": self.view.add_zamowienie_icon}),
             "button_modyfikuj_zamowienie": (lambda: self.dodaj_modyfikuj_zamowienie(commend="modyfikuj"), {"icon": self.view.edit_zamowienie_icon}),
-            "button_zatwierdz_edycje_zamowienie": (lambda: self.zatwierdz_nowy_modyfikuj_zamowienie(commend="modyfikuj"), {"pady": (3,30), "icon": self.view.edit_zamowienie_icon}),
-            "buttons_zatwierdz_zamowienia": (self.zatwierdz_nowy_modyfikuj_zamowienie, {"pady": (3,30), "icon": self.view.add_zamowienie_icon}),
-            "button_usun_zamowienie": (self.usun_zamowienie, {"side": "bottom", "pady": (3,30), "icon": self.view.delete_zamowienie_icon}),
+            "button_zatwierdz_edycje_zamowienie": (lambda: self.zatwierdz_nowy_modyfikuj_zamowienie(commend="modyfikuj"), {"icon": self.view.edit_zamowienie_icon}),
+            "buttons_zatwierdz_zamowienia": (self.zatwierdz_nowy_modyfikuj_zamowienie, {"icon": self.view.add_zamowienie_icon}),
+            "button_usun_zamowienie": (self.usun_zamowienie, {"side": "bottom", "icon": self.view.delete_zamowienie_icon}),
 
             # --- SKLEPY ---
             "button_dodaj_sklep": (self.stworz_sklep, {"icon": self.view.add_sklep_icon}),
@@ -359,7 +361,7 @@ class ControllerStock(BaseController):
             "button_usun_kupujacy": (self.usun_kupujacego, {"icon": self.view.delete_kupujacy_icon}),
 
             # --- LISTY / INNE ---
-            "button_lista_artykulow": (self.list_artykuly, {"pady": (30,30), "icon": self.view.lista_artykulow_icon}),
+            "button_lista_artykulow": (self.list_artykuly, {"icon": self.view.lista_artykulow_icon}),
             "button_lista_sklepow": (self.list_sklepy, {"icon": self.view.lista_sklepy_icon}),
             "button_lista_firm": (self.list_firmy, {"icon": self.view.lista_firmy_icon}),
             "button_lista_kupujacych": (self.list_kupujacy, {"icon": self.view.lista_kupujacy_icon}),
@@ -378,6 +380,7 @@ class ControllerStock(BaseController):
             "main": [
                 "button_dodaj_zamowienie",
                 "button_modyfikuj_zamowienie",
+                "__spacer__",
                 "button_lista_artykulow",
                 "button_lista_sklepow",
                 "button_lista_kupujacych",
@@ -449,6 +452,15 @@ class ControllerStock(BaseController):
 
         button_list = button_sets.get(frame, [])
         for item in button_list:
+            if item == "__spacer__":
+                if frame in ("wyjdź_z_cena_ilosc_dodawanie", "wyjdź_z_cena_ilosc_edycja"):
+                    target_frame = self.view.button_cena_ilosc_frame
+                else:
+                    target_frame = self.button_stock_frame
+
+                self.view.utworz_przerwe_frame(target_frame)
+                continue
+
             if isinstance(item, tuple):
                 key, target_frame = item
             else:
@@ -847,7 +859,7 @@ class ControllerStock(BaseController):
         values = self.inside_tree.item(selected_item[0], "values")
 
         artykul_id = int(values[0])
-        cena = self.currency_format(values[1])
+        cena = self.currency_format_no_symbol(values[1])
         ilosc = int(values[2])
 
         dialog = self.messagebox_controller.messagebox(
@@ -1331,7 +1343,7 @@ class ControllerStock(BaseController):
     def cena_ilosc_edycja(self):
         try:
             cena_artykulu_var = Decimal(
-                self.view.cena_artykulu_var.get().replace(",", ".")
+                self.view.cena_artykulu_var.get().replace(",", ".").replace(self.view.currency, "").replace(" ", "")
             )
         except Exception:
             self.messagebox_controller.messagebox(
@@ -1381,7 +1393,7 @@ class ControllerStock(BaseController):
 
     def cena_ilosc_dodanie(self):
         try:
-            cena_artykulu_var = float(self.view.cena_artykulu_var.get().replace(",", "."))
+            cena_artykulu_var = float(self.view.cena_artykulu_var.get().replace(",", ".").replace(self.view.currency, "").replace(" ", ""))
         except ValueError:
             self.messagebox_controller.messagebox(
                 type="error",

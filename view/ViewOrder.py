@@ -13,7 +13,6 @@ class ViewOrder(BaseView):
             self, order_master, 
             dsc=None, 
             leksykon = None, 
-            currency=None, 
             language_code = None, 
             konfiguracja_programu = None,
             sound = None,
@@ -26,7 +25,6 @@ class ViewOrder(BaseView):
 
         self.leksykon = leksykon
         self.style = style
-        self.currency = currency
         self.sound = sound
         self.language_code = language_code
         self.dsc = dsc

@@ -15,14 +15,11 @@ class ControllerStatistic(BaseController):
         main_controller=None,
         all_currency=None
     ):
-        # BASE
         super().__init__(konfiguracja_programu, all_currency)
 
-        # DB / MODEL
         self.session = SQLconnect()
         self.stats_model = StatisticsStockModel(self.session)
 
-        # REFERENCJE
         self.master = master
         self.dsc = dsc
         self.leksykon_programu = leksykon_programu
@@ -31,11 +28,8 @@ class ControllerStatistic(BaseController):
         self.messagebox_controller = messagebox_controller
         self.language_code = language_code
 
-        # WINDOW
         self.statistic_master = ct.CTkToplevel(self.master)
-        self.statistic_master.title("Statistics")
 
-        # VIEW (bez currency!)
         self.view = ViewStatistic(
             self.statistic_master, 
             dsc=self.dsc, 
@@ -45,13 +39,11 @@ class ControllerStatistic(BaseController):
             sound=self.sound
         )
 
-        # INIT
         self.inicjalizacja_frame()
         self.button_manager()
 
         self.statistic_master.protocol("WM_DELETE_WINDOW", self.on_closing_order_window)
 
-        
     def run(self):
         self.statistic_master.deiconify()
 

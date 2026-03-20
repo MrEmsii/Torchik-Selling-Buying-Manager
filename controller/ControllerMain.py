@@ -242,11 +242,16 @@ class ControllerMain:
             ("button_stan_magazynu", self.open_stock_window, 0, 0),
             ("button_zamowienia", self.open_order_window, 0, 1),
             ("button_statystyki", self.open_statistics_window, 1, 0),
+            ("button_przerwa", None, 2, 0),
             ("button_ustawienia", self.open_settings_window, 3, 0),
             ("button_wyjscie", self.on_close, 4, 0)
         ]
 
         for key, command, row, col in buttons:
+            if command is None:
+                self.main_view.utworz_przerwe_frame(frame, row=row, columnspan=2, pack=False)
+                continue
+
             leksykon = self.leksykon_programu.get("main_window", {}).get(key, {"text": key})
 
             self.main_view.utworz_przycisk(

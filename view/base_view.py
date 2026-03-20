@@ -35,12 +35,19 @@ class BaseView:
         CTkToolTip(przycisk, message=toolTip)
         return przycisk
 
+    def utworz_przerwe_frame(self, frame, row=0, column=0, columnspan=1, height=10, padx=5, pady=5, pack=True):
+        przerwa = ct.CTkFrame(frame, height=height, fg_color="transparent", width=1)
+        if pack:
+            przerwa.pack(fill='x', padx=padx, pady=pady)
+        else:
+            przerwa.grid(row=row, column=column, columnspan=columnspan, padx=padx, pady=pady, sticky="nsew")
+        return przerwa
+
     def _click_sound(self, func):
         def wrapper(*args, **kwargs):
             self.sound.play_info_sound()
             return func(*args, **kwargs)
         return wrapper
-
 
     def create_entry_with_placeholder(self, parent, textvariable, placeholder, **kwargs):
         entry = ct.CTkEntry(parent, textvariable=textvariable, **kwargs)

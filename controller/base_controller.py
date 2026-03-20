@@ -22,7 +22,7 @@ class BaseController:
         if value is None:
             formatted_value = "0.00"
         else:
-            formatted_value = f"{value:,.2f}".replace(",", " ")
+            formatted_value = f"{value:,.2f}".replace(",", ".")
 
         if self.symbol_first:
             return f"{self.symbol} {formatted_value}"

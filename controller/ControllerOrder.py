@@ -20,10 +20,8 @@ class ControllerOrder(BaseController):
         main_controller=None,
         all_currency=None
     ):
-        # BASE NAJPIERW
         super().__init__(konfiguracja_programu, all_currency)
 
-        # REFERENCJE
         self.master = master
         self.dsc = dsc
         self.leksykon_programu = leksykon_programu
@@ -32,14 +30,10 @@ class ControllerOrder(BaseController):
         self.messagebox_controller = messagebox_controller
         self.language_code = language_code
 
-        # WINDOW
         self.order_master = ct.CTkToplevel(self.master)
-        self.order_master.title("Order")
 
-        # DB
         self.db_session = SQLconnect()
 
-        # VIEW
         self.view = ViewOrder(
             self.order_master, 
             dsc=self.dsc, 
@@ -49,7 +43,6 @@ class ControllerOrder(BaseController):
             sound=self.sound
         )
 
-        # INIT
         self.inicjalizacja_frame()
         self.list_zamowienia()
 

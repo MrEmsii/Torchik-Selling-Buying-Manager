@@ -19,10 +19,11 @@ class ViewStock(BaseView):
             self, stock_master, 
             dsc=None, 
             leksykon = None, 
-            currency=None, 
             language_code = None, 
             konfiguracja_programu = None,
-            sound = None
+            sound = None,
+            currency = None,
+            symbol_first = None
             ):
         
         self.stock_master = stock_master
@@ -32,6 +33,7 @@ class ViewStock(BaseView):
 
         self.leksykon = leksykon
         self.currency = currency
+        self.symbol_first = symbol_first
 
         self.button_icon_pack(dsc)
         self.setup_frames()
@@ -398,8 +400,12 @@ class ViewStock(BaseView):
         rabat_p_entry = self.create_entry_with_placeholder(self.third_frame, self.rabat_p_var, "0.00", font=('calibre',10,'normal'), width=20)
         if not self.rabat_p_var.get(): rabat_p_entry.configure(placeholder_text="0%")
         
-        rabat_j_entry = self.create_entry_with_placeholder(self.third_frame, self.rabat_j_var, f"00.00 {self.currency}", font=('calibre',10,'normal'), width=20)
-        if not self.rabat_j_var.get(): rabat_j_entry.configure(placeholder_text="0%")        
+        if self.symbol_first == 1:
+            rabat_j_entry = self.create_entry_with_placeholder(self.third_frame, self.rabat_j_var, f"{self.currency} 0.00", font=('calibre',10,'normal'), width=20)
+            if not self.rabat_j_var.get(): rabat_j_entry.configure(placeholder_text="0")
+        else:
+            rabat_j_entry = self.create_entry_with_placeholder(self.third_frame, self.rabat_j_var, f"00.00 {self.currency}", font=('calibre',10,'normal'), width=20)
+            if not self.rabat_j_var.get(): rabat_j_entry.configure(placeholder_text="0%")        
         
         faktura_id_entry = self.create_entry_with_placeholder(self.third_frame, self.faktura_id, "FV_0000_00_00/00", font=('calibre',10,'normal'), width=20)
         if not self.faktura_id.get(): rabat_p_entry.configure(placeholder_text="0%")
@@ -446,13 +452,14 @@ class ViewStock(BaseView):
         self.filament_frame.grid(row=0, column=1, columnspan=2, sticky="nsew", padx=5, pady=5)
 
         cena_label = ct.CTkLabel(self.filament_frame, text = label_name["price"], font=('calibre', 10, 'bold'), anchor='center', padx=(12))
-        waluta_label = ct.CTkLabel(self.filament_frame, text = self.currency, font=('calibre', 10, 'bold'), anchor='e', padx=(12))
+        # waluta_label = ct.CTkLabel(self.filament_frame, text = self.currency, font=('calibre', 10, 'bold'), anchor='e', padx=(12))
         ilosc_label = ct.CTkLabel(self.filament_frame, text = label_name["amount"], font=('calibre', 10, 'bold'), anchor='w', padx=(12))
         
-        self.cena_artykulu_var = tk.StringVar(value=cena_artykulu_var)
+        self.cena_artykulu_var = tk.StringVar(value=f'{self.currency} {cena_artykulu_var}')
         self.ilosc_artykulu_var = tk.StringVar(value=ilosc_artykulu_var)
 
         cena_entry = ct.CTkEntry(self.filament_frame, textvariable = self.cena_artykulu_var, font=('calibre',10,'normal'), width=100)
+
         ilosc_entry = ct.CTkEntry(self.filament_frame, textvariable = self.ilosc_artykulu_var, font=('calibre',10,'normal'), width=100)
 
         cena_label.grid(row=1, column=1, sticky='e')
@@ -461,7 +468,7 @@ class ViewStock(BaseView):
         cena_entry.grid(row=1, column=2, sticky='we', padx=5)
         ilosc_entry.grid(row=2, column=2, sticky='we', padx=5)
 
-        waluta_label.grid(row=1, column=3)
+        # waluta_label.grid(row=1, column=3)
 
         self.window.grid_rowconfigure(0, weight=4)
 

@@ -452,10 +452,13 @@ class ViewStock(BaseView):
         self.filament_frame.grid(row=0, column=1, columnspan=2, sticky="nsew", padx=5, pady=5)
 
         cena_label = ct.CTkLabel(self.filament_frame, text = label_name["price"], font=('calibre', 10, 'bold'), anchor='center', padx=(12))
-        # waluta_label = ct.CTkLabel(self.filament_frame, text = self.currency, font=('calibre', 10, 'bold'), anchor='e', padx=(12))
         ilosc_label = ct.CTkLabel(self.filament_frame, text = label_name["amount"], font=('calibre', 10, 'bold'), anchor='w', padx=(12))
         
-        self.cena_artykulu_var = tk.StringVar(value=f'{self.currency} {cena_artykulu_var}')
+        if self.symbol_first == 1:
+            self.cena_artykulu_var = tk.StringVar(value=f'{self.currency} {cena_artykulu_var}')
+        else:
+            self.cena_artykulu_var = tk.StringVar(value=f'{cena_artykulu_var} {self.currency}')
+            
         self.ilosc_artykulu_var = tk.StringVar(value=ilosc_artykulu_var)
 
         cena_entry = ct.CTkEntry(self.filament_frame, textvariable = self.cena_artykulu_var, font=('calibre',10,'normal'), width=100)

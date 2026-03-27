@@ -53,13 +53,14 @@ class ControllerMain:
 
         if not os.path.exists(config_path):
             default_config = {
-                "volume": 0.4,
+                "confirm_sound": "confirm_sound.wav",
+                "currency_code": "PLN",
+                "error_sound": "error_sound.wav",
+                "info_sound": "info_sound.wav",
                 "language_code": "pl_PL",
                 "start_sound": "start_sound.wav",
-                "info_sound": "info_sound.wav",
-                "error_sound": "error_sound.wav",
-                "confirm_sound": "confirm_sound.wav",
-                "currency_code": "PLN"
+                "volume": 0.4,
+                "theme": "dark-blue"
             }
             with open(config_path, "w", encoding="utf-8") as f:
                 json.dump(default_config, f, ensure_ascii=False, indent=4)
@@ -204,9 +205,9 @@ class ControllerMain:
 
         # jeśli istnieje i okno żyje → tylko focus
         if hasattr(self, "stat_controller") and self.stat_controller:
-            if self.stat_controller.stat_master.winfo_exists():
-                self.stat_controller.stat_master.lift()
-                self.stat_controller.stat_master.focus_force()
+            if self.stat_controller.statistic_master.winfo_exists():
+                self.stat_controller.statistic_master.lift()
+                self.stat_controller.statistic_master.focus_force()
                 return
 
         # jeśli nie istnieje → twórz nowe

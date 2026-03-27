@@ -126,19 +126,19 @@ class ControllerOrder(BaseController):
         self.load_more_info_daemon(id_zamowienia)
 
     def load_realizacja_daemon(self, widok = "ukryj"):
-        print("load_statusy_daemon")
+        print("Wczytywanie realizacji...")
         threading.Thread(target=lambda: self.load_realizacja(widok = widok), daemon=True).start()
 
     def load_order_daemon(self, widok = "ukryj"):
-        print("load_orders_daemon")
+        print("Wczytywanie zamówień...")
         threading.Thread(target=lambda: self.load_zamowienia(widok = widok), daemon=True).start()
 
     def load_inside_daemon(self, id_zamowienia):
-        print("load_inside_daemon")
+        print("Wczytywanie szczegółów zamówienia...")
         threading.Thread(target=lambda: self.load_inside(id_zamowienia), daemon=True).start()
 
     def load_more_info_daemon(self, id_zamowienia):
-        print("load_more_info_daemon")
+        print("Wczytywanie dodatkowych informacji...")
         threading.Thread(target=lambda: self.load_more_info(id_zamowienia), daemon=True).start()
 
     def load_more_info(self, id_zamowienia):

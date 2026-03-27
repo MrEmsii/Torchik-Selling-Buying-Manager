@@ -344,8 +344,8 @@
         ],
     
         "implementation_state": [
-                "Nowe",  
                 "W realizacji", 
+                "Nowe",  
                 "Oczekuje na zapłatę",
                 "Zlecenie magazynowe",
                 "Własne", 

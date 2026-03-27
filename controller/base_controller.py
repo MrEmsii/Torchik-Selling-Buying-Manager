@@ -24,7 +24,7 @@ class BaseController:
         else:
             formatted_value = f"{value:,.2f}".replace(",", ".")
 
-        if self.symbol_first:
+        if self.symbol_first == 1:
             return f"{self.symbol} {formatted_value}"
         else:
             return f"{formatted_value} {self.symbol}"
@@ -36,7 +36,7 @@ class BaseController:
         if isinstance(value, str) and self.symbol:
             return value.replace(self.symbol, "").strip()
 
-        return f"{value:,.2f}".replace(",", " ")
+        return f"{value:,.2f}".replace(",", ".")
 
     # def currency_format(self, value):
     #     formatted_value = f"{value:,.2f}".replace(",", " ")

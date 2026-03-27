@@ -1,6 +1,6 @@
 from addons.CTkToolTip import CTkToolTip
 
-import addons.customtkinter as ct
+import customtkinter as ct
 
 
 class BaseView:

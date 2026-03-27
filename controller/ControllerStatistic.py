@@ -5,7 +5,7 @@ from model.stock_db_model import SQLconnect
 
 from controller.base_controller import BaseController
 
-import addons.customtkinter as ct
+import customtkinter as ct
 class ControllerStatistic(BaseController):
     def __init__(
         self, master, dsc, leksykon_programu, konfiguracja_programu, 

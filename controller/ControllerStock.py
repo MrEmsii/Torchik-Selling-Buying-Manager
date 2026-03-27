@@ -7,7 +7,7 @@ from decimal import Decimal
 from view.ViewStock import ViewStock
 from controller.base_controller import BaseController
 
-import addons.customtkinter as ct
+import customtkinter as ct
 
 from tkinterdnd2 import DND_FILES, TkinterDnD
 import tkinter as tk
@@ -1069,7 +1069,7 @@ class ControllerStock(BaseController):
 
         zamowienie_data_modyfikacja = zamowienie.data #0
         zamowienie_rabat_j = zamowienie.rabat_j #1
-        zamowienie_rabat_procentowy = zamowienie.rabat_procent #2
+        zamowienie_rabat_procentowy = str(zamowienie.rabat_procent) + "%" #2
         zamowienie_kupujacy_id = zamowienie.kupujacy_id #3
         zamowienie_sklep_id = zamowienie.sklep_id #4
         zamowienie_faktura_id = zamowienie.faktura_id #5
@@ -1131,10 +1131,7 @@ class ControllerStock(BaseController):
             return
 
         try:
-            if self.view.rabat_j_var.get() == self.currency_format(0.0) or self.view.rabat_j_var.get() == "":
-                rabat_j = 0.0
-            else:
-                rabat_j = float(self.view.rabat_j_var.get().replace(',', '.'))
+            rabat_j = self.currency_format_no_symbol(self.view.rabat_j_var.get()) 
         except tk.TclError:
             self.messagebox_controller.messagebox(
                 type="error",
@@ -1152,10 +1149,7 @@ class ControllerStock(BaseController):
             return   
 
         try:
-            if self.view.rabat_p_var.get() == "0.00" or self.view.rabat_p_var.get() == "":
-                rabat_procentowy = 0.0
-            else:
-                rabat_procentowy = float(self.view.rabat_p_var.get().replace(',', '.'))
+            rabat_procentowy = self.currency_format_no_symbol(self.view.rabat_p_var.get().replace(',', '.'))
         except tk.TclError:
             self.messagebox_controller.messagebox(
                 type="error",

@@ -1,7 +1,7 @@
 import os
 import json
 
-import addons.customtkinter as ct
+import customtkinter as ct
 
 from view.ViewSound import ViewSound
 from view.ViewMain import ViewMain

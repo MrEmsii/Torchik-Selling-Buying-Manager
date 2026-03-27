@@ -1,11 +1,9 @@
-ttkbootstrap
-sqlalchemy
-pygame
+SQLAlchemy
 Pillow
 matplotlib
 tkcalendar
+pygame
 tkinterdnd2
-darkdetect
 packaging
+darkdetect
 customtkinter
-pywinstyles

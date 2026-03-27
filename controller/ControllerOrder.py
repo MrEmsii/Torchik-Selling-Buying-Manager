@@ -1,6 +1,6 @@
 import threading
 
-import addons.customtkinter as ct
+import customtkinter as ct
 
 from sqlalchemy import select
 

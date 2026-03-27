@@ -1,7 +1,7 @@
 from addons.ctkcomponents import *
-import addons.customtkinter as ct
+import customtkinter as ct
 
-from tkinter import simpledialog
+# from tkinter import simpledialog
 
 
 class ViewMessageBox:

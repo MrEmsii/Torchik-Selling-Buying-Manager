@@ -1,5 +1,5 @@
-import addons.customtkinter as ct
-from addons.customtkinter import CTkImage
+import customtkinter as ct
+from customtkinter import CTkImage
 
 from view.base_view import BaseView
 

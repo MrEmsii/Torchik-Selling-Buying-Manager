@@ -2,8 +2,8 @@ from tkinter import ttk
 import tkinter as tk
 from tkcalendar import DateEntry
 
-import addons.customtkinter as ct
-from addons.customtkinter import CTkImage
+import customtkinter as ct
+from customtkinter import CTkImage
 from PIL import Image, ImageTk
 
 import platform
@@ -397,14 +397,14 @@ class ViewStock(BaseView):
         rabat_p_label = ct.CTkLabel(self.third_frame, text = label_name["proc_discount"], font=('calibre',10, 'bold'), anchor='center', padx=(12))
         faktura_id_label = ct.CTkLabel(self.third_frame, text = label_name["invoice_id"], font=('calibre', 10, 'bold'), anchor='center', padx=(12))
 
-        rabat_p_entry = self.create_entry_with_placeholder(self.third_frame, self.rabat_p_var, "0.00", font=('calibre',10,'normal'), width=20)
+        rabat_p_entry = self.create_entry_with_placeholder(self.third_frame, self.rabat_p_var, "0%", font=('calibre',10,'normal'), width=20)
         if not self.rabat_p_var.get(): rabat_p_entry.configure(placeholder_text="0%")
         
         if self.symbol_first == 1:
             rabat_j_entry = self.create_entry_with_placeholder(self.third_frame, self.rabat_j_var, f"{self.currency} 0.00", font=('calibre',10,'normal'), width=20)
             if not self.rabat_j_var.get(): rabat_j_entry.configure(placeholder_text="0")
         else:
-            rabat_j_entry = self.create_entry_with_placeholder(self.third_frame, self.rabat_j_var, f"00.00 {self.currency}", font=('calibre',10,'normal'), width=20)
+            rabat_j_entry = self.create_entry_with_placeholder(self.third_frame, self.rabat_j_var, f"0.00 {self.currency}", font=('calibre',10,'normal'), width=20)
             if not self.rabat_j_var.get(): rabat_j_entry.configure(placeholder_text="0%")        
         
         faktura_id_entry = self.create_entry_with_placeholder(self.third_frame, self.faktura_id, "FV_0000_00_00/00", font=('calibre',10,'normal'), width=20)

@@ -31,13 +31,12 @@ class BaseController:
 
     def currency_format_no_symbol(self, value):
         if value is None:
-            return "0.00"
+            return float(0.0)
 
         if isinstance(value, str) and self.symbol:
-            return value.replace(self.symbol, "").strip()
+            return float(value.replace(self.symbol, "").replace("%", "").strip())
 
-        return f"{value:,.2f}".replace(",", ".")
-
+        print(f"Warning: Unable to parse currency value '{value}' for code '{self.currency_code}'")
     # def currency_format(self, value):
     #     formatted_value = f"{value:,.2f}".replace(",", " ")
     #     if value is None:

@@ -5,7 +5,7 @@ version: 0.8
 
 import time
 import sys
-import addons.customtkinter as customtkinter
+import customtkinter as customtkinter
 from tkinter import Toplevel, Frame
 
 class CTkToolTip(Toplevel):

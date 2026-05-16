@@ -1,7 +1,7 @@
 from pygame import mixer
 import os
 
-class SoundView:
+class ViewSound:
     def __init__(self, base_path, config):
         self.base_path = base_path
         self.config = config

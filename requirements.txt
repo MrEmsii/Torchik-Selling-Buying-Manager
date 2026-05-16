@@ -1,0 +1,9 @@
+SQLAlchemy
+Pillow
+matplotlib
+tkcalendar
+pygame
+tkinterdnd2
+packaging
+darkdetect
+customtkinter
